@@ -1,0 +1,25 @@
+{
+  "name": "typora-copilot",
+  "private": true,
+  "version": "0.1.0",
+  "description": "GitHub Copilot plugin for Typora",
+  "keywords": [],
+  "homepage": "https://github.com/Snowfly-T/typora-copilot",
+  "bugs": {
+    "url": "https://github.com/Snowfly-T/typora-copilot/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Snowfly-T/typora-copilot"
+  },
+  "license": "MIT",
+  "author": "Snowflyt <gaoge011022@gmail.com>",
+  "type": "commonjs",
+  "main": "./index.js",
+  "scripts": {
+    "clean": "rimraf dist build",
+    "format": "prettier --write {src,test}/**/*.{json,js,jsx,ts,tsx}",
+    "lint": "eslint {src,test}/**/*.{js,jsx,ts,tsx}",
+    "lint:fix": "eslint --fix {src,test}/**/*.{js,jsx,ts,tsx}"
+  }
+}
