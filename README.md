@@ -36,9 +36,9 @@ cd typora-copilot
 If the script fails to find Typora, you can specify the path to Typora manually:
 
 ```powershell
-.\bin\install.ps1 -Path "C:\Program Files\Typora\" # Replace with your Typora path
+.\bin\install_windows.ps1 -Path "C:\Program Files\Typora\" # Replace with your Typora path
 # Or use the alias
-# .\bin\install.ps1 -p "C:\Program Files\Typora\" # Replace with your Typora path
+# .\bin\install_windows.ps1 -p "C:\Program Files\Typora\" # Replace with your Typora path
 ```
 
 You can safely delete the `typora-copilot` folder after installation.

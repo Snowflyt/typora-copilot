@@ -38,9 +38,9 @@ _对于中国大陆用户，如果你在运行 `git clone` 时遇到了网络问
 如果脚本无法找到 Typora，你可以手动指定 Typora 的路径：
 
 ```powershell
-.\bin\install.ps1 -Path "C:\Program Files\Typora\" # 替换为你的 Typora 路径
+.\bin\install_windows.ps1 -Path "C:\Program Files\Typora\" # 替换为你的 Typora 路径
 # 或使用别名
-# .\bin\install.ps1 -p "C:\Program Files\Typora\" # 替换为你的 Typora 路径
+# .\bin\install_windows.ps1 -p "C:\Program Files\Typora\" # 替换为你的 Typora 路径
 ```
 
 安装完成后，你可以安全地删除 `typora-copilot` 文件夹。
