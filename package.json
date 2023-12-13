@@ -3,7 +3,15 @@
   "private": true,
   "version": "0.1.0",
   "description": "GitHub Copilot plugin for Typora",
-  "keywords": [],
+  "keywords": [
+    "Typora",
+    "Copilot",
+    "GitHub Copilot",
+    "AI",
+    "code completion",
+    "code suggestion",
+    "code generation"
+  ],
   "homepage": "https://github.com/Snowfly-T/typora-copilot",
   "bugs": {
     "url": "https://github.com/Snowfly-T/typora-copilot/issues"
@@ -13,7 +21,7 @@
     "url": "https://github.com/Snowfly-T/typora-copilot"
   },
   "license": "MIT",
-  "author": "Snowflyt <gaoge011022@gmail.com>",
+  "author": "Snowflyt <gaoge011022@163.com>",
   "type": "commonjs",
   "main": "./index.js",
   "scripts": {
