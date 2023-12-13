@@ -2487,7 +2487,7 @@ footerPanelBtnSignIn.addEventListener("click", async () => {
   // Copy user code to clipboard
   navigator.clipboard.writeText(userCode);
   // Open verification URI in browser
-  // @ts-expect-error - `electron` is declared in types
+  // @ts-expect-error - `electron` is not declared in types
   require("electron").shell.openExternal(verificationUri);
   Files.editor.EditHelper.showDialog({
     title: "Copilot Sign In",
