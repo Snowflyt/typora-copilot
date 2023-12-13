@@ -75,7 +75,7 @@ _The following instructions for macOS users are only left here for future refere
 
 ## Setup
 
-When finished installation, you'll find a icon in the toolbar of Typora. Click it to open the panel of Copilot, and then click “Sign in to authenticate Copilot”.
+When finished installation, you'll find an icon in the toolbar of Typora. Click it to open the panel of Copilot, and then click “Sign in to authenticate Copilot”.
 
 ![Copilot icon](./docs/toolbar-icon.png)
 
