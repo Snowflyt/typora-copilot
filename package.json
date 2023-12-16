@@ -1,7 +1,7 @@
 {
   "name": "typora-copilot",
+  "version": "0.2.0",
   "private": true,
-  "version": "0.1.0",
   "description": "GitHub Copilot plugin for Typora",
   "keywords": [
     "Typora",
@@ -22,12 +22,55 @@
   },
   "license": "MIT",
   "author": "Snowflyt <gaoge011022@163.com>",
-  "type": "commonjs",
+  "type": "module",
   "main": "./index.js",
   "scripts": {
-    "clean": "rimraf dist build",
+    "prebuild": "npm run clean",
+    "build:dev": "npm run prebuild && rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript && cpy {package.json,README.md,README.zh-CN.md,bin,docs,language-server} dist && cpy src/assets/**/* dist/assets",
+    "build:watch": "npm run clean && cpy {package.json,README.md,README.zh-CN.md,bin,docs,language-server} dist && cpy src/assets/**/* dist/assets && rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript --watch",
+    "build:release": "npm run prebuild && rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript && prettier --loglevel=silent --print-width 80 --write dist/**/* && cpy {package.json,README.md,README.zh-CN.md,bin,docs,language-server} dist && cpy src/assets/**/* dist/assets",
+    "clean": "rimraf dist",
     "format": "prettier --write {src,test}/**/*.{json,js,jsx,ts,tsx}",
     "lint": "eslint {src,test}/**/*.{js,jsx,ts,tsx}",
-    "lint:fix": "eslint --fix {src,test}/**/*.{js,jsx,ts,tsx}"
+    "lint:fix": "eslint --fix {src,test}/**/*.{js,jsx,ts,tsx}",
+    "test": "vitest run",
+    "test-types": "typroof",
+    "test:cov": "vitest run --coverage",
+    "test:ui": "vitest --ui --coverage.enabled=true",
+    "test:watch": "vitest",
+    "test:watch-cov": "vitest --coverage"
+  },
+  "dependencies": {
+    "date-fns": "^2.30.0",
+    "lodash-es": "^4.17.21",
+    "path-browserify": "^1.0.1"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^11.1.5",
+    "@types/codemirror": "^5.60.15",
+    "@types/jquery": "^3.5.29",
+    "@types/lodash-es": "^4.17.12",
+    "@types/path-browserify": "^1.0.2",
+    "@types/rangy": "^0.0.38",
+    "@typescript-eslint/eslint-plugin": "^6.4.1",
+    "@typescript-eslint/parser": "^6.4.1",
+    "@vitest/coverage-v8": "^0.34.2",
+    "@vitest/ui": "^0.34.3",
+    "cpy-cli": "^5.0.0",
+    "eslint": "^8.47.0",
+    "eslint-config-prettier": "^8.10.0",
+    "eslint-import-resolver-typescript": "^3.6.0",
+    "eslint-plugin-import": "^2.28.1",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-sort-destructure-keys": "^1.5.0",
+    "prettier": "^2.8.8",
+    "prettier-plugin-packagejson": "^2.4.5",
+    "rimraf": "^5.0.1",
+    "rollup": "^4.9.0",
+    "typescript": "^5.2.2",
+    "typroof": "^0.0.1-alpha.0",
+    "vitest": "^0.34.2"
   }
 }

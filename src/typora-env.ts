@@ -5,38 +5,18 @@
 /// it's not worth the effort to declare all the types.                                        ///
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
+/* eslint-disable @typescript-eslint/consistent-type-imports */
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
+/* eslint-disable @typescript-eslint/no-namespace */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-var */
+
+import("codemirror");
+import("rangy");
+
 /*********************
  * Global variables. *
  *********************/
-/**
- * The jQuery function.
- *
- * It is not a full jQuery instance, but only contains some methods used by this project.
- */
-declare var $: {
-  (selector: string): JQuery;
-  (element: Element): JQuery;
-};
-interface JQuery<TElement = HTMLElement> {
-  [index: number]: TElement;
-  length: number;
-
-  closest(selector: string): JQuery<TElement>;
-  first(): JQuery<TElement>;
-  last(): JQuery<TElement>;
-  eq(index: number): JQuery<TElement>;
-  each(callback: (index: number, element: TElement) => void): JQuery<TElement>;
-  html(htmlString: string): JQuery<TElement>;
-  html(): string;
-  text(textString: string): JQuery<TElement>;
-  text(): string;
-  rawText(): string;
-  val(value: string): JQuery<TElement>;
-  val(): string;
-  append(content: JQuery<TElement> | HTMLElement | string): JQuery<TElement>;
-  prepend(content: JQuery<TElement> | HTMLElement | string): JQuery<TElement>;
-}
-
 /**
  * Options of the Typora application.
  *
@@ -50,9 +30,7 @@ declare var _options: {
 /**
  * The CodeMirror constructor.
  */
-declare var CodeMirror: {
-  fromTextArea: (textarea: HTMLTextAreaElement, options?: object) => Typora.CodeMirror;
-};
+declare var CodeMirror: typeof CodeMirror;
 
 /**
  * The actual type of `File` in Typora application.
@@ -134,8 +112,34 @@ interface FileConstructorExtensions {
       skipChangeCount?: boolean;
       onInit?: boolean;
       skipStore?: boolean;
-    }
+    },
   ) => void;
+
+  isLinux: boolean;
+  isLinuxSnap: boolean;
+  isMac: boolean;
+  isMacLegacy: boolean;
+  isMacNode: boolean;
+  isMacOrMacNode: boolean;
+  isNode: boolean;
+  isNodeHtml: boolean;
+  isSafari: boolean;
+  isUnixNode: boolean;
+  isWin: boolean;
+  isWk: boolean;
+  isWK: boolean;
+}
+
+interface Window {
+  /**
+   * Only available on Windows / Linux.
+   * @param moduleName The module name to require.
+   * @returns The required module.
+   */
+  reqnode?: {
+    (moduleName: "child_process"): typeof import("node:child_process");
+    (moduleName: string): unknown;
+  };
 }
 
 /**********
@@ -325,21 +329,21 @@ declare namespace Typora {
   /*****************************************
    * Cursor & Selection & Position & Range *
    *****************************************/
-  /**
-   * A range of text in raw markdown, used by CodeMirror.
-   */
-  interface CodeMirrorDocumentRange {
-    from: CodeMirrorDocumentPosition;
-    to: CodeMirrorDocumentPosition;
-  }
-  /**
-   * Representing a text cursor position in raw markdown, used by CodeMirror.
-   */
-  interface CodeMirrorDocumentPosition {
-    line: number;
-    ch: number;
-    sticky?: unknown;
-  }
+  // /**
+  //  * A range of text in raw markdown, used by CodeMirror.
+  //  */
+  // interface CodeMirrorDocumentRange {
+  //   from: CodeMirrorDocumentPosition;
+  //   to: CodeMirrorDocumentPosition;
+  // }
+  // /**
+  //  * Representing a text cursor position in raw markdown, used by CodeMirror.
+  //  */
+  // interface CodeMirrorDocumentPosition {
+  //   line: number;
+  //   ch: number;
+  //   sticky?: unknown;
+  // }
   /**
    * Representing the text cursor position in raw markdown. Can be considered as an enhanced version
    * of {@link CodeMirrorDocumentPosition}.
@@ -351,154 +355,28 @@ declare namespace Typora {
     beforeRegExp?: string;
     afterIndent?: boolean;
   }
-  /**
-   * Rangy range.
-   */
-  interface Rangy {
-    startContainer: HTMLElement;
-    collapsed: boolean;
-    commonAncestorContainer: HTMLElement;
+  // /**
+  //  * Rangy range.
+  //  */
+  // interface Rangy {
+  //   startContainer: HTMLElement;
+  //   collapsed: boolean;
+  //   commonAncestorContainer: HTMLElement;
 
-    setStartBefore(el: HTMLElement): void;
-    toHtml(): HTMLElement;
-  }
-  interface RangyText {
-    assignedSlot: unknown | null;
-    baseURI: string;
-    childNodes: NodeList;
-    /**
-     * File pathname.
-     */
-    data: string;
-    firstChild: unknown | null;
-    isConnected: boolean;
-  }
-
-  /**************
-   * CodeMirror *
-   **************/
-  // **Note:** Typora uses a custom version of CodeMirror, so the CodeMirror instance may not work
-  // as expected.
-  /**
-   * CodeMirror instance.
-   */
-  class CodeMirror {
-    doc: {
-      lineCount(): number;
-      getValue(): string;
-      getLine(line: number): string | null;
-      getCursor(): CodeMirrorDocumentPosition;
-      setCursor(pos: CodeMirrorDocumentPosition): void;
-      getSelection(): string;
-    };
-
-    getValue(EOL?: string): string;
-    setValue: (value: string, type?: string) => void;
-    getLine(line: number): string | null;
-    getCursor(): CodeMirrorDocumentPosition;
-    setCursor(pos: CodeMirrorDocumentPosition): void;
-
-    replaceRange: (
-      replacement: string,
-      from: CodeMirrorDocumentPosition,
-      to?: CodeMirrorDocumentPosition,
-      origin?: string
-    ) => void;
-
-    addWidget: (pos: CodeMirrorDocumentPosition, node: Element, scrollIntoView: boolean) => void;
-    markText: (
-      from: CodeMirrorDocumentPosition,
-      to: CodeMirrorDocumentPosition,
-      options?: { className?: string; inclusiveLeft?: boolean; inclusiveRight?: boolean }
-    ) => CodeMirrorTextMarker;
-
-    getHistory(): { done: readonly object[]; undone: readonly object[] };
-    setHistory(history: { done: readonly object[]; undone: readonly object[] }): void;
-    undo(): void;
-    redo(): void;
-    getWrapperElement(): HTMLElement;
-
-    on(event: "keydown", handler: (cm: CodeMirror, event: KeyboardEvent) => void): void;
-    /**
-     * This event is fired before a change is applied, and its handler may choose to modify or
-     * cancel the change. The `change` object has `from`, `to`, and `text` properties, as with the
-     * `"change"` event. It also has a `cancel()` method, which can be called to cancel the
-     * change, and, if the change isn't coming from an undo or redo event, an
-     * `update(from, to, text)` method, which may be used to modify the change. Undo or redo
-     * changes can't be modified, because they hold some metainformation for restoring old marked
-     * ranges that is only valid for that specific change. All three arguments to update are
-     * optional, and can be left off to leave the existing value for that field intact.
-     *
-     * **Note:** you may not do anything from a `"beforeChange"` handler that would cause changes
-     * to the document or its visualization. Doing so will, since this handler is called directly
-     * from the bowels of the CodeMirror implementation, probably cause the editor to become
-     * corrupted.
-     */
-    on(
-      event: "beforeChange",
-      handler: (cm: CodeMirror, change: CodeMirrorBeforeChangeEvent) => void
-    ): void;
-    on(event: "change", handler: (cm: CodeMirror, change: CodeMirrorChangeEvent) => void): void;
-    /**
-     * Will be fired when the cursor or selection moves, or any change is made to the editor
-     * content.
-     */
-    on(event: "cursorActivity", handler: (cm: CodeMirror) => void): void;
-
-    off(event: "keydown", handler: (cm: CodeMirror, event: KeyboardEvent) => void): void;
-    off(
-      event: "beforeChange",
-      handler: (cm: CodeMirror, change: CodeMirrorBeforeChangeEvent) => void
-    ): void;
-    off(event: "change", handler: (cm: CodeMirror, change: CodeMirrorChangeEvent) => void): void;
-    off(event: "cursorActivity", handler: (cm: CodeMirror) => void): void;
-  }
-
-  interface CodeMirrorTextMarker {
-    /**
-     * Remove the mark.
-     */
-    clear: () => void;
-    /**
-     * Returns a `CodeMirrorDocumentRange` object representing the current position of the mark
-     * range, or `undefined` if the mark is no longer in the document.
-     */
-    find: () => CodeMirrorDocumentRange | undefined;
-    /**
-     * Call it if you've done something that might change the size of the marker (e.g. changing the
-     * content of a `replacedWith` node), and want to cheaply update the display.
-     */
-    changed: () => void;
-  }
-
-  interface CodeMirrorBeforeChangeEvent {
-    from: CodeMirrorDocumentPosition;
-    to: CodeMirrorDocumentPosition;
-    text: readonly string[];
-    /**
-     * Cancel the change.
-     */
-    cancel: () => void;
-    /**
-     * Update the change. Only available if the change isn't coming from an undo or redo event.
-     * @param from
-     * @param to
-     * @param text
-     */
-    update?: (
-      from?: CodeMirrorDocumentPosition,
-      to?: CodeMirrorDocumentPosition,
-      text?: string
-    ) => void;
-    origin: string | undefined;
-  }
-  interface CodeMirrorChangeEvent {
-    from: CodeMirrorDocumentPosition;
-    to: CodeMirrorDocumentPosition;
-    text: readonly string[];
-    removed: readonly string[];
-    origin: string | undefined;
-  }
+  //   setStartBefore(el: HTMLElement): void;
+  //   toHtml(): HTMLElement;
+  // }
+  // interface RangyText {
+  //   assignedSlot: unknown | null;
+  //   baseURI: string;
+  //   childNodes: NodeList;
+  //   /**
+  //    * File pathname.
+  //    */
+  //   data: string;
+  //   firstChild: unknown | null;
+  //   isConnected: boolean;
+  // }
 
   /**********
    * Editor *
@@ -513,7 +391,7 @@ declare namespace Typora {
   class Editor {
     /**
      * Functions related to editing operations.
-     * 
+     *
      * The actual properties are more than these, but they are not used in this project, so they are
      * not declared here.
      */
@@ -526,7 +404,7 @@ declare namespace Typora {
         type?: "info" | "warning" | "error";
         callback?: (index: number) => void;
       }) => void;
-    }
+    };
     /**
      * Functions related to user operations.
      *
@@ -568,7 +446,7 @@ declare namespace Typora {
      * not declared here.
      */
     selection: {
-      getRangy: () => Rangy | null;
+      getRangy: () => RangyRange | null;
 
       jumpIntoElemBegin: (elem: JQuery) => void;
       jumpIntoElemEnd: (elem: JQuery) => void;
@@ -648,7 +526,7 @@ declare namespace Typora {
      * not declared here.
      */
     fences: {
-      getCm(cid: string): CodeMirror;
+      getCm(cid: string): CodeMirror.Editor;
     };
     /**
      * Math blocks.
@@ -657,7 +535,7 @@ declare namespace Typora {
      * not declared here.
      */
     mathBlock: {
-      currentCm?: CodeMirror;
+      currentCm?: CodeMirror.Editor;
     };
     /**
      * HTML blocks.
@@ -666,7 +544,7 @@ declare namespace Typora {
      * not declared here.
      */
     htmlBlock: {
-      currentCm?: CodeMirror;
+      currentCm?: CodeMirror.Editor;
     };
 
     /**
@@ -710,16 +588,16 @@ declare namespace Typora {
       event: "change",
       handler: (
         editor: Editor,
-        ev: { oldMarkdown: string; newMarkdown: string }
-      ) => void | Promise<void>
+        ev: { oldMarkdown: string; newMarkdown: string },
+      ) => void | Promise<void>,
     ): void;
 
     off(
       event: "change",
       handler: (
         editor: Editor,
-        ev: { oldMarkdown: string; newMarkdown: string }
-      ) => void | Promise<void>
+        ev: { oldMarkdown: string; newMarkdown: string },
+      ) => void | Promise<void>,
     ): void;
   }
 
@@ -755,7 +633,7 @@ declare namespace Typora {
     /**
      * The CodeMirror instance.
      */
-    cm: CodeMirror | null;
+    cm: CodeMirror.Editor | null;
     /**
      * Whether source mode is enabled.
      */
@@ -774,7 +652,7 @@ declare namespace Typora {
      * preview mode (which is not immediately apparent from the name).
      * @param options The options.
      */
-    gotoLine(options: CodeMirrorDocumentPosition & { lineText: string | null }): void;
+    gotoLine(options: CodeMirror.Position & { lineText: string | null }): void;
 
     enableTypeWriterMode(enable?: boolean): void;
     normalScrollAdjust(): void;
@@ -824,7 +702,7 @@ declare namespace Typora {
 
     off(
       event: "beforeToggle",
-      handler: (sv: SourceView, on: boolean) => void | Promise<void>
+      handler: (sv: SourceView, on: boolean) => void | Promise<void>,
     ): void;
     off(event: "toggle", handler: (sv: SourceView, on: boolean) => void | Promise<void>): void;
     off(event: "beforeShow", handler: (sv: SourceView) => void | Promise<void>): void;
@@ -933,11 +811,7 @@ declare namespace Typora {
     static isType(node: unknown, types: readonly unknown[]): boolean | undefined;
     static isType(node: unknown, ...types: unknown[]): boolean | undefined;
 
-    static parseFrom(
-      text: string,
-      nodeMap: Editor["nodeMap"],
-      options?: object
-    ): [string, readonly Node[]];
+    static parseFrom(text: string, nodeMap: Editor["nodeMap"], options?: object): [string, Node[]];
   }
 
   class NodeMap {

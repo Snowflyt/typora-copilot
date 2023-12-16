@@ -32,7 +32,7 @@ script_to_remove_after_candidates=(
     '<script src="./appsrc/main.js" defer></script>'
     '<script src="./appsrc/main.js" aria-hidden="true" defer></script>'
 )
-script_to_remove='<script src="./copilot/index.cjs" defer></script>'
+script_to_remove='<script src="./copilot/index.js" defer></script>'
 
 escape_for_sed() {
     echo "$1" | sed -E 's/[]\/$*.^|[]/\\&/g'

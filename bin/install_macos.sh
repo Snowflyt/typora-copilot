@@ -32,7 +32,7 @@ script_to_insert_after_candidates=(
     '<script src="./appsrc/main.js" defer></script>'
     '<script src="./appsrc/main.js" aria-hidden="true" defer></script>'
 )
-script_to_insert='<script src="./copilot/index.cjs" defer></script>'
+script_to_insert='<script src="./copilot/index.js" defer></script>'
 
 escape_for_sed() {
     echo "$1" | sed -E 's/[]\/$*.^|[]/\\&/g'
@@ -57,6 +57,7 @@ for path in "${paths[@]}"; do
         # If found, insert script
         if [[ -f "$index_html_path" ]]; then
             path_found=true
+            echo "Installation directory: \"$(dirname "$index_html_path")/copilot/\""
             echo "Found Typora \"index.html\" at \"$index_html_path\"."
             content=$(cat "$index_html_path")
 

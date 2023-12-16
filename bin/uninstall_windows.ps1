@@ -17,7 +17,7 @@ $scriptToRemoveAfterCandidates = @(
     '<script src="./app/window/frame.js" defer="defer"></script>'
     '<script src="./appsrc/window/frame.js" defer="defer"></script>'
 )
-$scriptToRemove = '<script src="./copilot/index.cjs" defer="defer"></script>'
+$scriptToRemove = '<script src="./copilot/index.js" defer="defer"></script>'
 
 # Find `window.html` in Typora installation path
 $pathFound = $false

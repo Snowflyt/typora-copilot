@@ -25,11 +25,11 @@ Only tested on Windows on Typora 1.7.6.
 
 ### Script Install (Recommended)
 
-For Windows users, run the following command in PowerShell **as administrator**:
+For all platform users, first download the latest release from [the releases page](https://github.com/Snowfly-T/typora-copilot/releases) and unzip it.
+
+Then for Windows users, locate to the folder where you unzipped the release and run the following command in PowerShell **as administrator**:
 
 ```powershell
-git clone https://github.com/Snowfly-T/typora-copilot.git
-cd typora-copilot
 .\bin\install_windows.ps1
 ```
 
@@ -41,13 +41,11 @@ If the script fails to find Typora, you can specify the path to Typora manually:
 # .\bin\install_windows.ps1 -p "C:\Program Files\Typora\" # Replace with your Typora path
 ```
 
-You can safely delete the `typora-copilot` folder after installation.
+You’ll see a message logging the installation directory of the plugin. _Keep it in mind, you’ll need it when uninstalling the plugin._ After that, you can safely delete the release folder.
 
-For Linux users, run the following command in terminal:
+For Linux users, locate to the folder where you unzipped the release and run the following command in terminal:
 
 ```bash
-git clone https://github.com/Snowfly-T/typora-copilot.git
-cd typora-copilot
 sudo bash ./bin/install_linux.sh
 ```
 
@@ -59,17 +57,17 @@ sudo bash ./bin/install_linux.sh --path "/usr/share/typora/" # Replace with your
 # sudo bash ./bin/install_linux.sh -p "/usr/share/typora/" # Replace with your Typora path
 ```
 
-You can safely delete the `typora-copilot` folder after installation.
+You’ll see a message logging the installation directory of the plugin. _Keep it in mind, you’ll need it when uninstalling the plugin._ After that, you can safely delete the release folder.
 
 ### Manual Install
 
 _The following instructions for macOS users are only left here for future reference. macOS is not supported yet._
 
-1. Download the latest code from this repository.
+1. Download the latest release from [the releases page](https://github.com/Snowfly-T/typora-copilot/releases) and unzip it.
 2. For Windows / Linux users, find `window.html` in your Typora installation folder, usually located at `<typora_root_path>/resources/`; For macOS users, find `index.html` in your Typora installation folder, usually located at `<typora_root_path>/Contents/Resources/TypeMark/`. `<typora_root_path>` is the path where Typora is installed, replace it with your real Typora installation path (note that the angle brackets `<` and `>` should also be removed). This folder is called Typora resource folder in the following steps.
 3. Create a folder named `copilot` in Typora resource folder.
-4. Copy the downloaded code to the `copilot` folder.
-5. For Windows / Linux users, open the previous `window.html` file you found in Typora resource folder with a text editor, and add `<script src="./copilot/index.cjs" defer="defer"></script>` right after something like `<script src="./appsrc/window/frame.js" defer="defer"></script>` or `<script src="./app/window/frame.js" defer="defer"></script>`; For macOS users, open the previous `index.html` file you found in Typora resource folder with a text editor, and add `<script src="./copilot/index.cjs" defer></script>` right after something like `<script src="./appsrc/main.js" aria-hidden="true" defer></script>` or `<script src="./app/main.js" aria-hidden="true" defer></script>`.
+4. Copy the downloaded release to the `copilot` folder.
+5. For Windows / Linux users, open the previous `window.html` file you found in Typora resource folder with a text editor, and add `<script src="./copilot/index.js" defer="defer"></script>` right after something like `<script src="./appsrc/window/frame.js" defer="defer"></script>` or `<script src="./app/window/frame.js" defer="defer"></script>`; For macOS users, open the previous `index.html` file you found in Typora resource folder with a text editor, and add `<script src="./copilot/index.js" defer></script>` right after something like `<script src="./appsrc/main.js" aria-hidden="true" defer></script>` or `<script src="./app/main.js" aria-hidden="true" defer></script>`.
 6. Restart Typora.
 7. For macOS users, if you see a warning dialog saying Typora may be damaged, Ctrl-click Typora and select “Open” to open Typora.
 
@@ -90,7 +88,7 @@ Follow the prompts to authenticate Copilot plugin:
 
 ### Script Uninstall (Recommended)
 
-For Windows users, locate to the `typora-copilot` folder and run the following command in PowerShell **as administrator** (if you have deleted the `typora-copilot` folder, you can download it again using `git clone` or by hand):
+For Windows users, locate to the installation directory of the plugin and run the following command in PowerShell **as administrator**.
 
 ```powershell
 .\bin\uninstall_windows.ps1
@@ -98,7 +96,7 @@ For Windows users, locate to the `typora-copilot` folder and run the following c
 
 You can still specify the path to Typora manually by adding `-Path` or `-p`, just like the installation script.
 
-For Linux users, locate to the `typora-copilot` folder and run the following command in terminal (if you have deleted the `typora-copilot` folder, you can download it again using `git clone` or by hand):
+For Linux users, locate to the installation directory of the plugin and run the following command in terminal.
 
 ```bash
 sudo bash ./bin/uninstall_linux.sh
@@ -112,7 +110,7 @@ _The following instructions for macOS users are only left here for future refere
 
 1. For Windows / Linux users, find `window.html` in your Typora installation folder, usually located at `<typora_root_path>/resources/`; For macOS users, find `index.html` in your Typora installation folder, usually located at `<typora_root_path>/Contents/Resources/TypeMark/`. `<typora_root_path>` is the path where Typora is installed, replace it with your real Typora installation path (note that the angle brackets `<` and `>` should also be removed). This folder is called Typora resource folder in the following steps.
 2. Delete the `copilot` folder in Typora resource folder.
-3. For Windows / Linux users, open the previous `window.html` file you found in Typora resource folder with a text editor, and delete `<script src="./copilot/index.cjs" defer="defer"></script>`; For macOS users, open the previous `index.html` file you found in Typora resource folder with a text editor, and delete `<script src="./copilot/index.cjs" defer></script>`.
+3. For Windows / Linux users, open the previous `window.html` file you found in Typora resource folder with a text editor, and delete `<script src="./copilot/index.js" defer="defer"></script>`; For macOS users, open the previous `index.html` file you found in Typora resource folder with a text editor, and delete `<script src="./copilot/index.js" defer></script>`.
 4. Restart Typora.
 
 ## Known Issues
