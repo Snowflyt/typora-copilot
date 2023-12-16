@@ -25,15 +25,13 @@ _暂不支持 macOS. 此外该插件在 Linux 上的使用尚未经过充分测�
 
 ### 脚本安装（推荐）
 
-对于 Windows 用户，在 PowerShell 中**以管理员身份**运行以下命令：
+对于所有平台的用户，首先从[发布页面](https://github.com/Snowfly-T/typora-copilot/releases)下载最新版本并解压。
+
+然后，对于 Windows 用户，定位到你解压的文件夹并在 PowerShell 中**以管理员身份**运行以下命令：
 
 ```powershell
-git clone https://github.com/Snowfly-T/typora-copilot.git
-cd typora-copilot
 .\bin\install_windows.ps1
 ```
-
-_对于中国大陆用户，如果你在运行 `git clone` 时遇到了网络问题，手动下载本仓库的 zip 压缩包并解压，进入 `typora-copilot` 文件夹后再运行 `.\bin\install_windows.ps1` 即可。_
 
 如果脚本无法找到 Typora，你可以手动指定 Typora 的路径：
 
@@ -43,13 +41,11 @@ _对于中国大陆用户，如果你在运行 `git clone` 时遇到了网络问
 # .\bin\install_windows.ps1 -p "C:\Program Files\Typora\" # 替换为你的 Typora 路径
 ```
 
-安装完成后，你可以安全地删除 `typora-copilot` 文件夹。
+安装过程中，你会看到一条消息记录插件的安装目录。_记住它，在卸载插件时你会需要它。_ 安装完成后，你可以安全地删除刚才解压的文件夹。
 
-对于 Linux 用户，在终端中运行以下命令：
+对于 Linux 用户，定位到你解压的文件夹并在终端中运行以下命令：
 
 ```bash
-git clone https://github.com/Snowfly-T/typora-copilot.git
-cd typora-copilot
 sudo bash ./bin/install_linux.sh
 ```
 
@@ -61,17 +57,17 @@ sudo bash ./bin/install_linux.sh --path "/usr/share/typora/" # 替换为你的 T
 # sudo bash ./bin/install_linux.sh -p "/usr/share/typora/" # 替换为你的 Typora 路径
 ```
 
-安装完成后，你可以安全地删除 `typora-copilot` 文件夹。
+安装过程中，你会看到一条消息记录插件的安装目录。_记住它，在卸载插件时你会需要它。_ 安装完成后，你可以安全地删除刚才解压的文件夹。
 
 ### 手动安装
 
 _以下对 macOS 用户的说明仅供参考，本插件暂不支持 macOS._
 
-1. 从本仓库下载最新代码。
+1. 从[发布页面](https://github.com/Snowfly-T/typora-copilot/releases)下载最新版本并解压。
 2. 找到 Typora 安装目录下的 `window.html` 文件，通常位于 `<typora_root_path>/resources/`；对于 macOS 用户，找到 Typora 安装目录下的 `index.html` 文件，通常位于 `<typora_root_path>/Contents/Resources/TypeMark/`。`<typora_root_path>` 是 Typora 的安装路径，替换为你的实际 Typora 安装路径（注意尖括号 `<` 和 `>` 也要删除）。这个文件夹在下面的步骤中被称为 Typora 资源文件夹。
 3. 在 Typora 资源文件夹中创建一个名为 `copilot` 的文件夹。
-4. 将下载的代码复制到 `copilot` 文件夹中。
-5. 对于 Windows / Linux 用户，在 Typora 资源文件夹中用文本编辑器打开 `window.html`，在类似 `<script src="./appsrc/window/frame.js" defer="defer"></script>` 或 `<script src="./app/window/frame.js" defer="defer"></script>` 的代码之后添加 `<script src="./copilot/index.cjs" defer="defer"></script>`；对于 macOS 用户，在 Typora 资源文件夹中用文本编辑器打开 `index.html`，在类似 `<script src="./appsrc/main.js" aria-hidden="true" defer></script>` 或 `<script src="./app/main.js" aria-hidden="true" defer></script>` 的代码之后添加 `<script src="./copilot/index.cjs" defer></script>`。
+4. 将解压出的文件全局复制到 `copilot` 文件夹中。
+5. 对于 Windows / Linux 用户，在 Typora 资源文件夹中用文本编辑器打开 `window.html`，在类似 `<script src="./appsrc/window/frame.js" defer="defer"></script>` 或 `<script src="./app/window/frame.js" defer="defer"></script>` 的代码之后添加 `<script src="./copilot/index.js" defer="defer"></script>`；对于 macOS 用户，在 Typora 资源文件夹中用文本编辑器打开 `index.html`，在类似 `<script src="./appsrc/main.js" aria-hidden="true" defer></script>` 或 `<script src="./app/main.js" aria-hidden="true" defer></script>` 的代码之后添加 `<script src="./copilot/index.js" defer></script>`。
 6. 重启 Typora。
 7. 对于 macOS 用户，如果你在打开 Typora 时被提示“文件已损坏”，你可以按住 Ctrl 点击 Typora，并选择“打开”来打开 Typora.
 
@@ -92,7 +88,7 @@ _以下对 macOS 用户的说明仅供参考，本插件暂不支持 macOS._
 
 ### 脚本卸载（推荐）
 
-对于 Windows 用户，在 PowerShell 中**以管理员身份**运行以下命令（如果你已经删除了 `typora-copilot` 文件夹，你可以使用 `git clone` 或手动下载本仓库的 zip 压缩包并解压，进入 `typora-copilot` 文件夹后再运行 `.\bin\uninstall_windows.ps1`）：
+对于 Windows 用户，定位到插件安装目录并在 PowerShell 中**以管理员身份**运行以下命令：
 
 ```powershell
 .\bin\uninstall_windows.ps1
@@ -100,7 +96,7 @@ _以下对 macOS 用户的说明仅供参考，本插件暂不支持 macOS._
 
 和安装时一样，如果脚本无法找到 Typora，你可以手动通过 `-Path` 或 `-p` 参数指定 Typora 的路径。
 
-对于 Linux 用户，在终端中运行以下命令：
+对于 Linux 用户，定位到插件安装目录并在终端中运行以下命令：
 
 ```bash
 sudo bash ./bin/uninstall_linux.sh
@@ -114,7 +110,7 @@ _以下对 macOS 用户的说明仅供参考，本插件暂不支持 macOS._
 
 1. 找到 Typora 安装目录下的 `window.html` 文件，通常位于 `<typora_root_path>/resources/`；对于 macOS 用户，找到 Typora 安装目录下的 `index.html` 文件，通常位于 `<typora_root_path>/Contents/Resources/TypeMark/`. `<typora_root_path>` 是 Typora 的安装路径，替换为你的实际 Typora 安装路径（注意尖括号 `<` 和 `>` 也要删除）。这个文件夹在下面的步骤中被称为 Typora 资源文件夹。
 2. 删除 Typora 资源文件夹中的 `copilot` 文件夹。
-3. 对于 Windows / Linux 用户，在 Typora 资源文件夹中用文本编辑器打开 `window.html`，删除 `<script src="./copilot/index.cjs" defer="defer"></script>`；对于 macOS 用户，在 Typora 资源文件夹中用文本编辑器打开 `index.html`，删除 `<script src="./copilot/index.cjs" defer></script>`.
+3. 对于 Windows / Linux 用户，在 Typora 资源文件夹中用文本编辑器打开 `window.html`，删除 `<script src="./copilot/index.js" defer="defer"></script>`；对于 macOS 用户，在 Typora 资源文件夹中用文本编辑器打开 `index.html`，删除 `<script src="./copilot/index.js" defer></script>`.
 4. 重启 Typora。
 
 ## 已知问题

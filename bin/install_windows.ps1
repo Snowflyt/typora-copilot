@@ -17,7 +17,7 @@ $scriptToInsertAfterCandidates = @(
     '<script src="./app/window/frame.js" defer="defer"></script>'
     '<script src="./appsrc/window/frame.js" defer="defer"></script>'
 )
-$scriptToInsert = '<script src="./copilot/index.cjs" defer="defer"></script>'
+$scriptToInsert = '<script src="./copilot/index.js" defer="defer"></script>'
 
 # Find `window.html` in Typora installation path
 $pathFound = $false
@@ -34,6 +34,7 @@ foreach ($path in $paths) {
         # If found, insert script
         if (Test-Path $windowHtmlPath) {
             $pathFound = $true
+            Write-Host "Installation directory: ""$(Split-Path -Path $windowHtmlPath -Parent)\copilot\"""
             Write-Host "Found Typora ""window.html"" at ""$windowHtmlPath""."
             $content = Get-Content $windowHtmlPath -Raw
 
