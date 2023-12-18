@@ -5,29 +5,26 @@ import { pathToFileURL } from "@modules/url";
 import { debounce } from "lodash-es";
 
 import { createCopilotClient } from "./client";
-import { VERSION } from "./constants";
+import { attachCompletionPanel } from "./components/CompletionPanel";
+import { PLUGIN_DIR, VERSION } from "./constants";
+import { attachFooter } from "./footer";
 import {
   File,
-  TYPORA_RESOURCE_DIR,
   TYPORA_VERSION,
   getCursorPlacement,
   waitUntilEditorInitialized,
 } from "./typora-utils";
+import { getTextCursorPosition } from "./utils/dom";
 import { createLogger } from "./utils/logging";
 import { css, registerCSS, setGlobalVar, sliceTextByRange } from "./utils/tools";
 
-import type { Completion, CopilotAccountStatus, CopilotStatus } from "./client";
+import type { Completion } from "./client";
 import type { Position } from "./types/lsp";
 import type { ChildProcessWithoutNullStreams } from "@modules/child_process";
 
-const COPILOT_DIR = path.join(TYPORA_RESOURCE_DIR, "copilot");
-setGlobalVar("__copilotDir", COPILOT_DIR);
-const COPILOT_ICON_PATHNAME = path.join(COPILOT_DIR, "assets", "copilot-icon.png");
-const COPILOT_WARNING_ICON_PATHNAME = path.join(COPILOT_DIR, "assets", "copilot-icon-warning.png");
+const server = fork(path.join(PLUGIN_DIR, "language-server", "agent"), { silent: true });
 
-const server = fork(path.join(COPILOT_DIR, "language-server", "agent"), { silent: true });
-
-const logger = createLogger({ prefix: `\x1b[1mCopilot plugin:\x1b[0m ` });
+export const logger = createLogger({ prefix: `\x1b[1mCopilot plugin:\x1b[0m ` });
 logger.info("Copilot plugin activated. Version:", VERSION);
 logger.debug("Copilot LSP server started. PID:", server.pid);
 
@@ -45,62 +42,6 @@ registerCSS(css`
   .font-italic {
     font-style: italic !important;
   }
-  .completion-panel {
-    position: absolute;
-    z-index: 9999;
-    pointer-events: none;
-    white-space: pre-wrap;
-    border: 1px solid #ccc;
-    display: flex;
-    flex-direction: column;
-    padding: 0.5em;
-    border-radius: 5px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-  }
-  #footer-copilot {
-    margin-left: 8px;
-    margin-right: 0;
-    padding: 0 8px;
-    opacity: 0.75;
-    cursor: pointer;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-  }
-  #footer-copilot:hover {
-    opacity: 1;
-  }
-  #footer-copilot-panel {
-    left: auto;
-    right: 4px;
-    top: auto;
-    padding-top: 8px;
-    padding-bottom: 8px;
-    display: flex;
-    flex-direction: column;
-    overflow-x: hidden;
-    min-width: 160px;
-  }
-  .footer-copilot-panel-hint {
-    padding: 0 16px;
-    padding-bottom: 6px;
-    font-size: 8pt;
-    font-weight: normal;
-    line-height: 1.8;
-  }
-  .footer-copilot-panel-btn {
-    border: none !important;
-    border-radius: 0 !important;
-    padding: 3px 16px !important;
-    font-size: 10pt !important;
-    font-weight: normal !important;
-    line-height: 1.8 !important;
-  }
-  .footer-copilot-panel-btn:hover {
-    background-color: var(--item-hover-bg-color);
-    color: var(--item-hover-text-color);
-  }
 `);
 
 /**
@@ -110,233 +51,6 @@ const FAKE_TEMP_WORKSPACE_FOLDER = File.isWin
   ? "C:\\Users\\FakeUser\\FakeTyporaCopilotWorkspace"
   : "/home/fakeuser/faketyporacopilotworkspace";
 const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
-
-/* Footer stuff start */
-const footerContainer: HTMLElement | null = document.querySelector("footer.ty-footer");
-const footerTextColorGetterElement = document.createElement("div");
-footerTextColorGetterElement.style.height = "0";
-footerTextColorGetterElement.style.width = "0";
-footerTextColorGetterElement.style.position = "absolute";
-footerTextColorGetterElement.style.left = "0";
-footerTextColorGetterElement.style.top = "0";
-footerTextColorGetterElement.classList.add("footer-item", "footer-item-right");
-document.body.appendChild(footerTextColorGetterElement);
-/**
- * Text color of footer.
- */
-let footerTextColor = window.getComputedStyle(footerTextColorGetterElement).color;
-setInterval(() => {
-  const newTextColor = window.getComputedStyle(footerTextColorGetterElement).color;
-  if (newTextColor !== footerTextColor) {
-    footerTextColor = newTextColor;
-    footer.childNodes.forEach((node) => {
-      node.remove();
-    });
-    const icon = createCopilotIcon(copilot.status);
-    footer.appendChild(icon);
-  }
-}, 1000);
-
-// Update footer icon when Copilot status changes
-copilot.on("changeStatus", ({ newStatus: status }) => {
-  footer.childNodes.forEach((node) => {
-    node.remove();
-  });
-  const icon = createCopilotIcon(status);
-  footer.appendChild(icon);
-  footer.setAttribute(
-    "ty-hint",
-    `Copilot (${status === "Normal" ? "Ready" : status === "InProgress" ? "In Progress" : status})`,
-  );
-});
-
-/**
- * Create Copilot footer icon DOM element by status.
- * @param status Status of Copilot.
- */
-const createCopilotIcon = (status: CopilotStatus) => {
-  if (status === "InProgress") {
-    // Use a svg spinner
-    const result = document.createElement("div");
-    result.style.height = "50%";
-    result.style.aspectRatio = "1 / 1";
-    result.style.display = "flex";
-    result.style.flexDirection = "row";
-    result.style.alignItems = "center";
-    result.style.justifyContent = "center";
-    result.innerHTML = /* html */ `
-      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <style>
-          .spinner_aj0A {
-            transform-origin: center;
-            animation: spinner_KYSC .75s infinite linear
-          }
-          @keyframes spinner_KYSC {
-            100% {
-              transform:rotate(360deg)
-            }
-          }
-        </style>
-        <path
-          d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"
-          class="spinner_aj0A"
-          fill="${footerTextColor}"
-        />
-      </svg>
-    `;
-    return result;
-  } else {
-    const result = document.createElement("div");
-    result.style.height = "50%";
-    result.style.aspectRatio = "1 / 1";
-    result.style.backgroundColor = footerTextColor;
-    result.style.webkitMaskImage = `url('${path.posix.join(
-      ...(status === "Normal" ? COPILOT_ICON_PATHNAME : COPILOT_WARNING_ICON_PATHNAME).split(
-        path.sep,
-      ),
-    )}')`;
-    result.style.maskImage = `url('${path.posix.join(
-      ...(status === "Normal" ? COPILOT_ICON_PATHNAME : COPILOT_WARNING_ICON_PATHNAME).split(
-        path.sep,
-      ),
-    )}')`;
-    result.style.webkitMaskRepeat = "no-repeat";
-    result.style.maskRepeat = "no-repeat";
-    result.style.webkitMaskPosition = "center";
-    result.style.maskPosition = "center";
-    result.style.webkitMaskSize = "contain";
-    result.style.maskSize = "contain";
-    return result;
-  }
-};
-
-/**
- * Footer container for Copilot.
- */
-const footer = document.createElement("div");
-footer.classList.add("footer-item", "footer-item-right");
-footer.id = "footer-copilot";
-footer.setAttribute("ty-hint", "Copilot (Ready)");
-footer.setAttribute("data-lg", "Menu");
-footer.setAttribute("aria-label", "Copilot");
-footer.style.height = (footerContainer?.clientHeight ?? 30) + "px";
-if (footerContainer)
-  new ResizeObserver((entries) => {
-    const entry = entries[0];
-    if (entry) {
-      footer.style.height = entry.target.clientHeight + "px";
-      footerPanel.style.bottom = entry.target.clientHeight + 2 + "px";
-    }
-  }).observe(footerContainer);
-footer.addEventListener("click", (ev) => {
-  if (footerPanel.style.display === "none") {
-    footerPanel.style.removeProperty("display");
-    document.body.classList.remove("ty-show-spell-check", "ty-show-word-count");
-  } else {
-    footerPanel.style.display = "none";
-  }
-  ev.stopPropagation();
-});
-document.addEventListener("click", () => {
-  footerPanel.style.display = "none";
-});
-document.querySelector("#footer-spell-check")?.addEventListener("click", () => {
-  footerPanel.style.display = "none";
-});
-document.querySelector("#footer-word-count")?.addEventListener("click", () => {
-  footerPanel.style.display = "none";
-});
-footer.appendChild(createCopilotIcon("Normal"));
-if (footerContainer) {
-  const firstFooterItemRight = footerContainer.querySelector(".footer-item-right");
-  if (firstFooterItemRight) firstFooterItemRight.insertAdjacentElement("beforebegin", footer);
-  else footerContainer.appendChild(footer);
-}
-
-/**
- * Reset account status.
- * @param status Status of Copilot account.
- */
-const resetAccountStatus = (status: CopilotAccountStatus) => {
-  if (status !== "NotSignedIn") {
-    footerPanelBtnSignIn.style.display = "none";
-    footerPanelBtnSignOut.style.display = "block";
-  } else {
-    footerPanelBtnSignIn.style.display = "block";
-    footerPanelBtnSignOut.style.display = "none";
-  }
-  if (status === "NotAuthorized") footerNoSubscribeHint.style.display = "block";
-  else footerNoSubscribeHint.style.display = "none";
-  if (status !== "OK") copilot.status = "Warning";
-  else copilot.status = "Normal";
-};
-
-const footerPanel = document.createElement("div");
-footerPanel.id = "footer-copilot-panel";
-footerPanel.classList.add("dropdown-menu");
-footerPanel.style.display = "none";
-const footerNoSubscribeHint = document.createElement("div");
-footerNoSubscribeHint.classList.add("footer-copilot-panel-hint");
-footerNoSubscribeHint.textContent = "Your GitHub account is not subscribed to Copilot";
-footerNoSubscribeHint.style.display = "none";
-footerPanel.appendChild(footerNoSubscribeHint);
-const footerPanelBtnSignIn = document.createElement("button");
-footerPanelBtnSignIn.classList.add("footer-copilot-panel-btn");
-footerPanelBtnSignIn.textContent = "Sign in to authenticate Copilot";
-footerPanel.appendChild(footerPanelBtnSignIn);
-footerPanelBtnSignIn.addEventListener("click", () => {
-  void (async () => {
-    const { status, userCode, verificationUri } = await copilot.request.signInInitiate();
-    if (status === "AlreadySignedIn") return;
-    // Copy user code to clipboard
-    void navigator.clipboard.writeText(userCode);
-    // Open verification URI in browser
-    // // @ts-expect-error - `electron` is not declared in types
-    // require("electron").shell.openExternal(verificationUri);
-    File.editor.EditHelper.showDialog({
-      title: "Copilot Sign In",
-      html: /* html */ `
-      <div style="text-align: center; margin-top: 8px;">
-        <span>The device activation code is:</span>
-        <div style="margin-top: 8px; margin-bottom: 8px; font-size: 14pt; font-weight: bold;">${userCode}</div>
-        <span>It has been copied to your clipboard. Please paste it in the popup GitHub page.</span>
-        <span>If the popup page does not show up, please open the following link in your browser:</span>
-        <div style="margin-top: 8px; margin-bottom: 8px;">
-          <a href="${verificationUri}" target="_blank" rel="noopener noreferrer">Open verification page</a>
-        </div>
-        <span>Press OK <strong>after</strong> you have completed the verification.</span>
-      </div>
-    `,
-      buttons: ["OK"],
-      callback: () => {
-        void copilot.request.signInConfirm({ userCode }).then(({ status }) => {
-          resetAccountStatus(status);
-          File.editor.EditHelper.showDialog({
-            title: "Copilot Signed In",
-            html: /* html */ `
-            <div style="text-align: center; margin-top: 8px;">
-              <span>Sign in to Copilot successful!</span>
-            </div>
-          `,
-            buttons: ["OK"],
-          });
-        });
-      },
-    });
-  })();
-});
-const footerPanelBtnSignOut = document.createElement("button");
-footerPanelBtnSignOut.classList.add("footer-copilot-panel-btn");
-footerPanelBtnSignOut.textContent = "Sign out";
-footerPanelBtnSignOut.style.display = "none";
-footerPanelBtnSignOut.addEventListener("click", () => {
-  void copilot.request.signOut().then(({ status }) => {
-    resetAccountStatus(status);
-  });
-});
-footerPanel.appendChild(footerPanelBtnSignOut);
-document.body.appendChild(footerPanel);
-/* Footer stuff end */
 
 /**
  * Main function.
@@ -496,112 +210,13 @@ const main = async () => {
     if (!focusedElem) return;
     if (!(focusedElem instanceof HTMLElement)) return;
 
-    const getMouseCursorPosition = (): { x: number; y: number } | null => {
-      const sel = window.getSelection();
-      if (sel && sel.rangeCount) {
-        const range = sel.getRangeAt(0).cloneRange();
-        const caret = document.createElement("span");
-        range.insertNode(caret);
-        const rect = caret.getBoundingClientRect();
-        if (caret.parentNode) caret.parentNode.removeChild(caret);
-        return { x: rect.left, y: rect.top };
-      }
-      return null;
-    };
-    const pos = getMouseCursorPosition();
+    const pos = getTextCursorPosition();
     if (!pos) return;
 
     // Insert a completion panel below the cursor
-    const completionPanel = document.createElement("div");
-    const maxAvailableWidth =
-      editor.writingArea.getBoundingClientRect().width -
-      (pos.x - editor.writingArea.getBoundingClientRect().left) -
-      30;
-    completionPanel.classList.add("completion-panel");
-    completionPanel.style.visibility = "hidden";
-    completionPanel.style.left = "0";
-    completionPanel.style.top = `calc(${pos.y}px + 1.5em)`;
-    completionPanel.style.maxWidth = `min(80ch, max(40ch, ${maxAvailableWidth}px))`;
-    completionPanel.style.backgroundColor = window.getComputedStyle(document.body).backgroundColor;
-    completionPanel.style.color = window.getComputedStyle(document.body).color;
-    const code = document.createElement("textarea");
-    code.style.padding = "0";
-    code.innerText = displayText;
-    completionPanel.appendChild(code);
-    const hint = document.createElement("div");
-    hint.style.color = footerTextColor;
-    hint.style.marginTop = "0.25em";
-    hint.style.marginLeft = "0.25em";
-    hint.style.display = "flex";
-    hint.style.flexDirection = "row";
-    hint.style.alignItems = "center";
-    const icon = document.createElement("div");
-    icon.style.marginRight = "0.4em";
-    icon.style.height = "1em";
-    icon.style.width = "1em";
-    icon.style.backgroundColor = footerTextColor;
-    icon.style.webkitMaskImage = `url('${path.posix.join(
-      ...COPILOT_ICON_PATHNAME.split(path.sep),
-    )}')`;
-    icon.style.maskImage = `url('${path.posix.join(...COPILOT_ICON_PATHNAME.split(path.sep))}')`;
-    icon.style.webkitMaskRepeat = "no-repeat";
-    icon.style.maskRepeat = "no-repeat";
-    icon.style.webkitMaskPosition = "center";
-    icon.style.maskPosition = "center";
-    icon.style.webkitMaskSize = "contain";
-    icon.style.maskSize = "contain";
-    hint.appendChild(icon);
-    const hintText = document.createElement("span");
-    hintText.style.marginRight = "0.25em";
-    hintText.innerText = "Generated by GitHub Copilot";
-    hint.appendChild(hintText);
-    completionPanel.appendChild(hint);
-    document.body.appendChild(completionPanel);
-    const actualWidth = completionPanel.getBoundingClientRect().width;
-    completionPanel.style.left = `min(${pos.x}px, calc(${pos.x}px + ${maxAvailableWidth}px - ${actualWidth}px))`;
-    completionPanel.style.visibility = "visible";
-    const completionPanelCm = CodeMirror.fromTextArea(code, {
-      lineWrapping: true,
-      mode: "gfm",
-      theme: "typora-default",
-      maxHighlightLength: Infinity,
-      // @ts-expect-error - Extracted from Typora. I don't really know if this prop is used,
-      // but to be safe, I just keep it like original
-      styleActiveLine: true,
-      visibleSpace: true,
-      autoCloseTags: true,
-      resetSelectionOnContextMenu: false,
-      lineNumbers: false,
-      dragDrop: false,
-    });
-    code.style.backgroundColor = window.getComputedStyle(document.body).backgroundColor;
-    completionPanelCm.getWrapperElement().style.backgroundColor = window.getComputedStyle(
-      document.body,
-    ).backgroundColor;
-    completionPanelCm.getWrapperElement().style.padding = "0";
-    Array.from(completionPanelCm.getWrapperElement().children).forEach((node) => {
-      if (!(node instanceof HTMLElement)) return;
-      if (node.classList.contains("CodeMirror-hscrollbar")) {
-        node.remove();
-        return;
-      }
-      node.style.backgroundColor = window.getComputedStyle(document.body).backgroundColor;
-    });
-    completionPanelCm
-      .getWrapperElement()
-      .querySelectorAll(".CodeMirror-activeline-background")
-      .forEach((node) => {
-        node.remove();
-      });
+    const unattachCompletionPanel = attachCompletionPanel(displayText);
 
     copilot.notification.notifyShown({ uuid: options.uuid });
-
-    const scrollListener = () => {
-      const pos = getMouseCursorPosition();
-      if (!pos) return;
-      completionPanel.style.top = `calc(${pos.y}px + 1.5em)`;
-    };
-    document.querySelector("content")?.addEventListener("scroll", scrollListener);
 
     /**
      * Reject the completion.
@@ -613,7 +228,7 @@ const main = async () => {
 
       finished = true;
 
-      completionPanel.remove();
+      unattachCompletionPanel();
 
       copilot.notification.notifyRejected({ uuids: [options.uuid] });
 
@@ -629,7 +244,7 @@ const main = async () => {
 
       finished = true;
 
-      completionPanel.remove();
+      unattachCompletionPanel();
 
       // Calculate whether it is safe to just use `insertText` to insert completion text
       let safeToJustUseInsertText = false;
@@ -692,7 +307,6 @@ const main = async () => {
     const clearListeners = () => {
       cleared = true;
       editor.writingArea.removeEventListener("keydown", keydownHandler);
-      document.querySelector("content")?.removeEventListener("scroll", scrollListener);
       clearInterval(cursorMoveListener);
     };
 
@@ -919,8 +533,6 @@ const main = async () => {
     ) => {
       if (cleared) return;
 
-      console.log("beforeChange", { text, from, to, origin });
-
       clearListeners();
       // Cancel the change temporarily
       cancel();
@@ -1119,6 +731,11 @@ const main = async () => {
     accept: null as (() => void) | null,
   };
 
+  /***********
+   * UI Misc *
+   ***********/
+  attachFooter(copilot);
+
   /**************************
    * Initialize Copilot LSP *
    **************************/
@@ -1146,17 +763,6 @@ const main = async () => {
   });
 
   await copilot.request.getVersion();
-
-  /* Check editor status */
-  let initialCheckStatusResult: Awaited<ReturnType<typeof copilot.request.checkStatus>>;
-  try {
-    initialCheckStatusResult = await copilot.request.checkStatus();
-  } catch (e) {
-    logger.error("Checking copilot account status failed.", e);
-    copilot.status = "Warning";
-    return;
-  }
-  resetAccountStatus(initialCheckStatusResult.status);
 
   /* Send initial didOpen */
   if (state.activeFilePathname) onChangeActiveFile(state.activeFilePathname, null);

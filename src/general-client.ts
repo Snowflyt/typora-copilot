@@ -335,6 +335,14 @@ export interface ClientOptions<
   >;
 }
 
+export type ClientEventHandler<EventName extends keyof ClientEventMap> = (
+  ...args: ClientEventMap[EventName] extends void ? [] : [ev: ClientEventMap[EventName]]
+) => void | Promise<void>;
+
+export interface ClientEventMap {
+  initialized: void;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ValidateClientOptions<Options extends ClientOptions<any, any>> = {
   [P in keyof Options]: P extends "requestHandlers"
@@ -692,9 +700,19 @@ export const createClient = <
   // End
 
   let requestId = 0;
+  let _initialized = false;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const _eventHandlers: Map<string, Array<(ev?: any) => void | Promise<void>>> = new Map();
 
   const result = {
+    /**
+     * @readonly
+     */
     logger,
+
+    get initialized() {
+      return _initialized;
+    },
 
     requestHandlers: requestHandlers as Equals<
       RequestHandlers,
@@ -820,11 +838,17 @@ export const createClient = <
          *
          * The `initialize` request may only be sent once.
          */
-        initialize: (params: InitializeParams): ResponsePromise<InitializeResult> =>
-          _mutate(
+        initialize: (params: InitializeParams): ResponsePromise<InitializeResult> => {
+          const promise = _mutate(
             "initialize",
             params as unknown as LSPObject,
-          ) as unknown as ResponsePromise<InitializeResult>,
+          ) as unknown as ResponsePromise<InitializeResult>;
+          void promise.then(() => {
+            _initialized = true;
+            _eventHandlers.get("initialized")?.forEach((handler) => void handler());
+          });
+          return promise;
+        },
         /**
          * The shutdown request is sent from the client to the server. It asks the server to shut
          * down, but to not exit (otherwise the response might not be delivered correctly to the
@@ -970,6 +994,28 @@ export const createClient = <
           _notify("workspace/didChangeWorkspaceFolders", params as unknown as LSPObject),
       } as const,
     } as const,
+
+    _eventHandlers,
+
+    /**
+     * Add event handler.
+     * @readonly
+     */
+    on: ((event, handler): void => {
+      const handlers = _eventHandlers.get(event) ?? [];
+      handlers.push(handler as never);
+      _eventHandlers.set(event, handlers);
+    }) as <E extends keyof ClientEventMap>(event: E, handler: ClientEventHandler<E>) => void,
+    /**
+     * Remove event handler.
+     * @readonly
+     */
+    off: ((event, handler): void => {
+      const handlers = _eventHandlers.get(event) ?? [];
+      const index = handlers.indexOf(handler as never);
+      if (index !== -1) handlers.splice(index, 1);
+      _eventHandlers.set(event, handlers);
+    }) as <E extends keyof ClientEventMap>(event: E, handler: ClientEventHandler<E>) => void,
   };
 
   const _request = result.request;

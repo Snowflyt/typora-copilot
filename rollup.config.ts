@@ -4,7 +4,7 @@ import typescript from "@rollup/plugin-typescript";
 import { defineConfig } from "rollup";
 
 export default defineConfig({
-  input: "src/main.ts",
+  input: "src/index.ts",
   output: {
     file: "dist/index.js",
     format: "iife",
@@ -14,7 +14,7 @@ export default defineConfig({
       tsconfig: "./tsconfig.build.json",
     }),
     nodeResolve({
-      extensions: [".js", ".ts"],
+      extensions: [".js", ".jsx", ".ts", ".tsx"],
     }),
     commonjs(),
   ],

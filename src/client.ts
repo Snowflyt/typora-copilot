@@ -3,6 +3,7 @@ import { pathToFileURL } from "@modules/url";
 import { createClient } from "./general-client";
 
 import type {
+  ClientEventMap,
   ClientOptions,
   NotificationHandler,
   RequestHandler,
@@ -134,8 +135,6 @@ export interface CompletionResult {
   readonly cancellationReason?: string;
 }
 
-export type CopilotChangeStatusHandler = (ev: CopilotChangeStatusEvent) => void | Promise<void>;
-
 /**
  * Copilot change status event.
  */
@@ -149,6 +148,16 @@ export interface CopilotChangeStatusEvent {
    * New status.
    */
   readonly newStatus: CopilotStatus;
+}
+
+export type CopilotClientEventHandler<EventName extends keyof CopilotClientEventMap> = (
+  ...args: CopilotClientEventMap[EventName] extends void
+    ? []
+    : [ev: CopilotClientEventMap[EventName]]
+) => void | Promise<void>;
+
+export interface CopilotClientEventMap extends ClientEventMap {
+  changeStatus: CopilotChangeStatusEvent;
 }
 
 export type CopilotClientOptions<
@@ -199,7 +208,7 @@ export const createCopilotClient = <
         const oldStatus = result.status;
         const newStatus = status;
         result.status = newStatus;
-        _eventHandlers.get("changeStatus")?.forEach((handler) => {
+        client._eventHandlers.get("changeStatus")?.forEach((handler) => {
           void handler({ oldStatus, newStatus });
         });
       },
@@ -243,15 +252,17 @@ export const createCopilotClient = <
     };
   };
 
-  let _status: CopilotStatus = "Normal";
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const _eventHandlers: Map<string, Array<(ev: any) => void | Promise<void>>> = new Map();
+  let _status: CopilotStatus = "Warning";
 
   const result = {
     /**
      * @readonly
      */
     logger: client.logger,
+
+    get initialized() {
+      return client.initialized;
+    },
 
     // Mutable properties start
     /**
@@ -267,7 +278,7 @@ export const createCopilotClient = <
     set status(value) {
       if (value !== _status) {
         _status = value;
-        _eventHandlers.get("changeStatus")?.forEach((handler) => {
+        client._eventHandlers.get("changeStatus")?.forEach((handler) => {
           void handler({ oldStatus: _status, newStatus: value });
         });
       }
@@ -388,26 +399,34 @@ export const createCopilotClient = <
      * Add event handler.
      * @readonly
      */
-    on: ((event, handler): void => {
-      const handlers = _eventHandlers.get(event) ?? [];
-      handlers.push(handler);
-      _eventHandlers.set(event, handlers);
-    }) satisfies {
-      (event: "changeStatus", handler: CopilotChangeStatusHandler): void;
-    },
+    on: ((event, handler) => client.on(event as never, handler)) as <
+      EventName extends keyof CopilotClientEventMap,
+    >(
+      event: EventName,
+      handler: CopilotClientEventHandler<EventName>,
+    ) => void,
     /**
      * Remove event handler.
      * @readonly
      */
-    off: ((event, handler): void => {
-      const handlers = _eventHandlers.get(event) ?? [];
-      const index = handlers.indexOf(handler);
-      if (index !== -1) handlers.splice(index, 1);
-      _eventHandlers.set(event, handlers);
-    }) satisfies {
-      (event: "changeStatus", handler: CopilotChangeStatusHandler): void;
-    },
+    off: ((event, handler) => client.off(event as never, handler)) as <
+      EventName extends keyof CopilotClientEventMap,
+    >(
+      event: EventName,
+      handler: CopilotClientEventHandler<EventName>,
+    ) => void,
   };
 
   return result;
 };
+
+export type CopilotClient<
+  RequestHandlers extends ReadonlyRecord<string, RequestHandler> = ReadonlyRecord<
+    string,
+    RequestHandler
+  >,
+  NotificationHandlers extends ReadonlyRecord<string, NotificationHandler> = ReadonlyRecord<
+    string,
+    NotificationHandler
+  >,
+> = ReturnType<typeof createCopilotClient<RequestHandlers, NotificationHandlers>>;
