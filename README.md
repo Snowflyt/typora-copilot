@@ -14,9 +14,9 @@ _macOS is not supported yet. Besides, this plugin has not been fully tested on L
 
 ## Compatiblility
 
-_*Note: `/` means not tested._
+_\*Note: `/` means not tested._
 
-**⚠️ Warning: ** For users using Typora < 1.6, you need to install [Node.js](https://nodejs.org/en/download/) ≥ 18.
+**⚠️ Warning:** For users using Typora < 1.6, you need to install [Node.js](https://nodejs.org/en/download/) ≥ 18.
 
 | Typora Version | Windows 11 | Ubuntu 22.04 | macOS 14.2 |
 | -------------- | ---------- | ------------ | ---------- |
