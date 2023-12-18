@@ -214,5 +214,5 @@ export const formatMethod = (method: string | null) => method ?? "Anonymous";
  */
 export const formatErrorCode = (code: integer) => {
   const name = getErrorCodeName(code) ?? "";
-  return code + (name || ` (${name})`);
+  return code + (name ? ` (${name})` : "");
 };

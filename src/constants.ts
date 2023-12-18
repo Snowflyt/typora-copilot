@@ -6,7 +6,7 @@ import { setGlobalVar } from "./utils/tools";
 /**
  * Plugin version.
  */
-export const VERSION = "0.1.0";
+export const VERSION = "0.2.2";
 
 /**
  * Copilot plugin directory.

@@ -1,6 +1,7 @@
 import type path from "node:path";
 
-import { File } from "@/typora-utils";
+// DO NOT import `File` from `@/typora-utils` as circular dependency will occur
+const File = window.File as ExtendedFileConstructor;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AddSep<F extends (...args: any) => unknown> = (

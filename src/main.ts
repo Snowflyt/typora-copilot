@@ -1,4 +1,4 @@
-import { fork } from "@modules/child_process";
+import { forkNode } from "@modules/child_process";
 import * as path from "@modules/path";
 import { pathToFileURL } from "@modules/url";
 
@@ -8,6 +8,7 @@ import { createCopilotClient } from "./client";
 import { attachCompletionPanel } from "./components/CompletionPanel";
 import { PLUGIN_DIR, VERSION } from "./constants";
 import { attachFooter } from "./footer";
+import { logger } from "./logging";
 import {
   File,
   TYPORA_VERSION,
@@ -15,23 +16,20 @@ import {
   waitUntilEditorInitialized,
 } from "./typora-utils";
 import { getTextCursorPosition } from "./utils/dom";
-import { createLogger } from "./utils/logging";
 import { css, registerCSS, setGlobalVar, sliceTextByRange } from "./utils/tools";
 
 import type { Completion } from "./client";
 import type { Position } from "./types/lsp";
-import type { ChildProcessWithoutNullStreams } from "@modules/child_process";
 
-const server = fork(path.join(PLUGIN_DIR, "language-server", "agent"), { silent: true });
+const server = forkNode(path.join(PLUGIN_DIR, "language-server", "agent.cjs"));
 
-export const logger = createLogger({ prefix: `\x1b[1mCopilot plugin:\x1b[0m ` });
 logger.info("Copilot plugin activated. Version:", VERSION);
 logger.debug("Copilot LSP server started. PID:", server.pid);
 
 /**
  * Copilot LSP client.
  */
-const copilot = createCopilotClient(server as ChildProcessWithoutNullStreams, { logging: "debug" });
+const copilot = createCopilotClient(server, { logging: "debug" });
 setGlobalVar("copilot", copilot);
 
 // Register CSS for completion text to use

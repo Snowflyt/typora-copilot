@@ -10,4 +10,8 @@ export default defineConfig({
       "@test": path.resolve(__dirname, "test"),
     },
   },
+  test: {
+    setupFiles: ["./setup-test.ts"],
+    environment: "happy-dom",
+  },
 });

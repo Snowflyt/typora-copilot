@@ -46,7 +46,7 @@ interface FileConstructorExtensions {
    * It is usually initialized only once and will not be reinitialized even the active file or
    * folder is changed, so it is safe to cache the value.
    */
-  editor: Typora.Editor;
+  editor?: Typora.Editor;
 
   /**
    * Legacy property, used to store the active file pathname, now use `bundle.filePath` instead.

@@ -4,7 +4,7 @@ import { useEffect, useMemo } from "preact/hooks";
 import { match } from "ts-pattern";
 
 import CopilotIcon from "./components/CopilotIcon";
-import { logger } from "./main";
+import { logger } from "./logging";
 import { File } from "./typora-utils";
 import { css, registerCSS } from "./utils/tools";
 
@@ -148,7 +148,7 @@ export const FooterPanel: FC<FooterPanelOptions> = ({ copilot, open = true }) =>
     // Open verification URI in browser
     // // @ts-expect-error - `electron` is not declared in types
     // require("electron").shell.openExternal(verificationUri);
-    File.editor.EditHelper.showDialog({
+    File.editor?.EditHelper.showDialog({
       title: "Copilot Sign In",
       html: /* html */ `
         <div style="text-align: center; margin-top: 8px;">
@@ -175,7 +175,7 @@ export const FooterPanel: FC<FooterPanelOptions> = ({ copilot, open = true }) =>
         void copilot.request.signInConfirm({ userCode }).then(({ status }) => {
           accountStatus.value = status;
           copilot.status = "Normal";
-          File.editor.EditHelper.showDialog({
+          File.editor?.EditHelper.showDialog({
             title: "Copilot Signed In",
             html: /* html */ `
               <div style="text-align: center; margin-top: 8px;">

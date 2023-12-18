@@ -59,8 +59,8 @@ const CompletionPanel: FC<CompletionPanelProps> = ({ text, textColor = "gray", x
   const codeAreaRef = useRef<HTMLTextAreaElement>(null);
 
   const maxAvailableWidth =
-    File.editor.writingArea.getBoundingClientRect().width -
-    (x - File.editor.writingArea.getBoundingClientRect().left) -
+    File.editor!.writingArea.getBoundingClientRect().width -
+    (x - File.editor!.writingArea.getBoundingClientRect().left) -
     30;
 
   const copilotIconPosixPathname = path.posix.join(...COPILOT_ICON_PATHNAME.NORMAL.split(path.sep));

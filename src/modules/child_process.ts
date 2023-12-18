@@ -1,59 +1,91 @@
 /* eslint-disable @typescript-eslint/consistent-type-imports */
 
-/**
- * The `child_process.fork()` method is a special case of {@link spawn} used specifically to spawn new Node.js processes.
- * Like {@link spawn}, a `ChildProcess` object is returned. The
- * returned `ChildProcess` will have an additional communication channel
- * built-in that allows messages to be passed back and forth between the parent and
- * child. See `subprocess.send()` for details.
- *
- * Keep in mind that spawned Node.js child processes are
- * independent of the parent with exception of the IPC communication channel
- * that is established between the two. Each process has its own memory, with
- * their own V8 instances. Because of the additional resource allocations
- * required, spawning a large number of child Node.js processes is not
- * recommended.
- *
- * By default, `child_process.fork()` will spawn new Node.js instances using the `process.execPath` of the parent process. The `execPath` property in the`options` object allows for an alternative
- * execution path to be used.
- *
- * Node.js processes launched with a custom `execPath` will communicate with the
- * parent process using the file descriptor (fd) identified using the
- * environment variable `NODE_CHANNEL_FD` on the child process.
- *
- * Unlike the [`fork(2)`](http://man7.org/linux/man-pages/man2/fork.2.html) POSIX system call, `child_process.fork()` does not clone the
- * current process.
- *
- * The `shell` option available in {@link spawn} is not supported by`child_process.fork()` and will be ignored if set.
- *
- * If the `signal` option is enabled, calling `.abort()` on the corresponding`AbortController` is similar to calling `.kill()` on the child process except
- * the error passed to the callback will be an `AbortError`:
- *
- * ```js
- * if (process.argv[2] === 'child') {
- *   setTimeout(() => {
- *     console.log(`Hello from ${process.argv[2]}!`);
- *   }, 1_000);
- * } else {
- *   const { fork } = require('node:child_process');
- *   const controller = new AbortController();
- *   const { signal } = controller;
- *   const child = fork(__filename, ['child'], { signal });
- *   child.on('error', (err) => {
- *     // This will be called with err being an AbortError if the controller aborts
- *   });
- *   controller.abort(); // Stops the child process
- * }
- * ```
- * @param modulePath The module to run in the child.
- * @param args List of string arguments.
- */
-export const fork = (
-  window.reqnode?.("child_process") ?? {
-    fork: () => {
-      throw new Error("child_process is not supported in browser");
-    },
+import type { ChildProcessWithoutNullStreams } from "node:child_process";
+
+import { logger } from "@/logging";
+import { File, waitUntilEditorInitialized } from "@/typora-utils";
+
+export const forkNode: (modulePath: string) => ChildProcessWithoutNullStreams = (() => {
+  const nodeFork = window.reqnode?.("child_process")?.fork;
+  if (nodeFork) {
+    // Check Node version
+    const nodeVersion = window.process.version
+      .split("v", 2)[1]!
+      .split(".")
+      .map((s) => s.trim())
+      .filter((s) => s);
+    if (Number.parseInt(nodeVersion[0]!) >= 18)
+      return (modulePath) =>
+        nodeFork(modulePath, [], { silent: true }) as ChildProcessWithoutNullStreams;
+
+    // For Node < 18, use Node from shell
+    logger.warn("Detected bundled Node version < 18, try using Node from shell instead.");
+    const { spawn, spawnSync } = window.reqnode!("child_process");
+
+    // Check Node version
+    const { stderr, stdout } = spawnSync("node", ["-v"]);
+    if (stdout === null) {
+      const errorMessage =
+        "Node not found in shell, please install Node >= 18 or use Typora >= 1.6";
+      logger.error(`${errorMessage}.`, ...(stderr ? ["Error:", stderr?.toString("utf-8")] : []));
+
+      void waitUntilEditorInitialized().then(() => {
+        File.editor!.EditHelper.showDialog({
+          title: "Typora Copilot: Node.js is required under Typora < 1.6",
+          type: "error",
+          html: /* html */ `
+            <div style="text-align: center; margin-top: 8px;">
+              <p>Node.js >= 18 or Typora >= 1.6 is required to run this plugin.</p>
+              <p>The current Typora version is <code>${window._options.appVersion}</code>.</p>
+              <p>
+                Either install <a href="https://nodejs.org/en/download/" target="_blank">Node.js</a>
+                >= 18 or upgrade <a href="https://typora.io/#download" target="_blank">Typora</a> to
+                >= 1.6.
+              </p>
+            </div>
+          `,
+          buttons: ["I understand"],
+        });
+      });
+
+      throw new Error(errorMessage);
+    }
+    const shellNodeVersion = stdout.toString().trim();
+    if (Number.parseInt(shellNodeVersion.split("v", 2)[1]!.split(".")[0]!) < 18) {
+      const errorMessage =
+        `Node version from shell is < 18 (${shellNodeVersion}), ` +
+        "please install Node >= 18 or use Typora >= 1.6 to use this plugin";
+      logger.error(errorMessage + ".");
+
+      void waitUntilEditorInitialized().then(() => {
+        File.editor!.EditHelper.showDialog({
+          title: "Typora Copilot: Node.js >= 18 is required under Typora < 1.6",
+          type: "error",
+          html: /* html */ `
+            <div style="text-align: center; margin-top: 8px;">
+              <p>Node.js >= 18 or Typora >= 1.6 is required to run this plugin.</p>
+              <P>The current Typora version is <code>${window._options.appVersion}</code>.</p>
+              <p>The current Node version is <code>${shellNodeVersion}</code>.</p>
+              <p>
+                Either install <a href="https://nodejs.org/en/download/" target="_blank">Node.js</a>
+                >= 18 or upgrade <a href="https://typora.io/#download" target="_blank">Typora</a> to
+                >= 1.6.
+              </p>
+            </div>
+          `,
+          buttons: ["I understand"],
+        });
+      });
+
+      throw new Error(errorMessage);
+    }
+
+    logger.info(`Detected Node ${shellNodeVersion} from shell, using it to start language server.`);
+
+    return (modulePath) => spawn("node", [modulePath]);
   }
-).fork;
+
+  throw new Error("child_process is not supported in browser");
+})();
 
 export type * from "node:child_process";

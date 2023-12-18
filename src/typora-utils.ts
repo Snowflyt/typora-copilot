@@ -4,26 +4,6 @@
 
 import * as path from "@modules/path";
 
-/*************
- * Constants *
- *************/
-/**
- * Typora version.
- */
-export const TYPORA_VERSION = window._options.appVersion;
-
-/**
- * Typora resource directory.
- */
-export const TYPORA_RESOURCE_DIR: string = (() => {
-  if ("dirname" in window && window.dirname) return window.dirname as string;
-  if ("__dirname" in window && window.__dirname)
-    return path.dirname(path.dirname(window.__dirname));
-  if ("appPath" in _options && _options.appPath)
-    return path.join(_options.appPath as string, "TypeMark");
-  throw new Error("Cannot determine Typora resource directory.");
-})();
-
 /****************************
  * Proxies to make TS happy *
  ****************************/
@@ -36,9 +16,39 @@ export const File = window.File as ExtendedFileConstructor;
  */
 export const Node = window.Node as unknown as typeof Typora.Node;
 
+/*************
+ * Constants *
+ *************/
+/**
+ * Typora version.
+ */
+export const TYPORA_VERSION = window._options.appVersion;
+
+/**
+ * Typora resource directory.
+ */
+export const TYPORA_RESOURCE_DIR: string = (() => {
+  let result = "";
+  if ("dirname" in window && window.dirname) result = window.dirname as string;
+  else if ("__dirname" in window && window.__dirname) result = window.__dirname;
+  else if ("appPath" in _options && _options.appPath) result = _options.appPath as string;
+
+  if (!result) throw new Error("Cannot determine Typora resource directory.");
+
+  let lastResult = "";
+  while (path.basename(result) !== "resources") {
+    lastResult = result;
+    result = path.dirname(result);
+    if (result === lastResult) throw new Error("Cannot determine Typora resource directory.");
+  }
+
+  return File.isMac ? path.join(result, "TypeMark") : result;
+})();
+
 /*********************
  * Prototype patches *
  *********************/
+let editorEnhanced = false;
 /**
  * Enhance Typora `Editor` class (by manipulating its prototype) to provide the following methods:
  *
@@ -55,7 +65,11 @@ export const Node = window.Node as unknown as typeof Typora.Node;
  * ```
  */
 const enhanceEditor = () => {
-  const rawEditor = File.editor;
+  if (editorEnhanced) return;
+
+  editorEnhanced = true;
+
+  const rawEditor = File.editor!;
 
   const editorPrototype: Typora.EnhancedEditor = rawEditor.constructor.prototype;
 
@@ -226,6 +240,7 @@ const enhanceEditor = () => {
     watchObj(historyManagerPrototype, key as keyof typeof historyManagerPrototype);
 };
 
+let sourceViewEnhanced = false;
 /**
  * Enhance Typora `SourceView` class (by manipulating its prototype) to provide the following methods:
  *
@@ -250,8 +265,12 @@ const enhanceEditor = () => {
  * ```
  */
 const enhanceSourceView = () => {
+  if (sourceViewEnhanced) return;
+
+  sourceViewEnhanced = true;
+
   const sourceViewPrototype: Typora.EnhancedSourceView =
-    File.editor.sourceView.constructor.prototype;
+    File.editor!.sourceView.constructor.prototype;
 
   const handlersMap: Map<
     string,

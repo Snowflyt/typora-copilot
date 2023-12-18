@@ -12,9 +12,24 @@ This plugin uses the LSP server extracted from Copilot.vim to provide suggestion
 
 _macOS is not supported yet. Besides, this plugin has not been fully tested on Linux, but it should work properly._
 
-## Compatible
+## Compatiblility
 
-Only tested on Windows on Typora 1.7.6.
+_*Note: `/` means not tested._
+
+**⚠️ Warning: ** For users using Typora < 1.6, you need to install [Node.js](https://nodejs.org/en/download/) ≥ 18.
+
+| Typora Version | Windows 11 | Ubuntu 22.04 | macOS 14.2 |
+| -------------- | ---------- | ------------ | ---------- |
+| 1.7.6          | √          | /            | ×          |
+| 1.6.7          | √          | /            | ×          |
+| 1.6.4-dev      | √          | /            | ×          |
+| 1.5.12         | √          | /            | ×          |
+| 1.4.8          | √          | /            | ×          |
+| 1.3.8          | √          | /            | ×          |
+| 1.2.5          | √          | /            | ×          |
+| 1.2.3          | √          | /            | ×          |
+| 1.0.3          | √          | /            | ×          |
+| 0.11.18-beta   | √          | /            | ×          |
 
 ## Prerequisites
 
