@@ -5,7 +5,7 @@ import { pathToFileURL } from "@modules/url";
 import { debounce } from "lodash-es";
 
 import { createCopilotClient } from "./client";
-import { attachCompletionPanel } from "./components/CompletionPanel";
+import { attachSuggestionPanel } from "./components/SuggestionPanel";
 import { PLUGIN_DIR, VERSION } from "./constants";
 import { attachFooter } from "./footer";
 import { logger } from "./logging";
@@ -217,8 +217,8 @@ const main = async () => {
     const pos = getCaretCoordinate();
     if (!pos) return;
 
-    // Insert a completion panel below the cursor
-    const unattachCompletionPanel = attachCompletionPanel(displayText);
+    // Insert a suggestion panel below the cursor
+    const unattachSuggestionPanel = attachSuggestionPanel(displayText);
 
     copilot.notification.notifyShown({ uuid: options.uuid });
 
@@ -232,7 +232,7 @@ const main = async () => {
 
       finished = true;
 
-      unattachCompletionPanel();
+      unattachSuggestionPanel();
 
       copilot.notification.notifyRejected({ uuids: [options.uuid] });
 
@@ -248,7 +248,7 @@ const main = async () => {
 
       finished = true;
 
-      unattachCompletionPanel();
+      unattachSuggestionPanel();
 
       // Calculate whether it is safe to just use `insertText` to insert completion text
       let safeToJustUseInsertText = false;

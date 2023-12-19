@@ -9,7 +9,7 @@ import { getCaretCoordinate } from "@/utils/dom";
 import { css, registerCSS } from "@/utils/tools";
 
 registerCSS(css`
-  .completion-panel {
+  .suggestion-panel {
     position: absolute;
     z-index: 9999;
     pointer-events: none;
@@ -23,14 +23,14 @@ registerCSS(css`
   }
 `);
 
-export interface CompletionPanelProps {
+export interface SuggestionPanelProps {
   x: number;
   y: number;
   text: string;
   textColor?: string;
 }
 
-export const attachCompletionPanel = (text: string) => {
+export const attachSuggestionPanel = (text: string) => {
   const pos = getCaretCoordinate();
   if (!pos) return () => {};
 
@@ -38,12 +38,12 @@ export const attachCompletionPanel = (text: string) => {
   document.body.appendChild(container);
 
   const { x, y } = pos;
-  render(<CompletionPanel x={x} y={y} text={text} />, container);
+  render(<SuggestionPanel x={x} y={y} text={text} />, container);
 
   const scrollListener = () => {
     const pos = getCaretCoordinate();
     if (!pos) return;
-    $(".completion-panel").css("top", `calc(${pos.y}px + 1.5em)`);
+    $(".suggestion-panel").css("top", `calc(${pos.y}px + 1.5em)`);
   };
   $("content").on("scroll", scrollListener);
 
@@ -54,7 +54,7 @@ export const attachCompletionPanel = (text: string) => {
   };
 };
 
-const CompletionPanel: FC<CompletionPanelProps> = ({ text, textColor = "gray", x, y }) => {
+const SuggestionPanel: FC<SuggestionPanelProps> = ({ text, textColor = "gray", x, y }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const codeAreaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -102,7 +102,7 @@ const CompletionPanel: FC<CompletionPanelProps> = ({ text, textColor = "gray", x
   return (
     <div
       ref={containerRef}
-      className="completion-panel"
+      className="suggestion-panel"
       style={{
         // Visibility is set to hidden on mount to adjust position after calculating actual width,
         // and then set to visible
@@ -145,4 +145,4 @@ const CompletionPanel: FC<CompletionPanelProps> = ({ text, textColor = "gray", x
   );
 };
 
-export default CompletionPanel;
+export default SuggestionPanel;
