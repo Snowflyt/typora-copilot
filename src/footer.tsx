@@ -146,8 +146,6 @@ export const FooterPanel: FC<FooterPanelOptions> = ({ copilot, open = true }) =>
     // Copy user code to clipboard
     void navigator.clipboard.writeText(userCode);
     // Open verification URI in browser
-    // // @ts-expect-error - `electron` is not declared in types
-    // require("electron").shell.openExternal(verificationUri);
     File.editor?.EditHelper.showDialog({
       title: "Copilot Sign In",
       html: /* html */ `
@@ -157,10 +155,8 @@ export const FooterPanel: FC<FooterPanelOptions> = ({ copilot, open = true }) =>
             ${userCode}
           </div>
           <span>
-            It has been copied to your clipboard. Please paste it in the popup GitHub page.
-          </span>
-          <span>
-            If the popup page does not show up, please open the following link in your browser:
+            It has been copied to your clipboard. Please open the following link in your browser
+            and paste the code to sign in:
           </span>
           <div style="margin-top: 8px; margin-bottom: 8px;">
             <a href="${verificationUri}" target="_blank" rel="noopener noreferrer">

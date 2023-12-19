@@ -95,9 +95,10 @@ When finished installation, you'll find an icon in the toolbar of Typora. Click 
 Follow the prompts to authenticate Copilot plugin:
 
 1. The User Code will be auto copied to your clipboard.
-2. Paste the User Code into the pop-up GitHub authentication page.
-3. Return to Typora and press OK on the dialog.
-4. If you see a “Copilot Signed In” dialog _after a few seconds_, Copilot plugin should start working since then.
+2. Follow the instructions on the pop-up dialog to open the GitHub authentication page in your browser.
+3. Paste the User Code into the GitHub authentication page.
+4. Return to Typora and press OK on the dialog.
+5. If you see a “Copilot Signed In” dialog _after a few seconds_, Copilot plugin should start working since then.
 
 ## Uninstallation
 
