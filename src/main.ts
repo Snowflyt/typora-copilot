@@ -179,30 +179,35 @@ const main = async () => {
           character: range.end.character - startPos.character,
         },
       };
-      // Get the code block starter "```" or "~~~"
-      const codeBlockStarter = state.markdown
-        .split(File.useCRLF ? "\r\n" : "\n")
-        [startPos.line - 1]!.slice(startPos.character, startPos.character + 3);
-      // Get only completion text before code block starter, as in Typora code block it is not possible
-      // to insert a new code block or end one using "```" or "~~~"
-      const indexOfCodeBlockStarter = subCmCompletion.text.indexOf(codeBlockStarter);
-      if (indexOfCodeBlockStarter !== -1) {
-        subCmCompletion.displayText = subCmCompletion.displayText.slice(
-          0,
-          subCmCompletion.displayText.indexOf(codeBlockStarter),
-        );
-        subCmCompletion.text = subCmCompletion.text.slice(0, indexOfCodeBlockStarter);
-        const textAfterCodeBlockStarter = subCmCompletion.text.slice(indexOfCodeBlockStarter);
-        // Reduce `subCmCompletion.range` to only include text before code block starter
-        const rows = textAfterCodeBlockStarter.split(File.useCRLF ? "\r\n" : "\n").length - 1;
-        subCmCompletion.range.end.line -= rows;
-        subCmCompletion.range.end.character = textAfterCodeBlockStarter
-          .split(File.useCRLF ? "\r\n" : "\n")
-          .pop()!.length;
-      }
-      insertCompletionTextToCodeMirror(cm, subCmCompletion);
+      // Get starter of CodeMirror to determine whether it is a code block, formula, etc.
+      let cmStarter = state.markdown.split(File.useCRLF ? "\r\n" : "\n")[startPos.line - 1];
 
-      return;
+      if (cmStarter) {
+        if (cmStarter.startsWith("```") || cmStarter.startsWith("~~~")) {
+          // * Code block *
+          cmStarter = cmStarter.slice(0, 3);
+          // Get only completion text before code block starter, as in Typora code block it is not possible
+          // to insert a new code block or end one using "```" or "~~~"
+          const indexOfCodeBlockStarter = subCmCompletion.text.indexOf(cmStarter);
+          if (indexOfCodeBlockStarter !== -1) {
+            subCmCompletion.displayText = subCmCompletion.displayText.slice(
+              0,
+              subCmCompletion.displayText.indexOf(cmStarter),
+            );
+            subCmCompletion.text = subCmCompletion.text.slice(0, indexOfCodeBlockStarter);
+            const textAfterCodeBlockStarter = subCmCompletion.text.slice(indexOfCodeBlockStarter);
+            // Reduce `subCmCompletion.range` to only include text before code block starter
+            const rows = textAfterCodeBlockStarter.split(File.useCRLF ? "\r\n" : "\n").length - 1;
+            subCmCompletion.range.end.line -= rows;
+            subCmCompletion.range.end.character = textAfterCodeBlockStarter
+              .split(File.useCRLF ? "\r\n" : "\n")
+              .pop()!.length;
+          }
+          insertCompletionTextToCodeMirror(cm, subCmCompletion);
+
+          return;
+        }
+      }
     }
 
     const focusedElem = document.querySelector(`[cid=${editor.focusCid}]`);
