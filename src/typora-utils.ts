@@ -342,4 +342,4 @@ export const waitUntilEditorInitialized = (): Promise<void> =>
 /*******************************************************************************************
  * Extracted functions (Extracted from Typora's bundled code, I don't understand them all) *
  *******************************************************************************************/
-export { getCursorPlacement } from "./extracted";
+export { getCaretPlacement } from "./extracted";

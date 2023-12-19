@@ -1,6 +1,6 @@
 {
   "name": "typora-copilot",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "private": true,
   "description": "GitHub Copilot plugin for Typora",
   "keywords": [
@@ -69,6 +69,7 @@
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-sort-destructure-keys": "^1.5.0",
     "happy-dom": "^12.10.3",
+    "hotscript": "^1.0.13",
     "prettier": "^2.8.8",
     "prettier-plugin-packagejson": "^2.4.7",
     "rimraf": "^5.0.5",

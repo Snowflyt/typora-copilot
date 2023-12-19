@@ -21,17 +21,17 @@ const Node = /** @type {typeof Typora.Node} */ (/** @type {unknown} */ (window.N
  * Extracted functions (Extracted from Typora's bundled code, I don't understand them all) *
  *******************************************************************************************/
 /**
- * Get the cursor placement of the current node.
- * @returns {Typora.CursorPlacement | null}
+ * Get the caret placement of the current node.
+ * @returns {Typora.CaretPlacement | null}
  */
-export const getCursorPlacement = () =>
+export const getCaretPlacement = () =>
   _getCursorPlacement.call(
     /** @type {ExtendedFileConstructor & { get(key: string): string | undefined }} */ (File),
   ) ?? null;
 /**
  * @this {ExtendedFileConstructor & { get(key: string): string | undefined }}
- * @param {Typora.CursorPlacement} [placement]
- * @returns {Typora.CursorPlacement | undefined}
+ * @param {Typora.CaretPlacement} [placement]
+ * @returns {Typora.CaretPlacement | undefined}
  */
 function _getCursorPlacement(placement) {
   if (this.editor.focusCid) {
@@ -65,7 +65,7 @@ function _getCursorPlacement(placement) {
           (s = !/`|~/.exec(activeNode.get("pattern") || "```")) || i++,
           ((placement = document.activeElement.classList.contains("ty-cm-lang-input")
             ? { line: -1, before: activeNode.get("pattern") || "```" }
-            : /** @type {Typora.CursorPlacement} */ (
+            : /** @type {Typora.CaretPlacement} */ (
                 // THIS IS TO FIX A BUG IN TYPORA, THE IMPLEMENTATION IS NOT THE SAME AS THE ORIGINAL
                 // Typora originally just mutate the cursor in place and return itself, which can cause bugs.
                 // Here I use a immutable way by creating a new one, which is slower but safer.

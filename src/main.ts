@@ -12,10 +12,10 @@ import { logger } from "./logging";
 import {
   File,
   TYPORA_VERSION,
-  getCursorPlacement,
+  getCaretPlacement,
   waitUntilEditorInitialized,
 } from "./typora-utils";
-import { getTextCursorPosition } from "./utils/dom";
+import { $S, getCaretCoordinate } from "./utils/dom";
 import { css, registerCSS, setGlobalVar, sliceTextByRange } from "./utils/tools";
 
 import type { Completion } from "./client";
@@ -70,10 +70,10 @@ const main = async () => {
     (File.filePath ?? (File.bundle && File.bundle.filePath)) || null;
 
   /**
-   * Get current cursor position in source markdown text.
+   * Get current caret position in source markdown text.
    * @returns
    */
-  const getCursorPos = (): Position | null => {
+  const getCaretPosition = (): Position | null => {
     // When selection, return null
     if (sourceView.inSourceMode) {
       if (cm.getSelection()) return null;
@@ -94,9 +94,9 @@ const main = async () => {
     // @ts-expect-error - CodeMirror supports 2nd parameter, but not declared in types
     cm.setValue(editor.getMarkdown(), "begin");
 
-    let placement: Typora.CursorPlacement | null;
+    let placement: Typora.CaretPlacement | null;
     try {
-      placement = getCursorPlacement();
+      placement = getCaretPlacement();
     } catch (e) {
       if (e instanceof Error && e.stack) console.warn(e.stack);
       return null;
@@ -154,14 +154,15 @@ const main = async () => {
     // When not in writer, do not insert completion text
     if ("BODY" === activeElement.tagName) return;
 
-    // If in a code block, use the cm way to insert completion text
+    // If in a CodeMirror instance, try to use the cm way to insert completion text
     if ("TEXTAREA" === activeElement.tagName) {
       const cms = $(activeElement).closest(".CodeMirror");
       if (!cms || !cms.length) return;
       const cm = (cms[0] as unknown as { CodeMirror: CodeMirror.Editor }).CodeMirror;
       const subCmCompletion = { ...options };
-      const startPos = getCursorPos()!;
-      startPos.line -= cm.getValue().split(File.useCRLF ? "\r\n" : "\n").length - 1;
+      const startPos = getCaretPosition()!;
+      startPos.line -=
+        cm.getValue(File.useCRLF ? "\r\n" : "\n").split(File.useCRLF ? "\r\n" : "\n").length - 1;
       startPos.character -= cm.getCursor().ch;
       // Set `position` and `range` to be relative to `startPos`
       subCmCompletion.position = {
@@ -208,7 +209,7 @@ const main = async () => {
     if (!focusedElem) return;
     if (!(focusedElem instanceof HTMLElement)) return;
 
-    const pos = getTextCursorPosition();
+    const pos = getCaretCoordinate();
     if (!pos) return;
 
     // Insert a completion panel below the cursor
@@ -247,7 +248,7 @@ const main = async () => {
       // Calculate whether it is safe to just use `insertText` to insert completion text
       let safeToJustUseInsertText = false;
       let textToInsert = text;
-      const cursorPos = getCursorPos();
+      const cursorPos = getCaretPosition();
       if (
         cursorPos &&
         cursorPos.line === range.end.line &&
@@ -305,7 +306,6 @@ const main = async () => {
     const clearListeners = () => {
       cleared = true;
       editor.writingArea.removeEventListener("keydown", keydownHandler);
-      clearInterval(cursorMoveListener);
     };
 
     /**
@@ -327,14 +327,13 @@ const main = async () => {
     };
     editor.writingArea.addEventListener("keydown", keydownHandler, true);
 
-    const lastCursor = editor.lastCursor;
-    const cursorMoveListener = setInterval(() => {
+    $S(editor.writingArea).once("caretMove", () => {
       if (cleared) return;
 
-      if (editor.lastCursor !== lastCursor) {
-        clearListeners();
-        _reject();
-      }
+      state.latestCaretMoveTimestamp = Date.now();
+
+      clearListeners();
+      _reject();
     });
 
     const reject = () => {
@@ -542,7 +541,7 @@ const main = async () => {
         if (origin === "undo" || origin === "redo") {
           if (sourceView.inSourceMode) cm[origin]();
           else editor.undo[origin]();
-          state.latestCursorChangeTimestamp = Date.now();
+          state.latestCaretMoveTimestamp = Date.now();
         } else {
           cm.replaceRange(text.join(File.useCRLF ? "\r\n" : "\n"), from, to, origin);
         }
@@ -556,7 +555,7 @@ const main = async () => {
     const cursorMoveHandler = () => {
       if (cleared) return;
 
-      state.latestCursorChangeTimestamp = Date.now();
+      state.latestCaretMoveTimestamp = Date.now();
 
       clearListeners();
       _reject();
@@ -637,12 +636,12 @@ const main = async () => {
     });
 
     /* Fetch completion from Copilot if cursor position exists */
-    const cursorPos = getCursorPos();
+    const cursorPos = getCaretPosition();
     if (!cursorPos) return;
 
     // Fetch completion from Copilot
     const changeTimestamp = state.latestChangeTimestamp;
-    const cursorChangeTimestamp = state.latestCursorChangeTimestamp;
+    const caretMoveTimestamp = state.latestCaretMoveTimestamp;
     const { cancellationReason, completions } = await copilot.request.getCompletions({
       position: cursorPos,
       path: state.activeFilePathname,
@@ -653,7 +652,7 @@ const main = async () => {
 
     if (
       state.latestChangeTimestamp !== changeTimestamp ||
-      state.latestCursorChangeTimestamp !== cursorChangeTimestamp
+      state.latestCaretMoveTimestamp !== caretMoveTimestamp
     ) {
       if (state.latestChangeTimestamp !== changeTimestamp)
         logger.debug(
@@ -664,8 +663,8 @@ const main = async () => {
       else
         logger.debug(
           "Ignoring completion due to text cursor change timestamp mismatch",
-          state.latestCursorChangeTimestamp,
-          cursorChangeTimestamp,
+          state.latestCaretMoveTimestamp,
+          caretMoveTimestamp,
         );
       completions.forEach((completion) => {
         copilot.notification.notifyRejected({ uuids: [completion.uuid] });
@@ -709,7 +708,7 @@ const main = async () => {
     markdown: editor.getMarkdown(),
     _actualLatestMarkdown: editor.getMarkdown(),
     latestChangeTimestamp: Date.now(),
-    latestCursorChangeTimestamp: Date.now(),
+    latestCaretMoveTimestamp: Date.now(),
     suppressMarkdownChange: 0,
   };
   // Initialize CodeMirror
@@ -818,7 +817,7 @@ const main = async () => {
   cm.on("change", (cm, change) => {
     if (!editor.sourceView.inSourceMode) return;
 
-    const newMarkdown = cm.getValue();
+    const newMarkdown = cm.getValue(File.useCRLF ? "\r\n" : "\n");
     // If not literally changed, simply return
     if (newMarkdown === state._actualLatestMarkdown) return;
     // If literally changed, update current actual markdown text

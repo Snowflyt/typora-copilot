@@ -348,7 +348,7 @@ declare namespace Typora {
    * Representing the text cursor position in raw markdown. Can be considered as an enhanced version
    * of {@link CodeMirrorDocumentPosition}.
    */
-  interface CursorPlacement {
+  interface CaretPlacement {
     line: number;
     ch?: number;
     before?: string;

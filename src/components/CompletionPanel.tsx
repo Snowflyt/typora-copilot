@@ -5,7 +5,7 @@ import { useEffect, useRef } from "preact/hooks";
 
 import { COPILOT_ICON_PATHNAME } from "@/constants";
 import { File } from "@/typora-utils";
-import { getTextCursorPosition } from "@/utils/dom";
+import { getCaretCoordinate } from "@/utils/dom";
 import { css, registerCSS } from "@/utils/tools";
 
 registerCSS(css`
@@ -31,7 +31,7 @@ export interface CompletionPanelProps {
 }
 
 export const attachCompletionPanel = (text: string) => {
-  const pos = getTextCursorPosition();
+  const pos = getCaretCoordinate();
   if (!pos) return () => {};
 
   const container = document.createElement("div");
@@ -41,7 +41,7 @@ export const attachCompletionPanel = (text: string) => {
   render(<CompletionPanel x={x} y={y} text={text} />, container);
 
   const scrollListener = () => {
-    const pos = getTextCursorPosition();
+    const pos = getCaretCoordinate();
     if (!pos) return;
     $(".completion-panel").css("top", `calc(${pos.y}px + 1.5em)`);
   };
