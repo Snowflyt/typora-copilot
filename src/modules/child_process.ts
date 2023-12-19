@@ -5,22 +5,34 @@ import type { ChildProcessWithoutNullStreams } from "node:child_process";
 import { logger } from "@/logging";
 import { File, waitUntilEditorInitialized } from "@/typora-utils";
 
+/**
+ * Parse Node version string to number array.
+ * @param version Node version string, e.g. `"v14.17.6"`.
+ * @returns A number array, e.g. `[14, 17, 6]`.
+ */
+const parseNodeVersion = (version: string): number[] =>
+  (version.trim().startsWith("v") ? version.trim().slice(1) : version.trim())
+    .split(".")
+    .map((s) => s.trim())
+    .filter((s) => s)
+    .map((s) => Number.parseInt(s));
+
+/**
+ * Start a Node process with the given module path. Stdio is enabled.
+ * @returns A Node process with stdio enabled.
+ */
 export const forkNode: (modulePath: string) => ChildProcessWithoutNullStreams = (() => {
-  const nodeFork = window.reqnode?.("child_process")?.fork;
-  if (nodeFork) {
+  if (File.isNode) {
+    const { fork, spawn, spawnSync } = window.reqnode!("child_process");
+
     // Check Node version
-    const nodeVersion = window.process.version
-      .split("v", 2)[1]!
-      .split(".")
-      .map((s) => s.trim())
-      .filter((s) => s);
-    if (Number.parseInt(nodeVersion[0]!) >= 18)
+    const nodeVersion = parseNodeVersion(process.version);
+    if (nodeVersion[0]! >= 18)
       return (modulePath) =>
-        nodeFork(modulePath, [], { silent: true }) as ChildProcessWithoutNullStreams;
+        fork(modulePath, [], { silent: true }) as ChildProcessWithoutNullStreams;
 
     // For Node < 18, use Node from shell
     logger.warn("Detected bundled Node version < 18, try using Node from shell instead.");
-    const { spawn, spawnSync } = window.reqnode!("child_process");
 
     // Check Node version
     const { stderr, stdout } = spawnSync("node", ["-v"]);
@@ -51,7 +63,7 @@ export const forkNode: (modulePath: string) => ChildProcessWithoutNullStreams = 
       throw new Error(errorMessage);
     }
     const shellNodeVersion = stdout.toString().trim();
-    if (Number.parseInt(shellNodeVersion.split("v", 2)[1]!.split(".")[0]!) < 18) {
+    if (parseNodeVersion(shellNodeVersion)[0]! < 18) {
       const errorMessage =
         `Node version from shell is < 18 (${shellNodeVersion}), ` +
         "please install Node >= 18 or use Typora >= 1.6 to use this plugin";

@@ -250,7 +250,8 @@ const main = async () => {
 
       unattachSuggestionPanel();
 
-      // Calculate whether it is safe to just use `insertText` to insert completion text
+      // Calculate whether it is safe to just use `insertText` to insert completion text,
+      // as using `reloadContent` uses much more resources and causes a flicker
       let safeToJustUseInsertText = false;
       let textToInsert = text;
       const cursorPos = getCaretPosition();

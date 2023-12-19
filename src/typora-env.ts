@@ -329,24 +329,9 @@ declare namespace Typora {
   /*****************************************
    * Cursor & Selection & Position & Range *
    *****************************************/
-  // /**
-  //  * A range of text in raw markdown, used by CodeMirror.
-  //  */
-  // interface CodeMirrorDocumentRange {
-  //   from: CodeMirrorDocumentPosition;
-  //   to: CodeMirrorDocumentPosition;
-  // }
-  // /**
-  //  * Representing a text cursor position in raw markdown, used by CodeMirror.
-  //  */
-  // interface CodeMirrorDocumentPosition {
-  //   line: number;
-  //   ch: number;
-  //   sticky?: unknown;
-  // }
   /**
    * Representing the text cursor position in raw markdown. Can be considered as an enhanced version
-   * of {@link CodeMirrorDocumentPosition}.
+   * of {@link CodeMirror.Position}.
    */
   interface CaretPlacement {
     line: number;
@@ -355,28 +340,6 @@ declare namespace Typora {
     beforeRegExp?: string;
     afterIndent?: boolean;
   }
-  // /**
-  //  * Rangy range.
-  //  */
-  // interface Rangy {
-  //   startContainer: HTMLElement;
-  //   collapsed: boolean;
-  //   commonAncestorContainer: HTMLElement;
-
-  //   setStartBefore(el: HTMLElement): void;
-  //   toHtml(): HTMLElement;
-  // }
-  // interface RangyText {
-  //   assignedSlot: unknown | null;
-  //   baseURI: string;
-  //   childNodes: NodeList;
-  //   /**
-  //    * File pathname.
-  //    */
-  //   data: string;
-  //   firstChild: unknown | null;
-  //   isConnected: boolean;
-  // }
 
   /**********
    * Editor *

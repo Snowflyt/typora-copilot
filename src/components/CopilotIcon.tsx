@@ -11,6 +11,10 @@ export interface CopilotIconProps {
   textColor: string;
 }
 
+/**
+ * Icon of Copilot, change according to status.
+ * @returns
+ */
 const CopilotIcon: FC<CopilotIconProps> = ({ status, textColor }) => {
   if (status === "InProgress")
     return (

@@ -62,6 +62,10 @@ registerCSS(css`
   }
 `);
 
+/**
+ * Get DOM element of Typora footer bar.
+ * @returns
+ */
 const getFooterBarDOM = () => document.querySelector<HTMLElement>("footer.ty-footer");
 
 const createFooterTextColorGetter = (options?: { className?: string }) => {
@@ -96,6 +100,9 @@ const createFooterTextColorGetter = (options?: { className?: string }) => {
 };
 
 const footerTextColorGetter = createFooterTextColorGetter();
+/**
+ * Text color of the footer of Typora App, updates every second.
+ */
 export let footerTextColor = footerTextColorGetter.getFooterTextColor();
 setInterval(() => {
   footerTextColor = footerTextColorGetter.getFooterTextColor();
@@ -106,6 +113,10 @@ export interface FooterPanelOptions {
   open?: boolean;
 }
 
+/**
+ * Panel for the user to control Copilot.
+ * @returns
+ */
 export const FooterPanel: FC<FooterPanelOptions> = ({ copilot, open = true }) => {
   const accountStatus = useSignal<CopilotAccountStatus>("NotSignedIn");
 
@@ -128,6 +139,9 @@ export const FooterPanel: FC<FooterPanelOptions> = ({ copilot, open = true }) =>
     else copilot.on("initialized", onCopilotInitialized);
   }, []);
 
+  /**
+   * Distance from the element bottom to App bottom.
+   */
   const bottom = useSignal(useMemo(() => (getFooterBarDOM()?.clientHeight ?? 30) + 2, []));
 
   // Watch footer bar height and change footer icon height accordingly
@@ -228,6 +242,9 @@ export interface FooterOptions {
   copilot: CopilotClient;
 }
 
+/**
+ * Footer of the plugin with an icon.
+ */
 export const Footer: FC<FooterOptions> = ({ copilot }) => {
   const status = useSignal<CopilotStatus>(copilot.status);
 
@@ -298,14 +315,25 @@ export const Footer: FC<FooterOptions> = ({ copilot }) => {
   );
 };
 
+/**
+ * Create and attach footer element to DOM.
+ * @param copilot The Copilot client.
+ * @returns A function that can be used to remove the footer element from the DOM.
+ */
 export const attachFooter = (copilot: CopilotClient) => {
   const footerBar = getFooterBarDOM();
-  if (footerBar) {
-    const container = document.createElement("div");
-    const firstFooterItemRight = $(footerBar).find(".footer-item-right")[0];
-    if (firstFooterItemRight) firstFooterItemRight.insertAdjacentElement("beforebegin", container);
-    else footerBar.appendChild(container);
-    const footer = <Footer copilot={copilot} />;
-    render(footer, container);
-  }
+
+  if (!footerBar) return () => {};
+
+  const container = document.createElement("div");
+  const firstFooterItemRight = $(footerBar).find(".footer-item-right")[0];
+  if (firstFooterItemRight) firstFooterItemRight.insertAdjacentElement("beforebegin", container);
+  else footerBar.appendChild(container);
+  const footer = <Footer copilot={copilot} />;
+  render(footer, container);
+
+  return () => {
+    render(null, container);
+    container.remove();
+  };
 };

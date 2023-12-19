@@ -1,5 +1,9 @@
 import type * as H from "hotscript";
 
+/**
+ * Get coordinates of the caret.
+ * @returns
+ */
 export const getCaretCoordinate = (): { x: number; y: number } | null => {
   const sel = window.getSelection();
   if (sel && sel.rangeCount) {
@@ -13,6 +17,10 @@ export const getCaretCoordinate = (): { x: number; y: number } | null => {
   return null;
 };
 
+/**
+ * Typesafe version of `document.querySelector` with additional util methods.
+ * @returns
+ */
 export const $S: {
   <T extends string>(selector: T): EnhanceElement<ElementFromSelector<T>> | null;
   <Element extends HTMLElement>(element: Element): EnhanceElement<Element>;
@@ -58,7 +66,11 @@ export const $S: {
     enhanced.on(event, onceHandler);
   };
 
-  let lastCaretPosition: { node: Node; offset: number } | null = (() => {
+  /**
+   * Get the current caret position.
+   * @returns
+   */
+  const getCaretPosition = (): { node: Node; offset: number } | null => {
     const selection = window.getSelection();
     if (selection === null) return null;
     if (selection.rangeCount) {
@@ -69,7 +81,9 @@ export const $S: {
       };
     }
     return null;
-  })();
+  };
+
+  let lastCaretPosition = getCaretPosition();
   const onCaretMove = () => {
     const selection = window.getSelection();
 

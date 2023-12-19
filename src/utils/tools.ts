@@ -1,4 +1,4 @@
-import type { EOL } from "@/types/lsp";
+import type { EOL, Range } from "@/types/lsp";
 import type { ReadonlyRecord } from "@/types/tools";
 
 /**
@@ -72,7 +72,7 @@ export const registerCSS = (css: string) => {
  */
 export const sliceTextByRange = <ReturnRows extends boolean = false>(
   text: string,
-  range: { start: { line: number; character: number }; end: { line: number; character: number } },
+  range: Range,
   eol: EOL = "\n",
   returnRows?: ReturnRows,
 ): ReturnRows extends true ? string[] : string => {
@@ -103,7 +103,7 @@ export const sliceTextByRange = <ReturnRows extends boolean = false>(
  */
 export const replaceTextByRange = (
   text: string,
-  range: { start: { line: number; character: number }; end: { line: number; character: number } },
+  range: Range,
   newText: string,
   eol: EOL = "\n",
 ) => {
