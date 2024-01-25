@@ -182,6 +182,7 @@ const main = async () => {
       // Get starter of CodeMirror to determine whether it is a code block, formula, etc.
       let cmStarter = state.markdown.split(File.useCRLF ? "\r\n" : "\n")[startPos.line - 1];
 
+      // eslint-disable-next-line sonarjs/no-collapsible-if
       if (cmStarter) {
         if (cmStarter.startsWith("```") || cmStarter.startsWith("~~~")) {
           // * Code block *
@@ -328,7 +329,6 @@ const main = async () => {
         event.stopPropagation();
         clearListeners();
         _accept();
-        return;
       }
     };
     editor.writingArea.addEventListener("keydown", keydownHandler, true);
@@ -352,8 +352,6 @@ const main = async () => {
       _accept();
     };
     completion.accept = accept;
-
-    return;
   };
 
   /**
@@ -520,7 +518,6 @@ const main = async () => {
         event.preventDefault();
         clearListeners();
         _accept();
-        return;
       }
     };
     cm.on("keydown", cmTabFixer);

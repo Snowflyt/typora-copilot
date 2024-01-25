@@ -1,3 +1,5 @@
+// @ts-check
+
 /** @satisfies {import("prettier").Config} */
 const config = {
   arrowParens: "always",

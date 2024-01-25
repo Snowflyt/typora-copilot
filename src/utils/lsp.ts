@@ -92,8 +92,7 @@ export const isLSPArray = (value: unknown): value is LSPArray =>
  */
 export const isMessage = (value: unknown): value is Message => {
   if (typeof value !== "object" || value === null) return false;
-  if (!("jsonrpc" in value) || typeof value.jsonrpc !== "string") return false;
-  return true;
+  return !(!("jsonrpc" in value) || typeof value.jsonrpc !== "string");
 };
 
 /**
@@ -109,8 +108,7 @@ export const isRequestMessage = (value: unknown): value is RequestMessage => {
   )
     return false;
   if (!("method" in value) || typeof value.method !== "string") return false;
-  if ("params" in value && !isLSPArray(value.params) && !isLSPObject(value.params)) return false;
-  return true;
+  return !("params" in value && !isLSPArray(value.params) && !isLSPObject(value.params));
 };
 
 /**
@@ -137,8 +135,7 @@ export const isResponseMessage = (value: unknown): value is ResponseMessage => {
   )
     return false;
   if ("error" in value && !isResponseError(value.error)) return false;
-  if (!("result" in value) && !("error" in value)) return false;
-  return true;
+  return !(!("result" in value) && !("error" in value));
 };
 
 /**
@@ -150,7 +147,7 @@ export const isResponseError = (value: unknown): value is ResponseError => {
   if (typeof value !== "object" || value === null) return false;
   if (!("code" in value) || !isInteger(value.code)) return false;
   if (!("message" in value) || typeof value.message !== "string") return false;
-  if (
+  return !(
     "data" in value &&
     typeof value.data !== "string" &&
     typeof value.data !== "number" &&
@@ -158,9 +155,7 @@ export const isResponseError = (value: unknown): value is ResponseError => {
     !isLSPArray(value.data) &&
     !isLSPObject(value.data) &&
     value.data !== null
-  )
-    return false;
-  return true;
+  );
 };
 
 /**
@@ -180,6 +175,5 @@ export const isNotificationMessage = (value: unknown): value is NotificationMess
   if (!isMessage(value)) return false;
   if ("id" in value && value.id !== null) return false;
   if (!("method" in value) || typeof value.method !== "string") return false;
-  if ("params" in value && !isLSPArray(value.params) && !isLSPObject(value.params)) return false;
-  return true;
+  return !("params" in value && !isLSPArray(value.params) && !isLSPObject(value.params));
 };

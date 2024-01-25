@@ -12,6 +12,7 @@ const config = {
     "plugin:import/recommended",
     "plugin:import/typescript",
     "plugin:prettier/recommended",
+    "plugin:sonarjs/recommended",
   ],
   parser: "@typescript-eslint/parser",
   parserOptions: {
@@ -33,9 +34,7 @@ const config = {
     "import/order": [
       "error",
       {
-        alphabetize: {
-          order: "asc",
-        },
+        alphabetize: { order: "asc" },
         groups: ["builtin", "external", "internal", "parent", "sibling", "index", "object", "type"],
         pathGroups: [
           {
@@ -54,6 +53,7 @@ const config = {
       },
     ],
     "no-undef": "off",
+    "sonarjs/cognitive-complexity": "off",
     "sort-destructure-keys/sort-destructure-keys": "error",
     "sort-imports": [
       "error",
@@ -65,6 +65,7 @@ const config = {
       },
     ],
   },
+  reportUnusedDisableDirectives: true,
 };
 
 module.exports = config;

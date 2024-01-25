@@ -466,6 +466,7 @@ export const createClient = <
       const color = type === "query" ? "#49cc90" : "purple";
       logger.block
         .overwrite({ color })
+        // eslint-disable-next-line sonarjs/no-duplicate-string
         .debug(`>> [${id}] ${isProtocol ? "[Protocol] " : ""}Response ${method}`, value);
     }
   };

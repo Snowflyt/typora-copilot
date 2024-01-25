@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/consistent-type-imports */
-
 import type { ChildProcessWithoutNullStreams } from "node:child_process";
 
 import { logger } from "@/logging";

@@ -2,8 +2,8 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "noEmit": false,
-    "outDir": "dist",
+    "outDir": "dist"
   },
   "include": ["src"],
-  "exclude": ["src/assets", "src/**/*.spec.ts", "src/**/*.proof.ts"],
+  "exclude": ["src/assets", "src/**/*.spec.ts", "src/**/*.proof.ts"]
 }

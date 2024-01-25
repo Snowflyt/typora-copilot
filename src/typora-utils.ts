@@ -75,7 +75,6 @@ const enhanceEditor = () => {
 
   const handlersMap: Map<
     string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Array<(editor: Typora.EnhancedEditor, ...args: any[]) => unknown>
   > = new Map();
 
@@ -225,7 +224,6 @@ const enhanceEditor = () => {
     if (typeof value === "object") {
       for (const key of Object.getOwnPropertyNames(value))
         watchObj(value, key as keyof typeof value);
-      return;
     }
   };
 
