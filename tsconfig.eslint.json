@@ -3,6 +3,7 @@
   "include": [
     ".eslintrc.cjs",
     "prettier.config.cjs",
+    "stylelint.config.js",
     "commitlint.config.js",
     ".lintstagedrc.js",
     "vitest.config.ts"

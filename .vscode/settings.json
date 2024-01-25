@@ -1,3 +1,4 @@
 {
-  "cSpell.words": ["reqnode"]
+  "cSpell.words": ["reqnode"],
+  "stylelint.validate": ["css", "scss"]
 }
