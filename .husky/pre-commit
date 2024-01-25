@@ -5,3 +5,5 @@ npm run test-types
 npm test
 
 npx lint-staged
+
+npx tsx pre-commit.ts
