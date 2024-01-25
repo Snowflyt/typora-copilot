@@ -5,6 +5,7 @@ import { pathToFileURL } from "@modules/url";
 import { debounce } from "lodash-es";
 
 import { createCopilotClient } from "./client";
+import { createCompletionTaskManager } from "./completion";
 import { attachSuggestionPanel } from "./components/SuggestionPanel";
 import { PLUGIN_DIR, VERSION } from "./constants";
 import { attachFooter } from "./footer";
@@ -328,7 +329,7 @@ const main = async () => {
     $S(editor.writingArea).once("caretMove", () => {
       if (cleared) return;
 
-      state.latestCaretMoveTimestamp = Date.now();
+      taskManager.cancelAll();
 
       clearListeners();
       _reject();
@@ -536,7 +537,7 @@ const main = async () => {
         if (origin === "undo" || origin === "redo") {
           if (sourceView.inSourceMode) cm[origin]();
           else editor.undo[origin]();
-          state.latestCaretMoveTimestamp = Date.now();
+          taskManager.cancelAll();
         } else {
           cm.replaceRange(text.join(File.useCRLF ? "\r\n" : "\n"), from, to, origin);
         }
@@ -550,7 +551,7 @@ const main = async () => {
     const cursorMoveHandler = () => {
       if (cleared) return;
 
-      state.latestCaretMoveTimestamp = Date.now();
+      taskManager.cancelAll();
 
       clearListeners();
       _reject();
@@ -622,11 +623,11 @@ const main = async () => {
    */
   // @ts-expect-error - Unused parameter `oldMarkdown`
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const onChangeMarkdown = debounce(async (newMarkdown: string, oldMarkdown: string) => {
+  const onChangeMarkdown = debounce((newMarkdown: string, oldMarkdown: string) => {
     /* Tell Copilot that file has changed */
     const version = ++copilot.version;
     copilot.notification.textDocument.didChange({
-      textDocument: { version, uri: pathToFileURL(state.activeFilePathname).href },
+      textDocument: { version, uri: pathToFileURL(taskManager.activeFilePathname).href },
       contentChanges: [{ text: newMarkdown }],
     });
 
@@ -634,61 +635,15 @@ const main = async () => {
     const cursorPos = getCaretPosition();
     if (!cursorPos) return;
 
+    taskManager.cancelAll();
     // Fetch completion from Copilot
-    const changeTimestamp = state.latestChangeTimestamp;
-    const caretMoveTimestamp = state.latestCaretMoveTimestamp;
-    const { cancellationReason, completions } = await copilot.request.getCompletions({
+    taskManager.startOne({
       position: cursorPos,
-      path: state.activeFilePathname,
-      relativePath: state.workspaceFolder
-        ? path.relative(state.workspaceFolder, state.activeFilePathname)
-        : state.activeFilePathname,
+      onCompletion: (completion) => {
+        if (editor.sourceView.inSourceMode) insertCompletionTextToCodeMirror(cm, completion);
+        else insertCompletionTextToEditor(completion);
+      },
     });
-
-    if (
-      state.latestChangeTimestamp !== changeTimestamp ||
-      state.latestCaretMoveTimestamp !== caretMoveTimestamp
-    ) {
-      if (state.latestChangeTimestamp !== changeTimestamp)
-        logger.debug(
-          "Ignoring completion due to markdown change timestamp mismatch",
-          state.latestChangeTimestamp,
-          changeTimestamp,
-        );
-      else
-        logger.debug(
-          "Ignoring completion due to text cursor change timestamp mismatch",
-          state.latestCaretMoveTimestamp,
-          caretMoveTimestamp,
-        );
-      completions.forEach((completion) => {
-        copilot.notification.notifyRejected({ uuids: [completion.uuid] });
-      });
-      return;
-    }
-
-    // Return if completion request cancelled
-    if (cancellationReason !== undefined) {
-      copilot.status = "Normal";
-      return;
-    }
-    // Return if no completion is provided
-    if (completions.length === 0) {
-      copilot.status = "Normal";
-      return;
-    }
-
-    // Reject other completions if exists
-    if (completions.length > 1)
-      copilot.notification.notifyRejected({ uuids: completions.slice(1).map((c) => c.uuid) });
-
-    /* Insert completion text and wait to be accepted or cancelled */
-    const firstCompletion = completions[0]!;
-    const { uuid } = firstCompletion;
-    completion.latestUUID = uuid;
-
-    if (editor.sourceView.inSourceMode) insertCompletionTextToCodeMirror(cm, firstCompletion);
-    else insertCompletionTextToEditor(firstCompletion);
   }, 500);
 
   /*********************
@@ -697,13 +652,8 @@ const main = async () => {
   const editor = File.editor as Typora.EnhancedEditor;
   // Initialize state
   const state = {
-    workspaceFolder: getWorkspaceFolder() ?? FAKE_TEMP_WORKSPACE_FOLDER,
-    activeFilePathname:
-      getActiveFilePathname() ?? path.join(FAKE_TEMP_WORKSPACE_FOLDER, FAKE_TEMP_FILENAME),
     markdown: editor.getMarkdown(),
     _actualLatestMarkdown: editor.getMarkdown(),
-    latestChangeTimestamp: Date.now(),
-    latestCaretMoveTimestamp: Date.now(),
     suppressMarkdownChange: 0,
   };
   // Initialize CodeMirror
@@ -712,7 +662,6 @@ const main = async () => {
   const cm = sourceView.cm!;
   // Initialize completion state
   const completion = {
-    latestUUID: "",
     /**
      * Reject current completion.
      */
@@ -722,6 +671,15 @@ const main = async () => {
      */
     accept: null as (() => void) | null,
   };
+
+  /***************************
+   * Initialize task manager *
+   ***************************/
+  const taskManager = createCompletionTaskManager(copilot, {
+    activeFilePathname: getWorkspaceFolder() ?? FAKE_TEMP_WORKSPACE_FOLDER,
+    workspaceFolder:
+      getActiveFilePathname() ?? path.join(FAKE_TEMP_WORKSPACE_FOLDER, FAKE_TEMP_FILENAME),
+  });
 
   /***********
    * UI Misc *
@@ -736,12 +694,12 @@ const main = async () => {
     processId: window.process?.pid ?? null,
     capabilities: { workspace: { workspaceFolders: true } },
     trace: "verbose",
-    rootUri: state.workspaceFolder && pathToFileURL(state.workspaceFolder).href,
-    ...(state.workspaceFolder && {
+    rootUri: taskManager.workspaceFolder && pathToFileURL(taskManager.workspaceFolder).href,
+    ...(taskManager.workspaceFolder && {
       workspaceFolders: [
         {
-          uri: pathToFileURL(state.workspaceFolder).href,
-          name: path.basename(state.workspaceFolder),
+          uri: pathToFileURL(taskManager.workspaceFolder).href,
+          name: path.basename(taskManager.workspaceFolder),
         },
       ],
     }),
@@ -757,7 +715,7 @@ const main = async () => {
   await copilot.request.getVersion();
 
   /* Send initial didOpen */
-  if (state.activeFilePathname) onChangeActiveFile(state.activeFilePathname, null);
+  if (taskManager.activeFilePathname) onChangeActiveFile(taskManager.activeFilePathname, null);
 
   /************
    * Watchers *
@@ -765,15 +723,15 @@ const main = async () => {
   /* Interval to update workspace and active file pathname */
   setInterval(() => {
     const newWorkspaceFolder = getWorkspaceFolder() ?? FAKE_TEMP_WORKSPACE_FOLDER;
-    if (newWorkspaceFolder !== state.workspaceFolder) {
-      const oldWorkspaceFolder = state.workspaceFolder;
-      state.workspaceFolder = newWorkspaceFolder;
+    if (newWorkspaceFolder !== taskManager.workspaceFolder) {
+      const oldWorkspaceFolder = taskManager.workspaceFolder;
+      taskManager.workspaceFolder = newWorkspaceFolder;
       onChangeWorkspaceFolder(newWorkspaceFolder, oldWorkspaceFolder);
     }
     const newActiveFilePathname = getActiveFilePathname() ?? FAKE_TEMP_FILENAME;
-    if (newActiveFilePathname !== state.activeFilePathname) {
-      const oldActiveFilePathname = state.activeFilePathname;
-      state.activeFilePathname = newActiveFilePathname;
+    if (newActiveFilePathname !== taskManager.activeFilePathname) {
+      const oldActiveFilePathname = taskManager.activeFilePathname;
+      taskManager.activeFilePathname = newActiveFilePathname;
       onChangeActiveFile(newActiveFilePathname, oldActiveFilePathname);
     }
   }, 100);
@@ -826,7 +784,6 @@ const main = async () => {
     const oldMarkdown = state.markdown;
     // Update current markdown text
     state.markdown = newMarkdown;
-    state.latestChangeTimestamp = Date.now();
     logger.debug("Changing markdown", { from: oldMarkdown, to: newMarkdown, change });
     // Reject last completion if exists
     completion.reject?.();
