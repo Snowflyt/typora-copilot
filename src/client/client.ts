@@ -16,8 +16,8 @@ import type {
   Position,
   Range,
   integer,
-} from "./types/lsp";
-import type { ReadonlyRecord } from "./types/tools";
+} from "@/types/lsp";
+import type { ReadonlyRecord } from "@/types/tools";
 import type { ChildProcessWithoutNullStreams } from "@modules/child_process";
 
 /**

@@ -1,7 +1,3 @@
-import { ErrorCodes, JSONRPC_VERSION } from "./types/lsp";
-import { createLogger, formatErrorCode, formatId, formatMethod } from "./utils/logging";
-import { isNotificationMessage, isRequestMessage, isResponseMessage } from "./utils/lsp";
-
 import type {
   CancelParams,
   DidChangeTextDocumentParams,
@@ -25,10 +21,14 @@ import type {
   SuccessResponseMessage,
   UnregistrationParams,
   integer,
-} from "./types/lsp";
-import type { Equals, ReadonlyRecord } from "./types/tools";
-import type { Logger } from "./utils/logging";
+} from "../types/lsp";
+import type { Equals, ReadonlyRecord } from "@/types/tools";
+import type { Logger } from "@/utils/logging";
 import type { ChildProcessWithoutNullStreams } from "@modules/child_process";
+
+import { ErrorCodes, JSONRPC_VERSION } from "@/types/lsp";
+import { createLogger, formatErrorCode, formatId, formatMethod } from "@/utils/logging";
+import { isNotificationMessage, isRequestMessage, isResponseMessage } from "@/utils/lsp";
 
 /**
  * A promise specially designed for LSP client representing a future response from LSP server that
