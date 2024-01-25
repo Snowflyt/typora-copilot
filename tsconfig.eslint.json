@@ -5,7 +5,6 @@
     "prettier.config.cjs",
     "commitlint.config.js",
     ".lintstagedrc.js",
-    "vitest.config.ts",
-    "setup-test.ts"
+    "vitest.config.ts"
   ]
 }
