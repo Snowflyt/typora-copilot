@@ -6,22 +6,8 @@ import { useEffect, useRef } from "preact/hooks";
 import { COPILOT_ICON_PATHNAME } from "@/constants";
 import { File } from "@/typora-utils";
 import { getCaretCoordinate } from "@/utils/dom";
-import { css, registerCSS } from "@/utils/tools";
 
-registerCSS(css`
-  .suggestion-panel {
-    position: absolute;
-    z-index: 9999;
-    pointer-events: none;
-    white-space: pre-wrap;
-    border: 1px solid #ccc;
-    display: flex;
-    flex-direction: column;
-    padding: 0.5em;
-    border-radius: 5px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-  }
-`);
+import "./SuggestionPanel.scss";
 
 export interface SuggestionPanelProps {
   x: number;

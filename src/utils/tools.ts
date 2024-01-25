@@ -42,27 +42,6 @@ export const setGlobalVar = <K extends keyof typeof globalThis | (string & NonNu
 ) => Object.defineProperty(global, name, { value });
 
 /**
- * Create a CSS string template (Alias of `String.raw`).
- * @param template The template string.
- * @param substitutions The substitutions.
- * @returns The CSS string.
- */
-export const css = (
-  template: { raw: readonly string[] | ArrayLike<string> },
-  ...substitutions: unknown[]
-) => String.raw(template, ...substitutions);
-
-/**
- * Register CSS to global context.
- * @param css The CSS string.
- */
-export const registerCSS = (css: string) => {
-  const style = document.createElement("style");
-  style.appendChild(document.createTextNode(css));
-  document.head.appendChild(style);
-};
-
-/**
  * Slice text by range.
  * @param text The text to slice.
  * @param range The range to slice.

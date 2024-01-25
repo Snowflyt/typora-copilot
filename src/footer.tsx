@@ -6,7 +6,8 @@ import { match } from "ts-pattern";
 import CopilotIcon from "./components/CopilotIcon";
 import { logger } from "./logging";
 import { File } from "./typora-utils";
-import { css, registerCSS } from "./utils/tools";
+
+import "./footer.scss";
 
 import type {
   CopilotAccountStatus,
@@ -14,53 +15,6 @@ import type {
   CopilotClientEventHandler,
   CopilotStatus,
 } from "./client";
-
-registerCSS(css`
-  #footer-copilot {
-    margin-left: 8px;
-    margin-right: 0;
-    padding: 0 8px;
-    opacity: 0.75;
-    cursor: pointer;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-  }
-  #footer-copilot:hover {
-    opacity: 1;
-  }
-  #footer-copilot-panel {
-    left: auto;
-    right: 4px;
-    top: auto;
-    padding-top: 8px;
-    padding-bottom: 8px;
-    display: flex;
-    flex-direction: column;
-    overflow-x: hidden;
-    min-width: 160px;
-  }
-  .footer-copilot-panel-hint {
-    padding: 0 16px;
-    padding-bottom: 6px;
-    font-size: 8pt;
-    font-weight: normal;
-    line-height: 1.8;
-  }
-  .footer-copilot-panel-btn {
-    border: none !important;
-    border-radius: 0 !important;
-    padding: 3px 16px !important;
-    font-size: 10pt !important;
-    font-weight: normal !important;
-    line-height: 1.8 !important;
-  }
-  .footer-copilot-panel-btn:hover {
-    background-color: var(--item-hover-bg-color);
-    color: var(--item-hover-text-color);
-  }
-`);
 
 /**
  * Get DOM element of Typora footer bar.

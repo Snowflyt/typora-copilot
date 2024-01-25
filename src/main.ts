@@ -16,7 +16,9 @@ import {
   waitUntilEditorInitialized,
 } from "./typora-utils";
 import { $S, getCaretCoordinate } from "./utils/dom";
-import { css, registerCSS, setGlobalVar, sliceTextByRange } from "./utils/tools";
+import { setGlobalVar, sliceTextByRange } from "./utils/tools";
+
+import "./styles.scss";
 
 import type { Completion } from "./client";
 import type { Position } from "./types/lsp";
@@ -31,16 +33,6 @@ logger.debug("Copilot LSP server started. PID:", server.pid);
  */
 const copilot = createCopilotClient(server, { logging: "debug" });
 setGlobalVar("copilot", copilot);
-
-// Register CSS for completion text to use
-registerCSS(css`
-  .text-gray {
-    color: gray !important;
-  }
-  .font-italic {
-    font-style: italic !important;
-  }
-`);
 
 /**
  * Fake temporary workspace folder, only used when no folder is opened.
