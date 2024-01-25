@@ -1,4 +1,11 @@
 {
   "extends": "./tsconfig.json",
-  "include": [".eslintrc.cjs", "prettier.config.cjs", "vitest.config.ts", "setup-test.ts"]
+  "include": [
+    ".eslintrc.cjs",
+    "prettier.config.cjs",
+    "commitlint.config.js",
+    ".lintstagedrc.js",
+    "vitest.config.ts",
+    "setup-test.ts"
+  ]
 }
