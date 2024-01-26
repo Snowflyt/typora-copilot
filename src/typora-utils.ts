@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
 import * as path from "@modules/path";
+import { fileURLToPath } from "@modules/url";
 
 import { getCaretPlacement } from "./extracted";
 
@@ -39,8 +40,10 @@ export const TYPORA_RESOURCE_DIR: string = (() => {
 
   if (!result) throw new Error("Cannot determine Typora resource directory.");
 
+  if (result.startsWith("file://")) result = fileURLToPath(result);
+
   let lastResult = "";
-  while (path.basename(result) !== "resources") {
+  while (["resources", "Resources"].includes(path.basename(result))) {
     lastResult = result;
     result = path.dirname(result);
     if (result === lastResult) throw new Error("Cannot determine Typora resource directory.");
