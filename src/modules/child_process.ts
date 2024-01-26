@@ -3,6 +3,11 @@ import type { ChildProcessWithoutNullStreams } from "node:child_process";
 import { logger } from "@/logging";
 import { File, waitUntilEditorInitialized } from "@/typora-utils";
 
+export interface NodeServer {
+  readonly send: (message: string) => void;
+  readonly onMessage: (listener: (message: string) => void) => void;
+}
+
 /**
  * Parse Node version string to number array.
  * @param version Node version string, e.g. `"v14.17.6"`.
@@ -19,15 +24,30 @@ const parseNodeVersion = (version: string): number[] =>
  * Start a Node process with the given module path. Stdio is enabled.
  * @returns A Node process with stdio enabled.
  */
-export const forkNode: (modulePath: string) => ChildProcessWithoutNullStreams = (() => {
+export const forkNode: (modulePath: string) => NodeServer = (() => {
   if (File.isNode) {
     const { fork, spawn, spawnSync } = window.reqnode!("child_process");
+
+    const wrapNodeChildProcess = (cp: ChildProcessWithoutNullStreams): NodeServer => ({
+      send: (message) => {
+        cp.stdin.write(message);
+      },
+      onMessage: (listener) => {
+        cp.stdout.on("data", (data) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          const message: string = data.toString("utf-8");
+          listener(message);
+        });
+      },
+    });
 
     // Check Node version
     const nodeVersion = parseNodeVersion(process.version);
     if (nodeVersion[0]! >= 18)
       return (modulePath) =>
-        fork(modulePath, [], { silent: true }) as ChildProcessWithoutNullStreams;
+        wrapNodeChildProcess(
+          fork(modulePath, [], { silent: true }) as ChildProcessWithoutNullStreams,
+        );
 
     // For Node < 18, use Node from shell
     logger.warn("Detected bundled Node version < 18, try using Node from shell instead.");
@@ -92,10 +112,10 @@ export const forkNode: (modulePath: string) => ChildProcessWithoutNullStreams = 
 
     logger.info(`Detected Node ${shellNodeVersion} from shell, using it to start language server.`);
 
-    return (modulePath) => spawn("node", [modulePath]);
+    return (modulePath) => wrapNodeChildProcess(spawn("node", [modulePath]));
   }
 
-  throw new Error("child_process is not supported in browser");
+  throw new Error("`child_process` is not supported in your platform");
 })();
 
 export type * from "node:child_process";

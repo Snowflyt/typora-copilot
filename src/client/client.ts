@@ -18,7 +18,7 @@ import type {
   integer,
 } from "@/types/lsp";
 import type { ReadonlyRecord } from "@/types/tools";
-import type { ChildProcessWithoutNullStreams } from "@modules/child_process";
+import type { NodeServer } from "@modules/child_process";
 
 /**
  * Copilot account status.
@@ -175,7 +175,7 @@ export const createCopilotClient = <
   RequestHandlers extends ReadonlyRecord<string, RequestHandler>,
   NotificationHandlers extends ReadonlyRecord<string, NotificationHandler>,
 >(
-  server: ChildProcessWithoutNullStreams,
+  server: NodeServer,
   options?: CopilotClientOptions<RequestHandlers, NotificationHandlers>,
 ) => {
   const client = createClient(server, {

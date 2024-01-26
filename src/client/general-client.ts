@@ -24,7 +24,7 @@ import type {
 } from "../types/lsp";
 import type { Equals, ReadonlyRecord } from "@/types/tools";
 import type { Logger } from "@/utils/logging";
-import type { ChildProcessWithoutNullStreams } from "@modules/child_process";
+import type { NodeServer } from "@modules/child_process";
 
 import { ErrorCodes, JSONRPC_VERSION } from "@/types/lsp";
 import { createLogger, formatErrorCode, formatId, formatMethod } from "@/utils/logging";
@@ -194,7 +194,7 @@ export interface ClientContext {
   /**
    * The LSP server, represented as a child process.
    */
-  readonly server: ChildProcessWithoutNullStreams;
+  readonly server: NodeServer;
 
   /**
    * A logger that logs a message to the console.
@@ -366,7 +366,7 @@ export const createClient = <
   RequestHandlers extends ReadonlyRecord<string, RequestHandler>,
   NotificationHandlers extends ReadonlyRecord<string, NotificationHandler>,
 >(
-  server: ChildProcessWithoutNullStreams,
+  server: NodeServer,
   options?: ClientOptions<RequestHandlers, NotificationHandlers>,
 ) => {
   type RefinedRequestHandlers = RefineRequestHandlers<RequestHandlers, ProtocolRequestHandlers>;
@@ -390,7 +390,7 @@ export const createClient = <
     const dataString = JSON.stringify(data);
     const contentLength = Buffer.byteLength(dataString, "utf8");
     const rpcString = `Content-Length: ${contentLength}\r\n\r\n${dataString}`;
-    server.stdin.write(rpcString);
+    server.send(rpcString);
   };
 
   const logger = createLogger({
@@ -507,9 +507,7 @@ export const createClient = <
   };
 
   // Listen to server stdout
-  server.stdout.on("data", (data) => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    const rawString: string = data.toString("utf-8");
+  server.onMessage((rawString) => {
     const payloadStrings = rawString.split(/Content-Length: \d+\r\n\r\n/).filter((s) => s);
 
     for (const payloadString of payloadStrings) {
