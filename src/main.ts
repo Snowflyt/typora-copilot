@@ -13,7 +13,9 @@ import { logger } from "./logging";
 import {
   File,
   TYPORA_VERSION,
-  getCaretPlacement,
+  getActiveFilePathname,
+  getCaretPosition,
+  getWorkspaceFolder,
   waitUntilEditorInitialized,
 } from "./typora-utils";
 import { $S, getCaretCoordinate } from "./utils/dom";
@@ -22,7 +24,6 @@ import { setGlobalVar, sliceTextByRange } from "./utils/tools";
 import "./styles.scss";
 
 import type { Completion } from "./client";
-import type { Position } from "./types/lsp";
 
 const server = forkNode(path.join(PLUGIN_DIR, "language-server", "agent.cjs"));
 
@@ -50,82 +51,6 @@ const main = async () => {
   /*********************
    * Utility functions *
    *********************/
-  /**
-   * Get workspace folder path.
-   * @returns
-   */
-  const getWorkspaceFolder = (): string | null => editor.library?.watchedFolder ?? null;
-  /**
-   * Get active file pathname.
-   * @returns
-   */
-  const getActiveFilePathname = (): string | null =>
-    (File.filePath ?? (File.bundle && File.bundle.filePath)) || null;
-
-  /**
-   * Get current caret position in source markdown text.
-   * @returns
-   */
-  const getCaretPosition = (): Position | null => {
-    // When selection, return null
-    if (sourceView.inSourceMode) {
-      if (cm.getSelection()) return null;
-    } else {
-      const rangy = editor.selection.getRangy();
-      if (!rangy) return null;
-      if (!rangy.collapsed) return null;
-    }
-
-    /* If in source mode, simply return cursor position get from `cm` */
-    if (sourceView.inSourceMode) {
-      const { ch, line } = cm.getCursor();
-      return { line, character: ch };
-    }
-
-    /* When in live preview mode, calculate cursor position */
-    // First sync `cm` with live preview mode markdown text
-    // @ts-expect-error - CodeMirror supports 2nd parameter, but not declared in types
-    cm.setValue(editor.getMarkdown(), "begin");
-
-    let placement: Typora.CaretPlacement | null;
-    try {
-      placement = getCaretPlacement();
-    } catch (e) {
-      if (e instanceof Error && e.stack) console.warn(e.stack);
-      return null;
-    }
-    if (!placement) return null;
-
-    let lineContent: string | null;
-    let ch = placement.ch;
-
-    // If line number is negative, set it to the last line
-    if (placement.line < 0) placement.line = cm.lineCount() - 1;
-
-    // Handle indentation after list items, blockquotes, etc.
-    if (placement.afterIndent) {
-      lineContent = cm.getLine(placement.line);
-      ch = (/^((\s+)|([-+*]\s)|(\[( |x)\])|>|(\d+(\.|\))\s))+/i.exec(lineContent) || [""])[0]
-        .length;
-    }
-
-    // If character position is not defined
-    if (ch === undefined) {
-      lineContent = cm.getLine(placement.line) ?? "";
-      if (placement.before) {
-        // Find the position of the 'before' text
-        ch = lineContent.indexOf(placement.before) + placement.before.length;
-      } else if (placement.beforeRegExp) {
-        // Find the position based on regular expression
-        const pattern = new RegExp(placement.beforeRegExp, "g");
-        pattern.exec(lineContent);
-        ch = pattern.lastIndex;
-      }
-    }
-
-    return { line: placement.line, character: ch !== undefined && ch > 0 ? ch : 0 };
-  };
-
   /**
    * Insert completion text to editor.
    * @param options Completion options.
