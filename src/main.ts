@@ -2,7 +2,7 @@ import { forkNode } from "@modules/child_process";
 import * as path from "@modules/path";
 import { pathToFileURL } from "@modules/url";
 
-import { debounce } from "lodash-es";
+import debounce from "lodash-es/debounce";
 
 import { createCopilotClient } from "./client";
 import { createCompletionTaskManager } from "./completion";
