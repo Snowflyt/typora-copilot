@@ -3,15 +3,35 @@ import * as path from "@modules/path";
 import type { Completion, CopilotClient } from "./client";
 import type { Position } from "./types/lsp";
 
+/*************************
+ * CompletionTaskManager *
+ *************************/
+/**
+ * Options for {@link CompletionTaskManager}.
+ */
 export interface CompletionTaskManagerOptions {
   workspaceFolder: string;
   activeFilePathname: string;
 }
 
+/**
+ * Task ID used in {@link CompletionTaskManager}.
+ */
 export type TaskID = number & {
   readonly __tag: unique symbol;
 };
 
+/**
+ * A manager for GitHub Copilot completion tasks.
+ */
+export type CompletionTaskManager = ReturnType<typeof createCompletionTaskManager>;
+
+/**
+ * Create a {@link CompletionTaskManager}.
+ * @param copilot A GitHub Copilot client.
+ * @param options Options for the manager.
+ * @returns
+ */
 export const createCompletionTaskManager = (
   copilot: CopilotClient,
   options: CompletionTaskManagerOptions,
@@ -72,6 +92,10 @@ export const createCompletionTaskManager = (
           copilot.notification.notifyRejected({ uuids: completions.slice(1).map((c) => c.uuid) });
 
         onCompletion?.(completions[0]!);
+      })
+      .catch(() => {
+        taskStates.delete(taskId);
+        if (_isAllCancelled()) copilot.status = "Normal";
       });
 
     return taskId;
@@ -114,5 +138,3 @@ export const createCompletionTaskManager = (
     cancelAll: _cancelAll,
   };
 };
-
-export type CompletionTaskManager = ReturnType<typeof createCompletionTaskManager>;
