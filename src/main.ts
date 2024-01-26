@@ -639,9 +639,10 @@ const main = async () => {
     // Fetch completion from Copilot
     taskManager.startOne({
       position: cursorPos,
-      onCompletion: (completion) => {
-        if (editor.sourceView.inSourceMode) insertCompletionTextToCodeMirror(cm, completion);
-        else insertCompletionTextToEditor(completion);
+      onCompletion: (comp) => {
+        completion.reject?.();
+        if (editor.sourceView.inSourceMode) insertCompletionTextToCodeMirror(cm, comp);
+        else insertCompletionTextToEditor(comp);
       },
     });
   }, 500);
