@@ -4,32 +4,33 @@
 
 ![Copilot 建议截图](./docs/screenshot.zh-CN.png)
 
-[Typora](https://typora.io/) 的 [GitHub Copilot](https://github.com/features/copilot) 插件，由 [Copilot.vim](https://github.com/github/copilot.vim) 提供支持。
+[Typora](https://typora.io/) 的 [GitHub Copilot](https://github.com/features/copilot) 插件，支持 Windows、macOS 和 Linux，由 [Copilot.vim](https://github.com/github/copilot.vim) 提供支持。
 
 该插件使用从 Copilot.vim 提取的 LSP 服务器，以在编辑器中实时提供建议。
 
 **⚠️ 警告：** 该插件仍在开发中，可能无法正常工作。请谨慎使用。
 
-_暂不支持 macOS. 此外该插件在 Linux 上的使用尚未经过充分测试，但应该可以正常工作。_
+_该插件在 Linux 上的使用尚未经过充分测试，但应该可以正常工作。_
 
 ## 兼容性
 
 _\*注：`/` 表示未经过测试。_
 
-**⚠️ 警告：** 对于使用 Typora < 1.6 的用户，你需要安装 [Node.js](https://nodejs.org/en/download/) ≥ 18.
+**⚠️ 警告：** 对于使用 Typora < 1.6 的 Windows / Linux 用户以及使用任何版本 Typora 的 macOS 用户，你需要安装 [Node.js](https://nodejs.org/en/download/) ≥ 18.
 
 | Typora Version | Windows 11 | Ubuntu 22.04 | macOS 14.2 |
 | -------------- | ---------- | ------------ | ---------- |
-| 1.7.6          | √          | /            | ×          |
-| 1.6.7          | √          | /            | ×          |
-| 1.6.4-dev      | √          | /            | ×          |
-| 1.5.12         | √          | /            | ×          |
-| 1.4.8          | √          | /            | ×          |
-| 1.3.8          | √          | /            | ×          |
-| 1.2.5          | √          | /            | ×          |
-| 1.2.3          | √          | /            | ×          |
-| 1.0.3          | √          | /            | ×          |
-| 0.11.18-beta   | √          | /            | ×          |
+| 1.8.5          | √          | /            | √          |
+| 1.7.6          | √          | /            | /          |
+| 1.6.7          | √          | /            | /          |
+| 1.6.4-dev      | √          | /            | /          |
+| 1.5.12         | √          | /            | /          |
+| 1.4.8          | √          | /            | /          |
+| 1.3.8          | √          | /            | /          |
+| 1.2.5          | √          | /            | /          |
+| 1.2.3          | √          | /            | /          |
+| 1.0.3          | √          | /            | /          |
+| 0.11.18-beta   | √          | /            | /          |
 
 ## 前置条件
 
@@ -42,7 +43,9 @@ _\*注：`/` 表示未经过测试。_
 
 对于所有平台的用户，首先从[发布页面](https://github.com/Snowfly-T/typora-copilot/releases)下载最新版本并解压。
 
-然后，对于 Windows 用户，定位到你解压的文件夹并在 PowerShell 中**以管理员身份**运行以下命令：
+#### Windows
+
+对于 Windows 用户，定位到你解压的文件夹并在 PowerShell 中**以管理员身份**运行以下命令：
 
 ```powershell
 .\bin\install_windows.ps1
@@ -57,6 +60,26 @@ _\*注：`/` 表示未经过测试。_
 ```
 
 安装过程中，你会看到一条消息记录插件的安装目录。_记住它，在卸载插件时你会需要它。_ 安装完成后，你可以安全地删除刚才解压的文件夹。
+
+#### macOS
+
+对于 macOS 用户，定位到你解压的文件夹并在终端中运行以下命令：
+
+```bash
+sudo bash ./bin/install_macos.sh
+```
+
+如果脚本无法找到 Typora，你可以手动指定 Typora 的路径：
+
+```bash
+sudo bash ./bin/install_macos.sh --path "/Applications/Typora.app/" # 替换为你的 Typora 路径
+# 或使用别名
+# sudo bash ./bin/install_macos.sh -p "/Applications/Typora.app/" # 替换为你的 Typora 路径
+```
+
+安装过程中，你会看到一条消息记录插件的安装目录。_记住它，在卸载插件时你会需要它。_ 安装完成后，你可以安全地删除刚才解压的文件夹。
+
+#### Linux
 
 对于 Linux 用户，定位到你解压的文件夹并在终端中运行以下命令：
 
@@ -76,8 +99,6 @@ sudo bash ./bin/install_linux.sh --path "/usr/share/typora/" # 替换为你的 T
 
 ### 手动安装
 
-_以下对 macOS 用户的说明仅供参考，本插件暂不支持 macOS._
-
 1. 从[发布页面](https://github.com/Snowfly-T/typora-copilot/releases)下载最新版本并解压。
 2. 找到 Typora 安装目录下的 `window.html` 文件，通常位于 `<typora_root_path>/resources/`；对于 macOS 用户，找到 Typora 安装目录下的 `index.html` 文件，通常位于 `<typora_root_path>/Contents/Resources/TypeMark/`。`<typora_root_path>` 是 Typora 的安装路径，替换为你的实际 Typora 安装路径（注意尖括号 `<` 和 `>` 也要删除）。这个文件夹在下面的步骤中被称为 Typora 资源文件夹。
 3. 在 Typora 资源文件夹中创建一个名为 `copilot` 的文件夹。
@@ -88,7 +109,7 @@ _以下对 macOS 用户的说明仅供参考，本插件暂不支持 macOS._
 
 ## 初始化
 
-完成安装后，你会在 Typora 工具栏中找到一个 Copilot 图标。点击它打开 Copilot 面板，然后点击“Sign in to authenticate Copilot”。
+完成安装后，你会在 Typora 工具栏（即界面底部右下角）找到一个 Copilot 图标。点击它打开 Copilot 面板，然后点击“Sign in to authenticate Copilot”。
 
 ![Copilot 图标](./docs/toolbar-icon.zh-CN.png)
 
@@ -112,6 +133,14 @@ _以下对 macOS 用户的说明仅供参考，本插件暂不支持 macOS._
 
 和安装时一样，如果脚本无法找到 Typora，你可以手动通过 `-Path` 或 `-p` 参数指定 Typora 的路径。
 
+对于 macOS 用户，定位到插件安装目录并在终端中运行以下命令：
+
+```bash
+sudo bash ./bin/uninstall_macos.sh
+```
+
+和安装时一样，如果脚本无法找到 Typora，你可以手动通过 `--path` 或 `-p` 参数指定 Typora 的路径。
+
 对于 Linux 用户，定位到插件安装目录并在终端中运行以下命令：
 
 ```bash
@@ -121,8 +150,6 @@ sudo bash ./bin/uninstall_linux.sh
 和安装时一样，如果脚本无法找到 Typora，你可以手动通过 `--path` 或 `-p` 参数指定 Typora 的路径。
 
 ### 手动卸载
-
-_以下对 macOS 用户的说明仅供参考，本插件暂不支持 macOS._
 
 1. 找到 Typora 安装目录下的 `window.html` 文件，通常位于 `<typora_root_path>/resources/`；对于 macOS 用户，找到 Typora 安装目录下的 `index.html` 文件，通常位于 `<typora_root_path>/Contents/Resources/TypeMark/`. `<typora_root_path>` 是 Typora 的安装路径，替换为你的实际 Typora 安装路径（注意尖括号 `<` 和 `>` 也要删除）。这个文件夹在下面的步骤中被称为 Typora 资源文件夹。
 2. 删除 Typora 资源文件夹中的 `copilot` 文件夹。

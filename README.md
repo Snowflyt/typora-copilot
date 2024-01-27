@@ -4,32 +4,33 @@ English | [简体中文](./README.zh-CN.md)
 
 ![Copilot suggestion screenshot](./docs/screenshot.png)
 
-[GitHub Copilot](https://github.com/features/copilot) plugin for [Typora](https://typora.io/), provided through [Copilot.vim](https://github.com/github/copilot.vim).
+[GitHub Copilot](https://github.com/features/copilot) plugin for [Typora](https://typora.io/) on both Windows, macOS and Linux, provided through [Copilot.vim](https://github.com/github/copilot.vim).
 
 This plugin uses the LSP server extracted from Copilot.vim to provide suggestions in real-time right from your editor.
 
 **⚠️ Warning:** This plugin is still in development and may not work properly. Please use it with caution.
 
-_macOS is not supported yet. Besides, this plugin has not been fully tested on Linux, but it should work properly._
+_This plugin has not been fully tested on Linux, but it should work properly._
 
-## Compatiblility
+## Compatibility
 
 _\*Note: `/` means not tested._
 
-**⚠️ Warning:** For users using Typora < 1.6, you need to install [Node.js](https://nodejs.org/en/download/) ≥ 18.
+**⚠️ Warning:** For Windows / Linux users using Typora < 1.6 or macOS users using any version of Typora, you need to install [Node.js](https://nodejs.org/en/download/) ≥ 18.
 
 | Typora Version | Windows 11 | Ubuntu 22.04 | macOS 14.2 |
 | -------------- | ---------- | ------------ | ---------- |
-| 1.7.6          | √          | /            | ×          |
-| 1.6.7          | √          | /            | ×          |
-| 1.6.4-dev      | √          | /            | ×          |
-| 1.5.12         | √          | /            | ×          |
-| 1.4.8          | √          | /            | ×          |
-| 1.3.8          | √          | /            | ×          |
-| 1.2.5          | √          | /            | ×          |
-| 1.2.3          | √          | /            | ×          |
-| 1.0.3          | √          | /            | ×          |
-| 0.11.18-beta   | √          | /            | ×          |
+| 1.8.5          | √          | /            | √          |
+| 1.7.6          | √          | /            | /          |
+| 1.6.7          | √          | /            | /          |
+| 1.6.4-dev      | √          | /            | /          |
+| 1.5.12         | √          | /            | /          |
+| 1.4.8          | √          | /            | /          |
+| 1.3.8          | √          | /            | /          |
+| 1.2.5          | √          | /            | /          |
+| 1.2.3          | √          | /            | /          |
+| 1.0.3          | √          | /            | /          |
+| 0.11.18-beta   | √          | /            | /          |
 
 ## Prerequisites
 
@@ -42,7 +43,9 @@ _\*Note: `/` means not tested._
 
 For all platform users, first download the latest release from [the releases page](https://github.com/Snowfly-T/typora-copilot/releases) and unzip it.
 
-Then for Windows users, locate to the folder where you unzipped the release and run the following command in PowerShell **as administrator**:
+#### Windows
+
+For Windows users, locate to the folder where you unzipped the release and run the following command in PowerShell **as administrator**:
 
 ```powershell
 .\bin\install_windows.ps1
@@ -57,6 +60,26 @@ If the script fails to find Typora, you can specify the path to Typora manually:
 ```
 
 You’ll see a message logging the installation directory of the plugin. _Keep it in mind, you’ll need it when uninstalling the plugin._ After that, you can safely delete the release folder.
+
+#### macOS
+
+For macOS users, locate to the folder where you unzipped the release and run the following command in terminal:
+
+```bash
+sudo bash ./bin/install_macos.sh
+```
+
+If the script fails to find Typora, you can specify the path to Typora manually:
+
+```bash
+sudo bash ./bin/install_macos.sh --path "/Applications/Typora.app/" # Replace with your Typora path
+# Or use the alias
+# sudo bash ./bin/install_macos.sh -p "/Applications/Typora.app/" # Replace with your Typora path
+```
+
+You’ll see a message logging the installation directory of the plugin. _Keep it in mind, you’ll need it when uninstalling the plugin._ After that, you can safely delete the release folder.
+
+#### Linux
 
 For Linux users, locate to the folder where you unzipped the release and run the following command in terminal:
 
@@ -76,8 +99,6 @@ You’ll see a message logging the installation directory of the plugin. _Keep i
 
 ### Manual Install
 
-_The following instructions for macOS users are only left here for future reference. macOS is not supported yet._
-
 1. Download the latest release from [the releases page](https://github.com/Snowfly-T/typora-copilot/releases) and unzip it.
 2. For Windows / Linux users, find `window.html` in your Typora installation folder, usually located at `<typora_root_path>/resources/`; For macOS users, find `index.html` in your Typora installation folder, usually located at `<typora_root_path>/Contents/Resources/TypeMark/`. `<typora_root_path>` is the path where Typora is installed, replace it with your real Typora installation path (note that the angle brackets `<` and `>` should also be removed). This folder is called Typora resource folder in the following steps.
 3. Create a folder named `copilot` in Typora resource folder.
@@ -88,7 +109,7 @@ _The following instructions for macOS users are only left here for future refere
 
 ## Setup
 
-When finished installation, you'll find an icon in the toolbar of Typora. Click it to open the panel of Copilot, and then click “Sign in to authenticate Copilot”.
+When finished installation, you'll find an icon in the toolbar of Typora (i.e. the bottom-right corner of Typora). Click it to open the panel of Copilot, and then click “Sign in to authenticate Copilot”.
 
 ![Copilot icon](./docs/toolbar-icon.png)
 
@@ -112,6 +133,14 @@ For Windows users, locate to the installation directory of the plugin and run th
 
 You can still specify the path to Typora manually by adding `-Path` or `-p`, just like the installation script.
 
+For macOS users, locate to the installation directory of the plugin and run the following command in terminal.
+
+```bash
+sudo bash ./bin/uninstall_macos.sh
+```
+
+You can still specify the path to Typora manually by adding `--path` or `-p`, just like the installation script.
+
 For Linux users, locate to the installation directory of the plugin and run the following command in terminal.
 
 ```bash
@@ -121,8 +150,6 @@ sudo bash ./bin/uninstall_linux.sh
 You can still specify the path to Typora manually by adding `--path` or `-p`, just like the installation script.
 
 ### Manual Uninstall
-
-_The following instructions for macOS users are only left here for future reference. macOS is not supported yet._
 
 1. For Windows / Linux users, find `window.html` in your Typora installation folder, usually located at `<typora_root_path>/resources/`; For macOS users, find `index.html` in your Typora installation folder, usually located at `<typora_root_path>/Contents/Resources/TypeMark/`. `<typora_root_path>` is the path where Typora is installed, replace it with your real Typora installation path (note that the angle brackets `<` and `>` should also be removed). This folder is called Typora resource folder in the following steps.
 2. Delete the `copilot` folder in Typora resource folder.

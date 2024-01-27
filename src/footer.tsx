@@ -275,14 +275,23 @@ export const Footer: FC<FooterOptions> = ({ copilot }) => {
  * @returns A function that can be used to remove the footer element from the DOM.
  */
 export const attachFooter = (copilot: CopilotClient) => {
-  const footerBar = getFooterBarDOM();
-
-  if (!footerBar) return () => {};
-
   const container = document.createElement("div");
-  const firstFooterItemRight = $(footerBar).find(".footer-item-right")[0];
-  if (firstFooterItemRight) firstFooterItemRight.insertAdjacentElement("beforebegin", container);
-  else footerBar.appendChild(container);
+
+  const footerBar = getFooterBarDOM();
+  if (footerBar) {
+    const firstFooterItemRight = $(footerBar).find(".footer-item-right")[0];
+    if (firstFooterItemRight) firstFooterItemRight.insertAdjacentElement("beforebegin", container);
+    else footerBar.appendChild(container);
+  } else {
+    container.style.position = "fixed";
+    container.style.bottom = "0";
+    container.style.right = "0.25rem";
+    container.style.zIndex = "1000";
+    container.style.height = "2rem";
+    container.style.width = "2.75rem";
+    document.querySelector("content")!.appendChild(container);
+  }
+
   const footer = <Footer copilot={copilot} />;
   render(footer, container);
 
