@@ -388,7 +388,7 @@ export const createClient = <
    */
   const _send = (data: Message) => {
     const dataString = JSON.stringify(data);
-    const contentLength = Buffer.byteLength(dataString, "utf8");
+    const contentLength = new TextEncoder().encode(dataString).length;
     const rpcString = `Content-Length: ${contentLength}\r\n\r\n${dataString}`;
     server.send(rpcString);
   };

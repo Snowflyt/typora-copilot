@@ -59,7 +59,9 @@ const SuggestionPanel: FC<SuggestionPanelProps> = ({ text, textColor = "gray", x
     (x - File.editor!.writingArea.getBoundingClientRect().left) -
     30;
 
-  const copilotIconPosixPathname = path.posix.join(...COPILOT_ICON_PATHNAME.NORMAL.split(path.sep));
+  let copilotIconPosixPathname = path.posix.join(...COPILOT_ICON_PATHNAME.NORMAL.split(path.sep));
+  if (!File.isWin && !copilotIconPosixPathname.startsWith("/"))
+    copilotIconPosixPathname = "/" + copilotIconPosixPathname;
 
   // Calculate actual width after mount, and adjust position
   useEffect(() => {

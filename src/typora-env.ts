@@ -132,13 +132,29 @@ interface FileConstructorExtensions {
 
 interface Window {
   /**
-   * Only available on Windows / Linux.
+   * **⚠️ Warning:** This is **only available on Windows / Linux**.
    * @param moduleName The module name to require.
    * @returns The required module.
    */
   reqnode?: {
     (moduleName: "child_process"): typeof import("node:child_process");
+    (moduleName: "util"): typeof import("node:util");
     (moduleName: string): unknown;
+  };
+
+  /**
+   * **⚠️ Warning:** This is **only available on macOS**.
+   */
+  bridge?: {
+    callHandler(
+      type: "controller.runCommand",
+      options: { args: string; cwd?: string },
+      /**
+       * Callback to be invoked when the command is finished.
+       * @param results A tuple of `[success, stdout, stderr, command]`.
+       */
+      cb: (results: [boolean, string, string, string]) => void,
+    ): void;
   };
 }
 

@@ -1,9 +1,15 @@
+import * as path from "./path";
+
 import type { ChildProcessWithoutNullStreams } from "node:child_process";
 
+import { PLUGIN_DIR } from "@/constants";
 import { logger } from "@/logging";
-import { File, waitUntilEditorInitialized } from "@/typora-utils";
+import { File, findFreePort, runShellCommand, waitUntilEditorInitialized } from "@/typora-utils";
+import { wrapNodeChildProcess } from "@/utils/server";
 
 export interface NodeServer {
+  readonly pid: number;
+
   readonly send: (message: string) => void;
   readonly onMessage: (listener: (message: string) => void) => void;
 }
@@ -21,32 +27,21 @@ const parseNodeVersion = (version: string): number[] =>
     .map((s) => Number.parseInt(s));
 
 /**
- * Start a Node process with the given module path. Stdio is enabled.
+ * Start a Node process with the given module path.
  * @returns A Node process with stdio enabled.
  */
-export const forkNode: (modulePath: string) => NodeServer = (() => {
+export const forkNode: (modulePath: string) => Promise<NodeServer> = (() => {
   if (File.isNode) {
     const { fork, spawn, spawnSync } = window.reqnode!("child_process");
-
-    const wrapNodeChildProcess = (cp: ChildProcessWithoutNullStreams): NodeServer => ({
-      send: (message) => {
-        cp.stdin.write(message);
-      },
-      onMessage: (listener) => {
-        cp.stdout.on("data", (data) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          const message: string = data.toString("utf-8");
-          listener(message);
-        });
-      },
-    });
 
     // Check Node version
     const nodeVersion = parseNodeVersion(process.version);
     if (nodeVersion[0]! >= 18)
       return (modulePath) =>
-        wrapNodeChildProcess(
-          fork(modulePath, [], { silent: true }) as ChildProcessWithoutNullStreams,
+        Promise.resolve(
+          wrapNodeChildProcess(
+            fork(modulePath, [], { silent: true }) as ChildProcessWithoutNullStreams,
+          ),
         );
 
     // For Node < 18, use Node from shell
@@ -74,6 +69,7 @@ export const forkNode: (modulePath: string) => NodeServer = (() => {
               </p>
             </div>
           `,
+          // eslint-disable-next-line sonarjs/no-duplicate-string
           buttons: ["I understand"],
         });
       });
@@ -112,7 +108,140 @@ export const forkNode: (modulePath: string) => NodeServer = (() => {
 
     logger.info(`Detected Node ${shellNodeVersion} from shell, using it to start language server.`);
 
-    return (modulePath) => wrapNodeChildProcess(spawn("node", [modulePath]));
+    return (modulePath) => Promise.resolve(wrapNodeChildProcess(spawn("node", [modulePath])));
+  }
+
+  if (File.isMac) {
+    let initialized = false;
+    let initializeFailed = false;
+
+    void (async () => {
+      let shellNodeVersion = "";
+      try {
+        shellNodeVersion = await runShellCommand("node -v");
+      } catch (err) {
+        const errorMessage = "Node not found in shell, please install Node >= 18";
+        logger.error(`${errorMessage}.`, ...(err ? ["Error:", err] : []));
+
+        void waitUntilEditorInitialized().then(() => {
+          File.editor!.EditHelper.showDialog({
+            title: "Typora Copilot: Node.js is required on macOS",
+            type: "error",
+            html: /* html */ `
+              <div style="text-align: center; margin-top: 8px;">
+                <p>Node.js >= 18 is required to run this plugin.</p>
+                <p>
+                  Please install <a href="https://nodejs.org/en/download/" target="_blank">Node.js</a>
+                  >= 18 and restart Typora to use this plugin.
+                </p>
+              </div>
+            `,
+            buttons: ["I understand"],
+          });
+        });
+
+        throw new Error(errorMessage);
+      }
+
+      if (parseNodeVersion(shellNodeVersion)[0]! < 18) {
+        const errorMessage =
+          `Node version from shell is < 18 (${shellNodeVersion}), ` +
+          "please install Node >= 18 to use this plugin";
+        logger.error(errorMessage + ".");
+
+        void waitUntilEditorInitialized().then(() => {
+          File.editor!.EditHelper.showDialog({
+            title: "Typora Copilot: Node.js >= 18 is required",
+            type: "error",
+            html: /* html */ `
+              <div style="text-align: center; margin-top: 8px;">
+                <p>Node.js >= 18 is required to run this plugin.</p>
+                <p>
+                  Please install <a href="https://nodejs.org/en/download/" target="_blank">Node.js</a>
+                  >= 18 and restart Typora to use this plugin.
+                </p>
+              </div>
+            `,
+            buttons: ["I understand"],
+          });
+        });
+
+        throw new Error(errorMessage);
+      }
+
+      logger.info(
+        `Detected Node ${shellNodeVersion} from shell, using it to start language server.`,
+      );
+
+      initialized = true;
+    })().catch((err) => {
+      initializeFailed = true;
+      throw err;
+    });
+
+    return (modulePath) =>
+      new Promise((resolve, reject) => {
+        const interval = setInterval(() => {
+          if (initializeFailed) {
+            clearInterval(interval);
+            return;
+          }
+
+          if (initialized) {
+            clearInterval(interval);
+
+            void (async () => {
+              const port = await findFreePort();
+
+              const serverExecPath = path.join(PLUGIN_DIR, "mac-server.cjs");
+              const logFileName = ".typora-copilot-lsp-sever-output.log";
+              const command = `nohup node '${serverExecPath}' ${port} '${modulePath}' > ~/${logFileName} 2>&1 &`;
+              await runShellCommand(command);
+
+              const getPID = () =>
+                new Promise<number>((resolve, reject) => {
+                  let times = 0;
+                  const go = async () => {
+                    const pid = Number.parseInt(
+                      await runShellCommand(`lsof -t -i:${port} | tail -n 1`),
+                    );
+                    if (Number.isNaN(pid)) {
+                      if (times > 50) {
+                        reject(new Error("Failed to start Node LSP server"));
+                      } else {
+                        setTimeout(() => void go(), 100);
+                        times++;
+                      }
+                    } else resolve(pid);
+                  };
+                  void go();
+                });
+
+              const pid = await getPID();
+
+              const client = new WebSocket(`ws://localhost:${port}`);
+              client.onopen = () => {
+                const listeners: ((message: string) => void)[] = [];
+
+                client.onmessage = (event) => {
+                  listeners.forEach((listener) => listener(event.data as string));
+                };
+
+                resolve({
+                  pid,
+
+                  send: (message) => {
+                    client.send(message);
+                  },
+                  onMessage: (listener) => {
+                    listeners.push(listener);
+                  },
+                });
+              };
+            })().catch(reject);
+          }
+        }, 100);
+      });
   }
 
   throw new Error("`child_process` is not supported in your platform");

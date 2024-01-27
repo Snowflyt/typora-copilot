@@ -25,16 +25,7 @@ import "./styles.scss";
 
 import type { Completion } from "./client";
 
-const server = forkNode(path.join(PLUGIN_DIR, "language-server", "agent.cjs"));
-
 logger.info("Copilot plugin activated. Version:", VERSION);
-logger.debug("Copilot LSP server started. PID:", server.pid);
-
-/**
- * Copilot LSP client.
- */
-const copilot = createCopilotClient(server, { logging: "debug" });
-setGlobalVar("copilot", copilot);
 
 /**
  * Fake temporary workspace folder, only used when no folder is opened.
@@ -44,10 +35,18 @@ const FAKE_TEMP_WORKSPACE_FOLDER = File.isWin
   : "/home/fakeuser/faketyporacopilotworkspace";
 const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
 
-/**
- * Main function.
- */
-const main = async () => {
+(async () => {
+  const server = await forkNode(path.join(PLUGIN_DIR, "language-server", "agent.cjs"));
+  logger.debug("Copilot LSP server started. PID:", server.pid);
+
+  /**
+   * Copilot LSP client.
+   */
+  const copilot = createCopilotClient(server, { logging: "debug" });
+  setGlobalVar("copilot", copilot);
+
+  await waitUntilEditorInitialized();
+
   /*********************
    * Utility functions *
    *********************/
@@ -716,7 +715,6 @@ const main = async () => {
     // Invoke callback
     void onChangeMarkdown(newMarkdown, oldMarkdown);
   });
-};
-
-// Execute `main` function until Typora editor is initialized
-void waitUntilEditorInitialized().then(main);
+})().catch((err) => {
+  throw err;
+});

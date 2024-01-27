@@ -31,11 +31,13 @@ const CopilotIcon: FC<CopilotIconProps> = ({ status, textColor }) => {
       </div>
     );
 
-  const copilotIconPosixPathname = path.posix.join(
+  let copilotIconPosixPathname = path.posix.join(
     ...(status === "Normal" ? COPILOT_ICON_PATHNAME.NORMAL : COPILOT_ICON_PATHNAME.WARNING).split(
       path.sep,
     ),
   );
+  if (!(File as ExtendedFileConstructor).isWin && !copilotIconPosixPathname.startsWith("/"))
+    copilotIconPosixPathname = "/" + copilotIconPosixPathname;
 
   return (
     <div

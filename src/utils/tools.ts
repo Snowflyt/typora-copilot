@@ -29,8 +29,13 @@ export const omit = <O extends ReadonlyRecord<PropertyKey, unknown>, KS extends 
  */
 export const getGlobalVar = <K extends keyof typeof globalThis | (string & NonNullable<unknown>)>(
   name: K,
-): K extends keyof typeof globalThis ? (typeof globalThis)[K] : unknown =>
-  global[name as keyof typeof globalThis];
+): K extends keyof typeof globalThis ? (typeof globalThis)[K] : unknown => {
+  try {
+    return global[name as keyof typeof globalThis];
+  } catch {
+    return globalThis[name as keyof typeof globalThis];
+  }
+};
 /**
  * Set a global variable.
  * @param name The name of the global variable.
@@ -39,7 +44,13 @@ export const getGlobalVar = <K extends keyof typeof globalThis | (string & NonNu
 export const setGlobalVar = <K extends keyof typeof globalThis | (string & NonNullable<unknown>)>(
   name: K,
   value: K extends keyof typeof globalThis ? (typeof globalThis)[K] : unknown,
-) => Object.defineProperty(global, name, { value });
+) => {
+  try {
+    Object.defineProperty(global, name, { value });
+  } catch {
+    Object.defineProperty(globalThis, name, { value });
+  }
+};
 
 /**
  * Slice text by range.

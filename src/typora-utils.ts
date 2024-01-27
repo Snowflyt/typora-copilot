@@ -5,6 +5,7 @@
 import * as path from "@modules/path";
 import { fileURLToPath } from "@modules/url";
 
+import { PlatformError } from "./errors";
 import { getCaretPlacement } from "./extracted";
 
 import type { Position } from "./types/lsp";
@@ -43,7 +44,7 @@ export const TYPORA_RESOURCE_DIR: string = (() => {
   if (result.startsWith("file://")) result = fileURLToPath(result);
 
   let lastResult = "";
-  while (["resources", "Resources"].includes(path.basename(result))) {
+  while (!["resources", "Resources"].includes(path.basename(result))) {
     lastResult = result;
     result = path.dirname(result);
     if (result === lastResult) throw new Error("Cannot determine Typora resource directory.");
@@ -433,6 +434,55 @@ export const getCaretPosition = (): Position | null => {
   }
 
   return { line: placement.line, character: ch !== undefined && ch > 0 ? ch : 0 };
+};
+
+/**
+ * Run a shell command and return its output.
+ * @param command Shell command to run.
+ * @returns
+ */
+export const runShellCommand = (command: string, options?: { cwd?: string }): Promise<string> => {
+  const { cwd } = options ?? {};
+
+  if (File.isMac)
+    return new Promise((resolve, reject) => {
+      window.bridge!.callHandler(
+        "controller.runCommand",
+        { args: command, ...(cwd ? { cwd } : {}) },
+        ([success, stdout, stderr]) => {
+          if (success) resolve(stdout);
+          else reject(stderr);
+        },
+      );
+    });
+
+  if (File.isNode)
+    return new Promise((resolve, reject) => {
+      window.reqnode!("child_process").exec(command, { cwd }, (error, stdout, stderr) => {
+        if (error) reject(error);
+        else if (stderr) reject(stderr);
+        else resolve(stdout);
+      });
+    });
+
+  throw new PlatformError("Unsupported platform for `runShellCommand`");
+};
+
+/**
+ * Find a free localhost port.
+ *
+ * **⚠️ Warning:** This function only works on macOS and Linux.
+ */
+export const findFreePort = async (startAt = 6190): Promise<number> => {
+  const command = /* bash */ `
+    for port in {${startAt}..${startAt + 100 > 65535 ? 65535 : startAt + 100}}; do
+      nc -z localhost $port &>/dev/null || { echo $port; break; }
+    done
+  `;
+  const output = await runShellCommand(command);
+  const port = Number.parseInt(output.trim());
+  if (Number.isNaN(port)) throw new Error("Cannot find free port.");
+  return port;
 };
 
 /*******************************************************************************************
