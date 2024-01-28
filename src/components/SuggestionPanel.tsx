@@ -1,4 +1,5 @@
 import * as path from "@modules/path";
+import { pathToFileURL } from "@modules/url";
 
 import { render } from "preact";
 import { useEffect, useRef } from "preact/hooks";
@@ -62,6 +63,7 @@ const SuggestionPanel: FC<SuggestionPanelProps> = ({ text, textColor = "gray", x
   let copilotIconPosixPathname = path.posix.join(...COPILOT_ICON_PATHNAME.NORMAL.split(path.sep));
   if (!File.isWin && !copilotIconPosixPathname.startsWith("/"))
     copilotIconPosixPathname = "/" + copilotIconPosixPathname;
+  copilotIconPosixPathname = pathToFileURL(copilotIconPosixPathname).href;
 
   // Calculate actual width after mount, and adjust position
   useEffect(() => {

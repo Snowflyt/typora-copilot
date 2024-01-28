@@ -1,4 +1,5 @@
 import * as path from "@modules/path";
+import { pathToFileURL } from "@modules/url";
 
 import Spinner from "./Spinner";
 
@@ -38,6 +39,7 @@ const CopilotIcon: FC<CopilotIconProps> = ({ status, textColor }) => {
   );
   if (!(File as ExtendedFileConstructor).isWin && !copilotIconPosixPathname.startsWith("/"))
     copilotIconPosixPathname = "/" + copilotIconPosixPathname;
+  copilotIconPosixPathname = pathToFileURL(copilotIconPosixPathname).href;
 
   return (
     <div
