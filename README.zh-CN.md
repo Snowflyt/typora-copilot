@@ -8,13 +8,17 @@
 
 该插件使用从 Copilot.vim 提取的 LSP 服务器，以在编辑器中实时提供建议。
 
-**⚠️ 警告：** 该插件仍在开发中，可能无法正常工作。请谨慎使用。
+> [!WARNING]
+>
+> 该插件仍在开发中，可能无法正常工作。请谨慎使用。
 
 ## 兼容性
 
-_\*注：`/` 表示未经过测试。_
+> [!NOTE]
+>
+> 对于使用 Typora < 1.6 的 Windows / Linux 用户以及使用任何版本 Typora 的 macOS 用户，你需要安装 [Node.js](https://nodejs.org/en/download/) ≥ 18.
 
-**⚠️ 警告：** 对于使用 Typora < 1.6 的 Windows / Linux 用户以及使用任何版本 Typora 的 macOS 用户，你需要安装 [Node.js](https://nodejs.org/en/download/) ≥ 18.
+_\*注：`/` 表示未经过测试。_
 
 | Typora Version | Windows 11 | Ubuntu 22.04 | macOS 14.2 |
 | -------------- | ---------- | ------------ | ---------- |
@@ -112,6 +116,12 @@ sudo bash ./bin/install_linux.sh --path "/usr/share/typora/" # 替换为你的 T
 完成安装后，你会在 Typora 工具栏（即界面底部右下角）找到一个 Copilot 图标。点击它打开 Copilot 面板，然后点击“Sign in to authenticate Copilot”。
 
 ![Copilot 图标](./docs/toolbar-icon.zh-CN.png)
+
+> [!CAUTION]
+>
+> 如果你在中国大陆，登录这一步很可能因为网络原因失败。如果你发现点击按钮后很长时间没有反应，尝试按 Shift+F12（Windows 或 Linux）或在帮助菜单中打开“Enable Debugging”并在任意位置右键选择检查元素（macOS），以打开调试工具，定位到“控制台”或“Console”标签页，将过滤级别调整为“详细”或“Verbose”。然后查看控制台中打印的日志信息，以检查是否存在网络问题。
+>
+> 如果你看到一条来自“SignInInitiate”的红色错误信息，其中包含“ETIMEOUT”这样的内容，说明这一步因网络原因失败了。尝试调整你的代理软件设置，打开类似“增强代理”或“TUN 模式”的选项，重启 Typora 再进行尝试；或者，对于 Windows 用户可以使用使用 Proxifier 配置全局代理，对于 macOS / Linux 用户可以使用 Proxychains 打开 Typora，再进行尝试。
 
 按照提示进行身份验证：
 

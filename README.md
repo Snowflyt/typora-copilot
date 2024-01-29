@@ -8,13 +8,17 @@ English | [简体中文](./README.zh-CN.md)
 
 This plugin uses the LSP server extracted from Copilot.vim to provide suggestions in real-time right from your editor.
 
-**⚠️ Warning:** This plugin is still in development and may not work properly. Please use it with caution.
+> [!WARNING]
+>
+> This plugin is still in development and may not work properly. Please use it with caution.
 
 ## Compatibility
 
-_\*Note: `/` means not tested._
+> [!NOTE]
+>
+> For Windows / Linux users using Typora < 1.6 or macOS users using any version of Typora, you need to install [Node.js](https://nodejs.org/en/download/) ≥ 18.
 
-**⚠️ Warning:** For Windows / Linux users using Typora < 1.6 or macOS users using any version of Typora, you need to install [Node.js](https://nodejs.org/en/download/) ≥ 18.
+_\*Note: `/` means not tested._
 
 | Typora Version | Windows 11 | Ubuntu 22.04 | macOS 14.2 |
 | -------------- | ---------- | ------------ | ---------- |
