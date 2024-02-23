@@ -196,7 +196,7 @@ export const forkNode: (modulePath: string) => Promise<NodeServer> = (() => {
               const serverExecPath = path.join(PLUGIN_DIR, "mac-server.cjs");
               const logFileName = ".typora-copilot-lsp-sever-output.log";
               const command = `nohup node '${serverExecPath}' ${port} '${modulePath}' > ~/${logFileName} 2>&1 &`;
-              await runShellCommand(command);
+              void runShellCommand(command);
 
               const getPID = () =>
                 new Promise<number>((resolve, reject) => {
