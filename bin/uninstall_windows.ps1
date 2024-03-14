@@ -35,7 +35,7 @@ foreach ($path in $paths) {
         if (Test-Path $windowHtmlPath) {
             $pathFound = $true
             Write-Host "Found Typora ""window.html"" at ""$windowHtmlPath""."
-            $content = Get-Content $windowHtmlPath -Raw
+            $content = Get-Content $windowHtmlPath -Raw -Encoding UTF8
 
             foreach ($scriptToRemoveAfter in $scriptToRemoveAfterCandidates) {
                 if ($content.Contains($scriptToRemoveAfter)) {
@@ -49,7 +49,7 @@ foreach ($path in $paths) {
 
                         # Remove script
                         $newContent = $content -replace ($indent + $scriptToRemove), ''
-                        Set-Content -Path $windowHtmlPath -Value $newContent
+                        Set-Content -Path $windowHtmlPath -Value $newContent -Encoding UTF8
 
                         # Remove `<path_of_window_html>\copilot\` directory
                         $copilotPath = Join-Path -Path (Split-Path -Path $windowHtmlPath -Parent) -ChildPath 'copilot'
