@@ -36,7 +36,7 @@ foreach ($path in $paths) {
             $pathFound = $true
             Write-Host "Installation directory: ""$(Split-Path -Path $windowHtmlPath -Parent)\copilot\"""
             Write-Host "Found Typora ""window.html"" at ""$windowHtmlPath""."
-            $content = Get-Content $windowHtmlPath -Raw
+            $content = Get-Content $windowHtmlPath -Raw -Encoding UTF8
 
             if (!($content.Contains($scriptToInsert))) {
                 Write-Host 'Installing Copilot plugin in Typora...'
@@ -55,7 +55,7 @@ foreach ($path in $paths) {
                             $(If (($rowContentBeforeScriptToInsertAfter -ne '') -and ($indent -eq '')) { '' } Else { "`n" + $indent }) +
                             $scriptToInsert
                         )
-                        Set-Content -Path $windowHtmlPath -Value $newContent
+                        Set-Content -Path $windowHtmlPath -Value $newContent -Encoding UTF8
 
                         # Copy `<cwd>\..\` to `<path_of_window_html>\copilot\` directory
                         $copilotPath = Join-Path -Path (Split-Path -Path $windowHtmlPath -Parent) -ChildPath 'copilot'
