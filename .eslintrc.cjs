@@ -21,6 +21,7 @@ const config = {
     project: ["./tsconfig.json", "./tsconfig.eslint.json"],
     tsconfigRootDir: __dirname,
   },
+  ignorePatterns: ["!.lintstagedrc.js"],
   plugins: ["sort-destructure-keys"],
   rules: {
     "@typescript-eslint/consistent-type-imports": ["error", { prefer: "type-imports" }],
