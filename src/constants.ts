@@ -13,17 +13,3 @@ export const VERSION = "0.2.8-dev";
  */
 export const PLUGIN_DIR = path.join(TYPORA_RESOURCE_DIR, "copilot");
 setGlobalVar("__copilotDir", PLUGIN_DIR);
-
-/**
- * Copilot icon pathnames.
- */
-export const COPILOT_ICON_PATHNAME = {
-  /**
-   * Normal icon.
-   */
-  NORMAL: path.join(PLUGIN_DIR, "assets", "copilot-icon.png"),
-  /**
-   * Warning icon.
-   */
-  WARNING: path.join(PLUGIN_DIR, "assets", "copilot-icon-warning.png"),
-};

@@ -25,9 +25,9 @@
   "type": "module",
   "main": "./index.js",
   "scripts": {
-    "build:dev": "npm run prebuild && rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript && cpy {package.json,README.md,README.zh-CN.md,bin,docs,language-server} dist && cpy src/assets/**/* dist/assets",
-    "build:release": "npm run prebuild && rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript && prettier --loglevel=silent --print-width 80 --write dist/**/* && cpy {package.json,README.md,README.zh-CN.md,bin,docs,language-server} dist && cpy src/assets/**/* dist/assets",
-    "build:watch": "npm run prebuild && cpy {package.json,README.md,README.zh-CN.md,bin,docs,language-server} dist && cpy src/assets/**/* dist/assets && rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript --watch",
+    "build:dev": "npm run prebuild && rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript && cpy {package.json,README.md,README.zh-CN.md,bin,docs,language-server} dist",
+    "build:release": "npm run prebuild && rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript && prettier --loglevel=silent --print-width 80 --write dist/**/* && cpy {package.json,README.md,README.zh-CN.md,bin,docs,language-server} dist",
+    "build:watch": "npm run prebuild && cpy {package.json,README.md,README.zh-CN.md,bin,docs,language-server} dist && rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript --watch",
     "clean": "rimraf dist",
     "format": "prettier --write {src,test}/**/*.{json,js,jsx,ts,tsx} *.{js,cjs,mjs,ts,cts,mts,json,md} && prettier --write --parser json .hintrc",
     "lint": "eslint {src,test}/**/*.{js,jsx,ts,tsx} *.{js,cjs,mjs,ts,cts,mts} --report-unused-disable-directives-severity error --max-warnings 0 && stylelint \"src/**/*.{css,scss}\"",

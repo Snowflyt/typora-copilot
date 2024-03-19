@@ -32,6 +32,5 @@
       "@test/*": ["test/*"]
     }
   },
-  "include": ["src", "test", "rollup.config.ts", "pre-commit.ts"],
-  "exclude": ["src/assets"]
+  "include": ["src", "test", "rollup.config.ts", "pre-commit.ts"]
 }
