@@ -53,7 +53,7 @@ for path in "${paths[@]}"; do
     # If found, insert script
     if [[ -f "$window_html_path" ]]; then
       path_found=true
-      echo "Found Typora \"index.html\" at \"$window_html_path\"."
+      echo "Found Typora \"window.html\" at \"$window_html_path\"."
       content=$(cat "$window_html_path")
 
       for script_to_remove_after in "${script_to_remove_after_candidates[@]}"; do
@@ -62,7 +62,7 @@ for path in "${paths[@]}"; do
             echo "Removing Copilot plugin script after \"$script_to_remove_after\"..."
 
             escaped_script_to_remove=$(escape_for_sed "$script_to_remove")
-            new_content=$(echo "$content" | sed -E "/[[:space:]]*$escaped_script_to_remove/d")
+            new_content=$(echo "$content" | sed -E "s/[[:space:]]*$escaped_script_to_remove//")
 
             # Remove script
             echo "$new_content" >"$window_html_path"

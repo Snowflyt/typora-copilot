@@ -66,7 +66,7 @@ for path in "${paths[@]}"; do
             echo "Removing Copilot plugin script after \"$script_to_remove_after\"..."
 
             escaped_script_to_remove=$(escape_for_sed "$script_to_remove")
-            new_content=$(echo "$content" | sed -E "/[[:space:]]*$escaped_script_to_remove/d")
+            new_content=$(echo "$content" | sed -E "s/[[:space:]]*$escaped_script_to_remove//")
 
             # Remove script
             echo "$new_content" >"$index_html_path"
