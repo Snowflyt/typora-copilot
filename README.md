@@ -20,8 +20,9 @@ This plugin uses the LSP server extracted from Copilot.vim to provide suggestion
 
 _\*Note: `/` means not tested._
 
-| Typora Version | Windows 11 | Ubuntu 22.04 | macOS 14.2 |
+| Typora Version | Windows 11 | Ubuntu 22.04 | macOS 14.x |
 | -------------- | ---------- | ------------ | ---------- |
+| 1.8.10         | √          | √            | √          |
 | 1.8.8          | /          | √            | /          |
 | 1.8.6          | √          | /            | /          |
 | 1.8.5          | √          | /            | √          |
