@@ -115,19 +115,50 @@ export const forkNode: (modulePath: string) => Promise<NodeServer> = (() => {
     let initialized = false;
     let initializeFailed = false;
 
+    let nodePath = "node";
+
     void (async () => {
       let shellNodeVersion = "";
       try {
         shellNodeVersion = await runShellCommand("node -v");
       } catch (err) {
-        const errorMessage = "Node not found in shell, please install Node >= 18";
-        logger.error(`${errorMessage}.`, ...(err ? ["Error:", err] : []));
+        // Detect if NVM is installed
+        const nvmExists =
+          (
+            await runShellCommand(`
+          if [ -f ~/.nvm/nvm.sh ]; then
+            echo "true";
+          else
+            echo "false";
+          fi
+        `)
+          ).trim() === "true";
+        const availableVersions =
+          nvmExists ?
+            (await runShellCommand("ls ~/.nvm/versions/node"))
+              .split(/\s+/)
+              .filter((s) => s)
+              .map((s) => (s.endsWith("/") ? s.slice(0, -1) : s))
+          : [];
+        if (nvmExists && availableVersions.length > 0) {
+          availableVersions.sort((a, b) => {
+            const aVersion = parseNodeVersion(a);
+            const bVersion = parseNodeVersion(b);
+            if (aVersion[0] !== bVersion[0]) return bVersion[0]! - aVersion[0]!;
+            if (aVersion[1] !== bVersion[1]) return bVersion[1]! - aVersion[1]!;
+            return bVersion[2]! - aVersion[2]!;
+          });
+          shellNodeVersion = availableVersions[0]!;
+          nodePath = `~/.nvm/versions/node/${shellNodeVersion}/bin/node`;
+        } else {
+          const errorMessage = "Node not found in shell, please install Node >= 18";
+          logger.error(`${errorMessage}.`, ...(err ? ["Error:", err] : []));
 
-        void waitUntilEditorInitialized().then(() => {
-          File.editor!.EditHelper.showDialog({
-            title: "Typora Copilot: Node.js is required on macOS",
-            type: "error",
-            html: /* html */ `
+          void waitUntilEditorInitialized().then(() => {
+            File.editor!.EditHelper.showDialog({
+              title: "Typora Copilot: Node.js is required on macOS",
+              type: "error",
+              html: /* html */ `
               <div style="text-align: center; margin-top: 8px;">
                 <p>Node.js >= 18 is required to run this plugin.</p>
                 <p>
@@ -136,11 +167,12 @@ export const forkNode: (modulePath: string) => Promise<NodeServer> = (() => {
                 </p>
               </div>
             `,
-            buttons: ["I understand"],
+              buttons: ["I understand"],
+            });
           });
-        });
 
-        throw new Error(errorMessage);
+          throw new Error(errorMessage);
+        }
       }
 
       if (parseNodeVersion(shellNodeVersion)[0]! < 18) {
@@ -195,7 +227,7 @@ export const forkNode: (modulePath: string) => Promise<NodeServer> = (() => {
 
               const serverExecPath = path.join(PLUGIN_DIR, "mac-server.cjs");
               const logFileName = ".typora-copilot-lsp-sever-output.log";
-              const command = `nohup node '${serverExecPath}' ${port} '${modulePath}' > ~/${logFileName} 2>&1 &`;
+              const command = `nohup ${nodePath} '${serverExecPath}' ${port} '${modulePath}' > ~/${logFileName} 2>&1 &`;
               void runShellCommand(command);
 
               const getPID = () =>
