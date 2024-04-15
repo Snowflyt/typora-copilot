@@ -1,3 +1,5 @@
+import { P, match } from "ts-pattern";
+
 import type {
   CancelParams,
   DidChangeTextDocumentParams,
@@ -10,6 +12,7 @@ import type {
   LSPAny,
   LSPArray,
   LSPObject,
+  LogMessageParams,
   LogTraceParams,
   Message,
   NotificationMessage,
@@ -26,7 +29,7 @@ import type { Equals, ReadonlyRecord } from "@/types/tools";
 import type { Logger } from "@/utils/logging";
 import type { NodeServer } from "@modules/child_process";
 
-import { ErrorCodes, JSONRPC_VERSION } from "@/types/lsp";
+import { ErrorCodes, JSONRPC_VERSION, MessageType } from "@/types/lsp";
 import { createLogger, formatErrorCode, formatId, formatMethod } from "@/utils/logging";
 import { isNotificationMessage, isRequestMessage, isResponseMessage } from "@/utils/lsp";
 import { isKeyOf } from "@/utils/tools";
@@ -320,6 +323,21 @@ const _prepareProtocolNotificationHandlers = () =>
       context,
     ) => {
       // To be implemented by an actual implementation
+    },
+
+    /**
+     * The log message notification is sent from the server to the client to ask the client to log a
+     * particular message.
+     */
+    "window/logMessage": ({ message, type }: LogMessageParams, { logger, suppressLogging }) => {
+      suppressLogging();
+      match(type)
+        .with(MessageType.Error, () => logger.error(message))
+        .with(MessageType.Warning, () => logger.warn(message))
+        .with(P.union(MessageType.Info, MessageType.Log, MessageType.Debug), () =>
+          logger.debug(message),
+        )
+        .exhaustive();
     },
   });
 
