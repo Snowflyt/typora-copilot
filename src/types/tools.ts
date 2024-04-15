@@ -1,37 +1,7 @@
 /**
- * The class type (constructor type) of `T`.
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type Constructor<T> = new (...args: any) => T;
-
-declare const lazySymbol: unique symbol;
-/**
- * Use `interface` to wrap a type to make it lazy to be evaluated by TS. See also {@link Get}.
- *
- * See my <@Snowflyt> answer on Stack Overflow for more details:
- * [Answer: Interfaces vs Types in TypeScript](https://stackoverflow.com/a/77669722/21418758)
- */
-export interface Lazy<T = unknown> {
-  [lazySymbol]: T;
-}
-/**
- * Get the type of a lazy type. See also {@link Lazy}.
- *
- * See my <@Snowflyt> answer on Stack Overflow for more details:
- * [Answer: Interfaces vs Types in TypeScript](https://stackoverflow.com/a/77669722/21418758)
- */
-export type Get<L extends Lazy> = L[typeof lazySymbol];
-
-/**
  * Construct a type with a set of readonly properties `K` of type `T`.
  */
 export type ReadonlyRecord<K extends PropertyKey, T> = { readonly [P in K]: T };
-/**
- * Lazy version of {@link ReadonlyRecord}. See also {@link Lazy}.
- */
-export type ReadonlyRecordL<K extends PropertyKey, T extends Lazy> = {
-  readonly [P in K]: Get<T>;
-};
 
 /**
  * Check if two types are equal.
@@ -48,9 +18,10 @@ export type Equals<T, U> =
  */
 export type _Id<T> = T extends infer U ? { [K in keyof U]: U[K] } : never;
 
-export type _IdDeep<T> = T extends infer U
-  ? U extends object
-    ? { [K in keyof U]: _IdDeep<U[K]> }
+export type _IdDeep<T> =
+  T extends infer U ?
+    U extends object ?
+      { [K in keyof U]: _IdDeep<U[K]> }
     : U
   : never;
 

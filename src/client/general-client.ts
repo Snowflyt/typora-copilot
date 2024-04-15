@@ -29,6 +29,7 @@ import type { NodeServer } from "@modules/child_process";
 import { ErrorCodes, JSONRPC_VERSION } from "@/types/lsp";
 import { createLogger, formatErrorCode, formatId, formatMethod } from "@/utils/logging";
 import { isNotificationMessage, isRequestMessage, isResponseMessage } from "@/utils/lsp";
+import { isKeyOf } from "@/utils/tools";
 
 /**
  * A promise specially designed for LSP client representing a future response from LSP server that
@@ -104,36 +105,36 @@ export type RefineRequestHandlers<
   RequestHandlers extends ReadonlyRecord<string, RequestHandler>,
   RefineHandlers extends ReadonlyRecord<string, RequestHandler>,
 > = {
-  readonly [P in keyof RequestHandlers]: P extends keyof RefineHandlers
-    ? RefineHandlers[P]
-    : RequestHandlers[P];
+  readonly [P in keyof RequestHandlers]: P extends keyof RefineHandlers ? RefineHandlers[P]
+  : RequestHandlers[P];
 };
 
 /**
- * Validate request handlers. Check if the request handler params extend `RequestMessage["params"]`.
+ * Validate request handlers. Check if the request handler params extend `LSPArray | LSPObject`.
  */
 export type ValidateRequestHandlers<
   RequestHandlers extends ReadonlyRecord<string, RequestHandler>,
-> = RequestHandlers extends {
-  [P in keyof RequestHandlers]: {
-    type: RequestHandlers[P]["type"];
-    handler: Parameters<RequestHandlers[P]["handler"]>[0] extends RequestMessage["params"]
-      ? RequestHandlers[P]["handler"]
-      : "Request handler params must extend `RequestMessage['params']`";
-  };
-}
-  ? RequestHandlers
+> =
+  RequestHandlers extends {
+    [P in keyof RequestHandlers]: {
+      type: RequestHandlers[P]["type"];
+      handler: Parameters<RequestHandlers[P]["handler"]>[0] extends LSPArray | LSPObject ?
+        RequestHandlers[P]["handler"]
+      : "Request handler params must extend `LSPArray | LSPObject`";
+    };
+  } ?
+    RequestHandlers
   : {
       [P in keyof RequestHandlers]: {
         type: RequestHandlers[P]["type"];
-        handler: Parameters<RequestHandlers[P]["handler"]>[0] extends RequestMessage["params"]
-          ? RequestHandlers[P]["handler"]
-          : "Request handler params must extend `RequestMessage['params']`";
+        handler: Parameters<RequestHandlers[P]["handler"]>[0] extends LSPArray | LSPObject ?
+          RequestHandlers[P]["handler"]
+        : "Request handler params must extend `LSPArray | LSPObject`";
       };
     };
 
 /**
- * Validate request handlers. Check if the request handler params extend `RequestMessage["params"]`.
+ * Validate request handlers. Check if the request handler params extend `LSPArray | LSPObject`.
  * @param requestHandlers
  * @returns
  */
@@ -150,34 +151,34 @@ export type RefineNotificationHandlers<
   NotificationHandlers extends ReadonlyRecord<string, NotificationHandler>,
   RefineHandlers extends ReadonlyRecord<string, NotificationHandler>,
 > = {
-  readonly [P in keyof NotificationHandlers]: P extends keyof RefineHandlers
-    ? RefineHandlers[P]
-    : NotificationHandlers[P];
+  readonly [P in keyof NotificationHandlers]: P extends keyof RefineHandlers ? RefineHandlers[P]
+  : NotificationHandlers[P];
 };
 
 /**
- * Validate notification handlers. Check if the notification handler params extend `NotificationMessage["params"]`.
+ * Validate notification handlers. Check if the notification handler params extend `LSPArray | LSPObject`.
  */
 export type ValidateNotificationHandlers<
   NotificationHandlers extends ReadonlyRecord<string, NotificationHandler>,
-> = NotificationHandlers extends {
-  [P in keyof NotificationHandlers]: Parameters<
-    NotificationHandlers[P]
-  >[0] extends NotificationMessage["params"]
-    ? NotificationHandlers[P]
-    : 'Notification handler params must extend `NotificationMessage["params"]`';
-}
-  ? NotificationHandlers
+> =
+  NotificationHandlers extends {
+    [P in keyof NotificationHandlers]: Parameters<NotificationHandlers[P]>[0] extends (
+      LSPArray | LSPObject
+    ) ?
+      NotificationHandlers[P]
+    : "Notification handler params must extend `LSPArray | LSPObject`";
+  } ?
+    NotificationHandlers
   : {
-      [P in keyof NotificationHandlers]: Parameters<
+      [P in keyof NotificationHandlers]: Parameters<NotificationHandlers[P]>[0] extends (
+        LSPArray | LSPObject
+      ) ?
         NotificationHandlers[P]
-      >[0] extends NotificationMessage["params"]
-        ? NotificationHandlers[P]
-        : 'Notification handler params must extend `NotificationMessage["params"]`';
+      : "Notification handler params must extend `LSPArray | LSPObject`";
     };
 
 /**
- * Validate notification handlers. Check if the notification handler params extend `NotificationMessage["params"]`.
+ * Validate notification handlers. Check if the notification handler params extend `LSPArray | LSPObject`.
  * @param notificationHandlers
  * @returns
  */
@@ -217,7 +218,7 @@ export type ProtocolRequestHandlers = ReturnType<typeof _prepareProtocolRequestH
  * @returns
  */
 const _prepareProtocolRequestHandlers = () =>
-  ({
+  validateRequestHandlers({
     "client/registerCapability": {
       type: "mutation",
       /**
@@ -233,9 +234,15 @@ const _prepareProtocolRequestHandlers = () =>
        * and only register the capability statically if the client doesn’t support dynamic
        * registration for that capability.
        */
-      // @ts-expect-error - Unused parameters
-
-      handler: (params: RegistrationParams, success, error, context) => {
+      handler: (
+        // @ts-expect-error - Unused parameters
+        params: RegistrationParams,
+        success,
+        // @ts-expect-error - Unused parameters
+        error,
+        // @ts-expect-error - Unused parameters
+        context,
+      ) => {
         // To be implemented by an actual implementation
         success(null);
       },
@@ -247,14 +254,20 @@ const _prepareProtocolRequestHandlers = () =>
        * The `client/unregisterCapability` request is sent from the server to the client to unregister
        * a previously registered capability.
        */
-      // @ts-expect-error - Unused parameters
-
-      handler: (params: UnregistrationParams, success, error, context) => {
+      handler: (
+        // @ts-expect-error - Unused parameters
+        params: UnregistrationParams,
+        success,
+        // @ts-expect-error - Unused parameters
+        error,
+        // @ts-expect-error - Unused parameters
+        context,
+      ) => {
         // To be implemented by an actual implementation
         success(null);
       },
     },
-  }) satisfies ReadonlyRecord<string, RequestHandler>;
+  });
 
 /**
  * Protocol notification handlers.
@@ -266,22 +279,28 @@ export type ProtocolNotificationHandlers = ReturnType<typeof _prepareProtocolNot
  * @returns
  */
 const _prepareProtocolNotificationHandlers = () =>
-  ({
+  validateNotificationHandlers({
     /**
      * Invoked when received a `$/cancelRequest` notification from the server.
      */
-    // @ts-expect-error - Unused parameters
-
-    "$/cancelRequest": (params: CancelParams, context) => {
+    "$/cancelRequest": (
+      // @ts-expect-error - Unused parameters
+      params: CancelParams,
+      // @ts-expect-error - Unused parameters
+      context,
+    ) => {
       // TODO: Implement it
     },
 
     /**
      * Invoked when received a `$/progress` notification from the server.
      */
-    // @ts-expect-error - Unused parameters
-
-    "$/progress": (params: ProgressParams, context) => {
+    "$/progress": (
+      // @ts-expect-error - Unused parameters
+      params: ProgressParams,
+      // @ts-expect-error - Unused parameters
+      context,
+    ) => {
       // To be implemented by an actual implementation
     },
 
@@ -294,12 +313,15 @@ const _prepareProtocolNotificationHandlers = () =>
      * `$/logTrace` should only be used for systematic trace reporting. For single debugging
      * messages, the server should send `window/logMessage` notifications.
      */
-    // @ts-expect-error - Unused parameters
-
-    "$/logTrace": (params: LogTraceParams, context) => {
+    "$/logTrace": (
+      // @ts-expect-error - Unused parameters
+      params: LogTraceParams,
+      // @ts-expect-error - Unused parameters
+      context,
+    ) => {
       // To be implemented by an actual implementation
     },
-  }) satisfies ReadonlyRecord<string, NotificationHandler>;
+  });
 
 /**
  * Client options.
@@ -345,15 +367,15 @@ export interface ClientEventMap {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ValidateClientOptions<Options extends ClientOptions<any, any>> = {
-  [P in keyof Options]: P extends "requestHandlers"
-    ? Options[P] extends ReadonlyRecord<string, RequestHandler>
-      ? ValidateRequestHandlers<Options[P]>
-      : never
-    : P extends "notificationHandlers"
-      ? Options[P] extends ReadonlyRecord<string, NotificationHandler>
-        ? ValidateNotificationHandlers<Options[P]>
-        : never
-      : Options[P];
+  [P in keyof Options]: P extends "requestHandlers" ?
+    Options[P] extends ReadonlyRecord<string, RequestHandler> ?
+      ValidateRequestHandlers<Options[P]>
+    : never
+  : P extends "notificationHandlers" ?
+    Options[P] extends ReadonlyRecord<string, NotificationHandler> ?
+      ValidateNotificationHandlers<Options[P]>
+    : never
+  : Options[P];
 };
 
 /**
@@ -416,9 +438,8 @@ export const createClient = <
 
   /* Merge user handlers with protocol handlers */
   for (const [method, { handler, type }] of Object.entries(requestHandlers)) {
-    if (!(method in _protocolRequestHandlers)) continue;
-    const { type: protocolType } =
-      _protocolRequestHandlers[method as keyof ProtocolRequestHandlers];
+    if (!isKeyOf(_protocolRequestHandlers, method)) continue;
+    const { type: protocolType } = _protocolRequestHandlers[method];
     if (type !== protocolType) {
       Object.defineProperty(requestHandlers, method, {
         value: { type: protocolType, handler },
@@ -434,7 +455,7 @@ export const createClient = <
       logger.debug(`Overwriting request handler for protocol method \`${method}\``);
   }
   for (const [method] of Object.entries(notificationHandlers)) {
-    if (!(method in _protocolNotificationHandlers)) continue;
+    if (!isKeyOf(_protocolNotificationHandlers, method)) continue;
     if (logging === "debug")
       logger.debug(`Overwriting notification handler for protocol method \`${method}\``);
   }
@@ -575,7 +596,9 @@ export const createClient = <
 
             if (logging === "debug") {
               const color =
-                type === "query" ? "#49cc90" : type === "mutation" ? "purple" : "lightgray";
+                type === "query" ? "#49cc90"
+                : type === "mutation" ? "purple"
+                : "lightgray";
               logger.block
                 .overwrite({ color })
                 .debug(
@@ -592,8 +615,7 @@ export const createClient = <
 
         if (request.method.startsWith("$/")) {
           const typeAndHandler =
-            requestHandlers[request.method] ??
-            _protocolRequestHandlers[request.method as keyof ProtocolRequestHandlers];
+            requestHandlers[request.method] ?? _protocolRequestHandlers[request.method as never];
 
           if (!typeAndHandler) {
             _error(true, request.id, request.method, {
@@ -621,8 +643,7 @@ export const createClient = <
           }
         } else {
           const typeAndHandler =
-            requestHandlers[request.method] ??
-            _protocolRequestHandlers[request.method as keyof ProtocolRequestHandlers];
+            requestHandlers[request.method] ?? _protocolRequestHandlers[request.method as never];
 
           if (typeAndHandler) {
             const { handler, type } = typeAndHandler;
@@ -655,22 +676,20 @@ export const createClient = <
 
         if (logging === "debug" && !loggingSuppressed) {
           const typeAndHandler =
-            requestHandlers[request.method] ??
-            _protocolRequestHandlers[request.method as keyof ProtocolRequestHandlers];
+            requestHandlers[request.method] ?? _protocolRequestHandlers[request.method as never];
           const type = typeAndHandler?.type ?? "unknown";
-          const color = type === "query" ? "#49cc90" : type === "mutation" ? "purple" : "gray";
-          logger.block
-            .overwrite({ color })
-            .debug(
-              `<< [${request.id}] ${
-                request.method in _protocolRequestHandlers
-                  ? "[Protocol] "
-                  : requestHandlers[payload.method]
-                    ? ""
-                    : "[Ignored] "
-              }${request.method} Request`,
-              ...(request.params !== undefined ? [request.params] : []),
-            );
+          const color =
+            type === "query" ? "#49cc90"
+            : type === "mutation" ? "purple"
+            : "gray";
+          logger.block.overwrite({ color }).debug(
+            `<< [${request.id}] ${
+              request.method in _protocolRequestHandlers ? "[Protocol] "
+              : requestHandlers[payload.method] ? ""
+              : "[Ignored] "
+            }${request.method} Request`,
+            ...(request.params !== undefined ? [request.params] : []),
+          );
         }
       } else if (isNotificationMessage(payload)) {
         let loggingSuppressed = false;
@@ -716,18 +735,18 @@ export const createClient = <
     requestHandlers: requestHandlers as Equals<
       RequestHandlers,
       RefineRequestHandlers<ReadonlyRecord<string, RequestHandler>, ProtocolRequestHandlers>
-    > extends true
-      ? Record<string, never>
-      : RefinedRequestHandlers,
+    > extends true ?
+      Record<string, never>
+    : RefinedRequestHandlers,
     notificationHandlers: notificationHandlers as Equals<
       NotificationHandlers,
       RefineNotificationHandlers<
         ReadonlyRecord<string, NotificationHandler>,
         ProtocolNotificationHandlers
       >
-    > extends true
-      ? Record<string, never>
-      : RefinedNotificationHandlers,
+    > extends true ?
+      Record<string, never>
+    : RefinedNotificationHandlers,
     protocolRequestHandlers: _protocolRequestHandlers,
     protocolNotificationHandlers: _protocolNotificationHandlers,
 
@@ -1019,7 +1038,6 @@ export const createClient = <
 
   const _request = result.request;
   // @ts-expect-error - Planned to use in the future
-
   const _query = result.query;
   const _mutate = result.mutate;
   const _notify = result.notify;

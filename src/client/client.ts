@@ -1,6 +1,6 @@
 import { pathToFileURL } from "@modules/url";
 
-import { createClient } from "./general-client";
+import { createClient, validateNotificationHandlers } from "./general-client";
 
 import type {
   ClientEventMap,
@@ -151,9 +151,8 @@ export interface CopilotChangeStatusEvent {
 }
 
 export type CopilotClientEventHandler<EventName extends keyof CopilotClientEventMap> = (
-  ...args: CopilotClientEventMap[EventName] extends void
-    ? []
-    : [ev: CopilotClientEventMap[EventName]]
+  ...args: CopilotClientEventMap[EventName] extends void ? []
+  : [ev: CopilotClientEventMap[EventName]]
 ) => void | Promise<void>;
 
 export interface CopilotClientEventMap extends ClientEventMap {
@@ -181,7 +180,7 @@ export const createCopilotClient = <
   const client = createClient(server, {
     ...options,
 
-    notificationHandlers: {
+    notificationHandlers: validateNotificationHandlers({
       /**
        * Log message to console.
        */
@@ -214,7 +213,7 @@ export const createCopilotClient = <
       },
 
       ...options?.notificationHandlers,
-    },
+    }),
 
     serverName: "Copilot",
   });

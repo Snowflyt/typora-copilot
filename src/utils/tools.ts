@@ -22,6 +22,8 @@ export const omit = <O extends ReadonlyRecord<PropertyKey, unknown>, KS extends 
   return result as never;
 };
 
+export const isKeyOf = <O extends object>(obj: O, key: PropertyKey): key is keyof O => key in obj;
+
 /**
  * Get a global variable.
  * @param name The name of the global variable.
@@ -76,9 +78,11 @@ export const sliceTextByRange = <ReturnRows extends boolean = false>(
   const endLine = lines[end.line]!.slice(0, end.character);
 
   if (returnRows)
-    return [startLine, ...lines.slice(start.line + 1, end.line), endLine] as ReturnRows extends true
-      ? string[]
-      : string;
+    return [startLine, ...lines.slice(start.line + 1, end.line), endLine] as ReturnRows extends (
+      true
+    ) ?
+      string[]
+    : string;
   else
     return [startLine, ...lines.slice(start.line + 1, end.line), endLine].join(
       eol,

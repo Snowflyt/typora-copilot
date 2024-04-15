@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-duplicate-type-constituents */
 
-import type { Lazy, ReadonlyRecordL } from "./tools";
-
 /**
  * Defines an integer number in the range of -2^31 to 2^31 - 1.
  */
@@ -27,7 +25,17 @@ export type LSPAny = LSPObject | LSPArray | string | integer | uinteger | decima
 /**
  * LSP object definition.
  */
-export type LSPObject = ReadonlyRecordL<string, Lazy<LSPAny>>;
+export type LSPObject = {
+  readonly [K: string]:
+    | LSPObject
+    | LSPArray
+    | string
+    | integer
+    | uinteger
+    | decimal
+    | boolean
+    | null;
+};
 
 /**
  * LSP arrays.
@@ -50,14 +58,14 @@ export const JSONRPC_VERSION = "2.0";
  * A general message as defined by JSON-RPC. The language server protocol always uses `"2.0"` as the
  * `jsonrpc` version.
  */
-export interface Message {
+export type Message = {
   /**
    * The JSON-RPC version. Must be exactly `"2.0"`.
    */
   /* `extends infer U ? U : never` is a technique used here to tell TS to evaluate the type
       immediately, making type information more readable on hover. */
   jsonrpc: JSONRPCVersion extends infer U ? U : never;
-}
+};
 
 /**
  * A request message to describe a request between the client and the server. Every processed
@@ -121,7 +129,7 @@ export interface ErrorResponseMessage extends Message {
 /**
  * An error object returned as a response to a request.
  */
-export interface ResponseError {
+export type ResponseError = {
   /**
    * A number indicating the error type that occurred.
    */
@@ -137,7 +145,7 @@ export interface ResponseError {
    * omitted.
    */
   data?: LSPAny;
-}
+};
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace ErrorCodes {
@@ -245,12 +253,12 @@ export interface NotificationMessage extends Message {
 /**
  * Params to be sent with a `$/cancelRequest` notification.
  */
-export interface CancelParams {
+export type CancelParams = {
   /**
    * The request id to cancel.
    */
   id: integer | string;
-}
+};
 
 /**
  * A token that represents a work in progress.
@@ -260,7 +268,7 @@ export type ProgressToken = integer | string;
 /**
  * Params to be sent with a `$/progress` notification.
  */
-export interface ProgressParams<T extends LSPAny = LSPAny> {
+export type ProgressParams<T extends LSPAny = LSPAny> = {
   /**
    * The progress token provided by the client or server.
    */
@@ -270,7 +278,7 @@ export interface ProgressParams<T extends LSPAny = LSPAny> {
    * The progress data.
    */
   value: T;
-}
+};
 
 /*************************
  * Basic JSON Structures *
@@ -365,7 +373,7 @@ export type URI = string;
  * The only regular expression flag that a client needs to support is ‘i’ to specify a case
  * insensitive search.
  */
-export interface RegularExpressionsClientCapabilities {
+export type RegularExpressionsClientCapabilities = {
   /**
    * The engine's name.
    */
@@ -375,7 +383,7 @@ export interface RegularExpressionsClientCapabilities {
    * The engine's version.
    */
   version?: string;
-}
+};
 
 /**
  * To ensure that both client and server split the string into the same line representation the
@@ -397,7 +405,7 @@ export const EOL = ["\n", "\r\n", "\r"] as const;
  * position is between two characters like an ‘insert’ cursor in an editor. Special values like for
  * example `-1` to denote the end of a line are not supported.
  */
-export interface Position {
+export type Position = {
   /**
    * Line position in a document (zero-based).
    */
@@ -411,7 +419,7 @@ export interface Position {
    * to the line length.
    */
   character: uinteger;
-}
+};
 
 /**
  * A type indicating how positions are encoded, specifically what column offsets mean.
@@ -464,7 +472,7 @@ export namespace PositionEncodingKind {
  * }
  * ```
  */
-export interface Range {
+export type Range = {
   /**
    * The range's start position.
    */
@@ -474,7 +482,7 @@ export interface Range {
    * The range's end position.
    */
   end: Position;
-}
+};
 
 /**
  * Recommended language identifiers to use with the language client.
@@ -607,7 +615,7 @@ export const LanguageIdentifiers = [
  * | XSL | `xsl` |
  * | YAML | `yaml` |
  */
-export interface TextDocumentItem {
+export type TextDocumentItem = {
   /**
    * The text document's URI.
    */
@@ -628,17 +636,17 @@ export interface TextDocumentItem {
    * The content of the opened text document.
    */
   text: string;
-}
+};
 
 /**
  * Text documents are identified using a URI. On the protocol level, URIs are passed as strings.
  */
-export interface TextDocumentIdentifier {
+export type TextDocumentIdentifier = {
   /**
    * The text document's URI.
    */
   uri: DocumentUri;
-}
+};
 
 /**
  * An identifier to denote a specific version of a text document. This information usually flows
@@ -681,7 +689,7 @@ export interface OptionalVersionedTextDocumentIdentifier extends TextDocumentIde
  * request for a text document. The client can for example honor or ignore the selection direction
  * to make LSP request consistent with features implemented internally.
  */
-export interface TextDocumentPositionParams {
+export type TextDocumentPositionParams = {
   /**
    * The text document.
    */
@@ -691,7 +699,7 @@ export interface TextDocumentPositionParams {
    * The position inside the text document.
    */
   position: Position;
-}
+};
 
 /* eslint-disable no-irregular-whitespace */
 /**
@@ -709,7 +717,7 @@ export interface TextDocumentPositionParams {
  * as optional.
  */
 /* eslint-enable no-irregular-whitespace */
-export interface DocumentFilter {
+export type DocumentFilter = {
   /**
    * A language id, like `typescript`.
    */
@@ -738,7 +746,7 @@ export interface DocumentFilter {
    */
   /* eslint-enable no-irregular-whitespace */
   pattern?: string;
-}
+};
 
 /**
  * A document selector is the combination of one or more document filters.
@@ -748,7 +756,7 @@ export type DocumentSelector = readonly DocumentFilter[];
 /**
  * A textual edit applicable to a text document.
  */
-export interface TextEdit {
+export type TextEdit = {
   /**
    * The range of the text document to be manipulated. To insert
    * text into a document create a range where start === end.
@@ -760,14 +768,14 @@ export interface TextEdit {
    * empty string.
    */
   newText: string;
-}
+};
 
 /**
  * Additional information that describes document changes.
  *
  * @since 3.16.0
  */
-export interface ChangeAnnotation {
+export type ChangeAnnotation = {
   /**
    * A human-readable string describing the actual change. The string
    * is rendered prominent in the user interface.
@@ -785,7 +793,7 @@ export interface ChangeAnnotation {
    * the user interface.
    */
   description?: string;
-}
+};
 
 /**
  * An identifier referring to a change annotation managed by a workspace
@@ -815,7 +823,7 @@ export interface AnnotatedTextEdit extends TextEdit {
  * {@link TextDocumentEdit} doesn’t need to sort the array of edits or do any kind of ordering.
  * However the edits must be non overlapping.
  */
-export interface TextDocumentEdit {
+export type TextDocumentEdit = {
   /**
    * The text document to change.
    */
@@ -828,20 +836,20 @@ export interface TextDocumentEdit {
    * client capability `workspace.workspaceEdit.changeAnnotationSupport`
    */
   edits: (TextEdit | AnnotatedTextEdit)[];
-}
+};
 
 /**
  * Represents a location inside a resource, such as a line inside a text file.
  */
-export interface Location {
+export type Location = {
   uri: DocumentUri;
   range: Range;
-}
+};
 
 /**
  * Represents a link between a source and a target location.
  */
-export interface LocationLink {
+export type LocationLink = {
   /**
    * Span of the origin of this link.
    *
@@ -869,13 +877,13 @@ export interface LocationLink {
    * `targetRange`. See also `DocumentSymbol#range`
    */
   targetSelectionRange: Range;
-}
+};
 
 /**
  * Represents a diagnostic, such as a compiler error or warning. Diagnostic objects are only valid
  * in the scope of a resource.
  */
-export interface Diagnostic {
+export type Diagnostic = {
   /**
    * The range at which the message applies.
    */
@@ -931,7 +939,7 @@ export interface Diagnostic {
    * @since 3.16.0
    */
   data?: unknown;
-}
+};
 
 /**
  * Diagnostic severities and tags supported by the protocol.
@@ -997,7 +1005,7 @@ export namespace DiagnosticTag {
  * This should be used to point to code locations that cause or are related to
  * a diagnostics, e.g when duplicating a symbol in a scope.
  */
-export interface DiagnosticRelatedInformation {
+export type DiagnosticRelatedInformation = {
   /**
    * The location of this related diagnostic information.
    */
@@ -1007,19 +1015,19 @@ export interface DiagnosticRelatedInformation {
    * The message of this related diagnostic information.
    */
   message: string;
-}
+};
 
 /**
  * Structure to capture a description for an error code.
  *
  * @since 3.16.0
  */
-export interface CodeDescription {
+export type CodeDescription = {
   /**
    * An URI to open with more information about the diagnostic error.
    */
   href: URI;
-}
+};
 
 /**
  * Represents a reference to a command. Provides a title which will be used to represent a command
@@ -1028,7 +1036,7 @@ export interface CodeDescription {
  * corresponding capabilities. Alternatively the tool extension code could handle the command. The
  * protocol currently doesn’t specify a set of well-known commands.
  */
-export interface Command {
+export type Command = {
   /**
    * Title of the command, like `save`.
    */
@@ -1044,7 +1052,7 @@ export interface Command {
    * invoked with.
    */
   arguments?: LSPAny[];
-}
+};
 
 /**
  * Describes the content type that a client supports in various result literals like `Hover`,
@@ -1101,7 +1109,7 @@ export namespace MarkupKind {
  * _Please Note_ that clients might sanitize the return markdown. A client could
  * decide to remove HTML from the markdown to avoid script execution.
  */
-export interface MarkupContent {
+export type MarkupContent = {
   /**
    * The type of the Markup
    */
@@ -1111,7 +1119,7 @@ export interface MarkupContent {
    * The content itself
    */
   value: string;
-}
+};
 
 /**
  * Client capabilities specific to the used markdown parser.
@@ -1125,7 +1133,7 @@ export interface MarkupContent {
  *
  * @since 3.16.0
  */
-export interface MarkdownClientCapabilities {
+export type MarkdownClientCapabilities = {
   /**
    * The name of the parser.
    */
@@ -1143,12 +1151,12 @@ export interface MarkdownClientCapabilities {
    * @since 3.17.0
    */
   allowedTags?: readonly string[];
-}
+};
 
 /**
  * Options to create a file.
  */
-export interface CreateFileOptions {
+export type CreateFileOptions = {
   /**
    * Overwrite existing file. Overwrite wins over `ignoreIfExists`
    */
@@ -1158,12 +1166,12 @@ export interface CreateFileOptions {
    * Ignore if exists.
    */
   ignoreIfExists?: boolean;
-}
+};
 
 /**
  * Create file operation
  */
-export interface CreateFile {
+export type CreateFile = {
   /**
    * A create
    */
@@ -1185,12 +1193,12 @@ export interface CreateFile {
    * @since 3.16.0
    */
   annotationId?: ChangeAnnotationIdentifier;
-}
+};
 
 /**
  * Rename file options
  */
-export interface RenameFileOptions {
+export type RenameFileOptions = {
   /**
    * Overwrite target if existing. Overwrite wins over `ignoreIfExists`
    */
@@ -1200,12 +1208,12 @@ export interface RenameFileOptions {
    * Ignores if target exists.
    */
   ignoreIfExists?: boolean;
-}
+};
 
 /**
  * Rename file operation
  */
-export interface RenameFile {
+export type RenameFile = {
   /**
    * A rename
    */
@@ -1232,12 +1240,12 @@ export interface RenameFile {
    * @since 3.16.0
    */
   annotationId?: ChangeAnnotationIdentifier;
-}
+};
 
 /**
  * Delete file options
  */
-export interface DeleteFileOptions {
+export type DeleteFileOptions = {
   /**
    * Delete the content recursively if a folder is denoted.
    */
@@ -1247,12 +1255,12 @@ export interface DeleteFileOptions {
    * Ignore the operation if the file doesn't exist.
    */
   ignoreIfNotExists?: boolean;
-}
+};
 
 /**
  * Delete file operation
  */
-export interface DeleteFile {
+export type DeleteFile = {
   /**
    * A delete
    */
@@ -1274,7 +1282,7 @@ export interface DeleteFile {
    * @since 3.16.0
    */
   annotationId?: ChangeAnnotationIdentifier;
-}
+};
 
 /**
  * A workspace edit represents changes to many resources managed in the workspace. The edit should
@@ -1289,7 +1297,7 @@ export interface DeleteFile {
  * file a.txt) will cause failure of the operation. How the client recovers from the failure is
  * described by the client capability: `workspace.workspaceEdit.failureHandling`
  */
-export interface WorkspaceEdit {
+export type WorkspaceEdit = {
   /**
    * Holds changes to existing resources.
    */
@@ -1325,7 +1333,7 @@ export interface WorkspaceEdit {
    * @since 3.16.0
    */
   changeAnnotations?: { [id: ChangeAnnotationIdentifier]: ChangeAnnotation };
-}
+};
 
 /**
  * The capabilities of a workspace edit has evolved over the time. Clients can describe their
@@ -1336,7 +1344,7 @@ export interface WorkspaceEdit {
  * - property path (optional): `workspace.workspaceEdit`
  * - property type: {@link WorkspaceEditClientCapabilities} defined as follows.
  */
-export interface WorkspaceEditClientCapabilities {
+export type WorkspaceEditClientCapabilities = {
   /**
    * The client supports versioned document changes in `WorkspaceEdit`s
    */
@@ -1382,7 +1390,7 @@ export interface WorkspaceEditClientCapabilities {
      */
     groupsOnLabel?: boolean;
   };
-}
+};
 
 /**
  * The kind of resource operations supported by the client.
@@ -1457,7 +1465,7 @@ export type WorkDoneProgressPayload =
 /**
  * The payload to be sent in a `$/progress` notification to start progress reporting.
  */
-export interface WorkDoneProgressBegin {
+export type WorkDoneProgressBegin = {
   kind: "begin";
 
   /**
@@ -1493,12 +1501,12 @@ export interface WorkDoneProgressBegin {
    * that are not following this rule. The value range is [0, 100]
    */
   percentage?: uinteger;
-}
+};
 
 /**
  * The payload to be sent in a `$/progress` notification to report progress is done.
  */
-export interface WorkDoneProgressReport {
+export type WorkDoneProgressReport = {
   kind: "report";
 
   /**
@@ -1528,12 +1536,12 @@ export interface WorkDoneProgressReport {
    * that are not following this rule. The value range is [0, 100]
    */
   percentage?: uinteger;
-}
+};
 
 /**
  * The payload to be sent in a `$/progress` notification to signal the end of a progress.
  */
-export interface WorkDoneProgressEnd {
+export type WorkDoneProgressEnd = {
   kind: "end";
 
   /**
@@ -1541,35 +1549,35 @@ export interface WorkDoneProgressEnd {
    * of the operation.
    */
   message?: string;
-}
+};
 
 /**
  * Work done progress params for the client.
  */
-export interface WorkDoneProgressParams {
+export type WorkDoneProgressParams = {
   /**
    * An optional token that a server can use to report work done progress.
    */
   workDoneToken?: ProgressToken;
-}
+};
 
 /**
  * Work done progress options.
  */
-export interface WorkDoneProgressOptions {
+export type WorkDoneProgressOptions = {
   workDoneProgress?: boolean;
-}
+};
 
 /**
  * A parameter literal used to pass a partial result token.
  */
-export interface PartialResultParams {
+export type PartialResultParams = {
   /**
    * An optional token that a server can use to report partial results (e.g.
    * streaming) to the client.
    */
   partialResultToken?: ProgressToken;
-}
+};
 
 /**
  * A TraceValue represents the level of verbosity with which the server systematically reports its
@@ -1669,7 +1677,7 @@ export interface InitializeParams extends WorkDoneProgressParams {
 /**
  * Text document specific client capabilities.
  */
-export interface TextDocumentClientCapabilities {
+export type TextDocumentClientCapabilities = {
   synchronization?: TextDocumentSyncClientCapabilities;
 
   /**
@@ -1846,23 +1854,23 @@ export interface TextDocumentClientCapabilities {
    * @since 3.17.0
    */
   diagnostic?: DiagnosticClientCapabilities;
-}
+};
 
 /**
  * Capabilities specific to the notebook document support.
  *
  * @since 3.17.0
  */
-export interface NotebookDocumentClientCapabilities {
+export type NotebookDocumentClientCapabilities = {
   /**
    * Capabilities specific to notebook document synchronization
    *
    * @since 3.17.0
    */
   synchronization: NotebookDocumentSyncClientCapabilities;
-}
+};
 
-interface ClientCapabilities {
+type ClientCapabilities = {
   /**
    * Workspace specific client capabilities.
    */
@@ -2109,12 +2117,12 @@ interface ClientCapabilities {
    * Experimental client capabilities.
    */
   experimental?: LSPAny;
-}
+};
 
 /**
  * Result of the `initialize` request.
  */
-export interface InitializeResult {
+export type InitializeResult = {
   /**
    * The capabilities the language server provides.
    */
@@ -2136,7 +2144,7 @@ export interface InitializeResult {
      */
     version?: string;
   };
-}
+};
 
 /**
  * Known error codes for an `InitializeErrorCodes`.
@@ -2160,7 +2168,7 @@ export namespace InitializeErrorCodes {
 /**
  * Error returned if the `initialize` request failed.
  */
-export interface InitializeError {
+export type InitializeError = {
   /**
    * Indicates whether the client execute the following retry logic:
    * (1) show the message provided by the ResponseError to the user
@@ -2168,12 +2176,12 @@ export interface InitializeError {
    * (3) if user selected retry the initialize method is sent again.
    */
   retry: boolean;
-}
+};
 
 /**
  * Server capabilities.
  */
-interface ServerCapabilities {
+type ServerCapabilities = {
   /**
    * The position encoding the server picked from the encodings offered
    * by the client via the client capability `general.positionEncodings`.
@@ -2444,7 +2452,7 @@ interface ServerCapabilities {
    * Experimental server capabilities.
    */
   experimental?: LSPAny;
-}
+};
 
 /**
  * Params of the `initialized` notification.
@@ -2454,7 +2462,7 @@ export interface InitializedParams {}
 /**
  * General parameters to register for a capability.
  */
-export interface Registration {
+export type Registration = {
   /**
    * The id used to register the request. The id can be used to deregister
    * the request again.
@@ -2470,41 +2478,41 @@ export interface Registration {
    * Options necessary for the registration.
    */
   registerOptions?: LSPAny;
-}
+};
 
 /**
  * Params of the `client/registerCapability` request.
  */
-export interface RegistrationParams {
+export type RegistrationParams = {
   registrations: readonly Registration[];
-}
+};
 
 /**
  * Static registration options to be returned in the initialize request.
  */
-export interface StaticRegistrationOptions {
+export type StaticRegistrationOptions = {
   /**
    * The id used to register the request. The id can be used to deregister
    * the request again. See also Registration#id.
    */
   id?: string;
-}
+};
 
 /**
  * General text document registration options.
  */
-export interface TextDocumentRegistrationOptions {
+export type TextDocumentRegistrationOptions = {
   /**
    * A document selector to identify the scope of the registration. If set to
    * null the document selector provided on the client side will be used.
    */
   documentSelector: DocumentSelector | null;
-}
+};
 
 /**
  * General parameters to unregister a capability.
  */
-export interface Unregistration {
+export type Unregistration = {
   /**
    * The id used to unregister the request or notification. Usually an id
    * provided during the register request.
@@ -2515,32 +2523,32 @@ export interface Unregistration {
    * The method / capability to unregister for.
    */
   method: string;
-}
+};
 
 /**
  * Params of the `client/unregisterCapability` request.
  */
-export interface UnregistrationParams {
+export type UnregistrationParams = {
   // This should correctly be named `unregistrations`. However changing this
   // is a breaking change and needs to wait until we deliver a 4.x version
   // of the specification.
   unregisterations: readonly Unregistration[];
-}
+};
 
 /**
  * Params of the `$/setTrace` request.
  */
-export interface SetTraceParams {
+export type SetTraceParams = {
   /**
    * The new value that should be assigned to the trace setting.
    */
   value: TraceValue;
-}
+};
 
 /**
  * Params of the `$/logTrace` request.
  */
-export interface LogTraceParams {
+export type LogTraceParams = {
   /**
    * The message to be logged.
    */
@@ -2550,7 +2558,7 @@ export interface LogTraceParams {
    * is set to `'verbose'`
    */
   verbose?: string;
-}
+};
 
 /*********************************
  * Text Document Synchronization *
@@ -2586,7 +2594,7 @@ export namespace TextDocumentSyncKind {
 /**
  * Text document sync options.
  */
-export interface TextDocumentSyncOptions {
+export type TextDocumentSyncOptions = {
   /**
    * Open and close notifications are sent to the server. If omitted open
    * close notification should not be sent.
@@ -2618,17 +2626,17 @@ export interface TextDocumentSyncOptions {
    * notification should not be sent.
    */
   save?: boolean | SaveOptions;
-}
+};
 
 /**
  * Params of the `textDocument/didOpen` notification.
  */
-export interface DidOpenTextDocumentParams {
+export type DidOpenTextDocumentParams = {
   /**
    * The document that was opened.
    */
   textDocument: TextDocumentItem;
-}
+};
 
 /**
  * Describe options to be used when registering for text document change events.
@@ -2644,7 +2652,7 @@ export interface TextDocumentChangeRegistrationOptions extends TextDocumentRegis
 /**
  * Params of the `textDocument/didChange` notification.
  */
-export interface DidChangeTextDocumentParams {
+export type DidChangeTextDocumentParams = {
   /**
    * The document that did change. The version number points
    * to the version after all provided content changes have
@@ -2668,7 +2676,7 @@ export interface DidChangeTextDocumentParams {
    *   in the order you receive them.
    */
   contentChanges: readonly TextDocumentContentChangeEvent[];
-}
+};
 
 /**
  * An event describing a change to a text document. If only a text is provided
@@ -2704,7 +2712,7 @@ export type TextDocumentContentChangeEvent =
  * Params of the `textDocument/willSave` notification and the `textDocument/willSaveWaitUntil`
  * request.
  */
-export interface WillSaveTextDocumentParams {
+export type WillSaveTextDocumentParams = {
   /**
    * The document that will be saved.
    */
@@ -2714,7 +2722,7 @@ export interface WillSaveTextDocumentParams {
    * The 'TextDocumentSaveReason'.
    */
   reason: TextDocumentSaveReason;
-}
+};
 
 /**
  * Represents reasons why a text document is saved.
@@ -2745,12 +2753,12 @@ export namespace TextDocumentSaveReason {
 /**
  * Save options.
  */
-export interface SaveOptions {
+export type SaveOptions = {
   /**
    * The client is supposed to include the content on save.
    */
   includeText?: boolean;
-}
+};
 
 /**
  * Text document save registration options.
@@ -2765,7 +2773,7 @@ export interface TextDocumentSaveRegistrationOptions extends TextDocumentRegistr
 /**
  * Params of the `document/didSave` notification.
  */
-export interface DidSaveTextDocumentParams {
+export type DidSaveTextDocumentParams = {
   /**
    * The document that was saved.
    */
@@ -2776,19 +2784,19 @@ export interface DidSaveTextDocumentParams {
    * when the save notification was requested.
    */
   text?: string;
-}
+};
 
 /**
  * Params of the `document/didClose` notification.
  */
-export interface DidCloseTextDocumentParams {
+export type DidCloseTextDocumentParams = {
   /**
    * The document that was closed.
    */
   textDocument: TextDocumentIdentifier;
-}
+};
 
-export interface TextDocumentSyncClientCapabilities {
+export type TextDocumentSyncClientCapabilities = {
   /**
    * Whether text document synchronization supports dynamic registration.
    */
@@ -2810,14 +2818,14 @@ export interface TextDocumentSyncClientCapabilities {
    * The client supports did save notifications.
    */
   didSave?: boolean;
-}
+};
 
 /**
  * A notebook document.
  *
  * @since 3.17.0
  */
-export interface NotebookDocument {
+export type NotebookDocument = {
   /**
    * The notebook document's URI.
    */
@@ -2844,7 +2852,7 @@ export interface NotebookDocument {
    * The cells of a notebook.
    */
   cells: readonly NotebookCell[];
-}
+};
 
 /**
  * A notebook cell.
@@ -2855,7 +2863,7 @@ export interface NotebookDocument {
  *
  * @since 3.17.0
  */
-export interface NotebookCell {
+export type NotebookCell = {
   /**
    * The cell's kind
    */
@@ -2877,7 +2885,7 @@ export interface NotebookCell {
    * if supported by the client.
    */
   executionSummary?: ExecutionSummary;
-}
+};
 
 /**
  * A notebook cell kind.
@@ -2906,7 +2914,7 @@ export namespace NotebookCellKind {
 /**
  * Notebook execution summary.
  */
-export interface ExecutionSummary {
+export type ExecutionSummary = {
   /**
    * A strict monotonically increasing value
    * indicating the execution order of a cell
@@ -2919,7 +2927,7 @@ export interface ExecutionSummary {
    * not if known by the client.
    */
   success?: boolean;
-}
+};
 
 /**
  * A notebook cell text document filter denotes a cell text
@@ -2927,7 +2935,7 @@ export interface ExecutionSummary {
  *
  * @since 3.17.0
  */
-export interface NotebookCellTextDocumentFilter {
+export type NotebookCellTextDocumentFilter = {
   /**
    * A filter that matches against the notebook
    * containing the notebook cell. If a string
@@ -2943,7 +2951,7 @@ export interface NotebookCellTextDocumentFilter {
    * notebook cell document. '*' matches every language.
    */
   language?: string;
-}
+};
 
 /**
  * A notebook document filter denotes a notebook document by
@@ -2988,7 +2996,7 @@ export type NotebookDocumentFilter =
  *
  * @since 3.17.0
  */
-export interface NotebookDocumentSyncClientCapabilities {
+export type NotebookDocumentSyncClientCapabilities = {
   /**
    * Whether implementation supports dynamic registration. If this is
    * set to `true` the client supports the new
@@ -3001,7 +3009,7 @@ export interface NotebookDocumentSyncClientCapabilities {
    * The client supports sending execution summary data per cell.
    */
   executionSummarySupport?: boolean;
-}
+};
 
 /**
  * Options specific to a notebook plus its cells
@@ -3018,7 +3026,7 @@ export interface NotebookDocumentSyncClientCapabilities {
  *
  * @since 3.17.0
  */
-export interface NotebookDocumentSyncOptions {
+export type NotebookDocumentSyncOptions = {
   /**
    * The notebooks to be synced
    */
@@ -3056,7 +3064,7 @@ export interface NotebookDocumentSyncOptions {
    * the server. Will only be honored if mode === `notebook`.
    */
   save?: boolean;
-}
+};
 
 /**
  * Registration options specific to a notebook.
@@ -3072,7 +3080,7 @@ export interface NotebookDocumentSyncRegistrationOptions
  *
  * @since 3.17.0
  */
-export interface DidOpenNotebookDocumentParams {
+export type DidOpenNotebookDocumentParams = {
   /**
    * The notebook document that got opened.
    */
@@ -3083,14 +3091,14 @@ export interface DidOpenNotebookDocumentParams {
    * of a notebook cell.
    */
   cellTextDocuments: TextDocumentItem[];
-}
+};
 
 /**
  * Params of the `notebookDocument/didChange` notification.
  *
  * @since 3.17.0
  */
-export interface DidChangeNotebookDocumentParams {
+export type DidChangeNotebookDocumentParams = {
   /**
    * The notebook document that did change. The version number points
    * to the version after all provided changes have been applied.
@@ -3111,14 +3119,14 @@ export interface DidChangeNotebookDocumentParams {
    *   you receive them.
    */
   change: NotebookDocumentChangeEvent;
-}
+};
 
 /**
  * A versioned notebook document identifier.
  *
  * @since 3.17.0
  */
-export interface VersionedNotebookDocumentIdentifier {
+export type VersionedNotebookDocumentIdentifier = {
   /**
    * The version number of this notebook document.
    */
@@ -3128,14 +3136,14 @@ export interface VersionedNotebookDocumentIdentifier {
    * The notebook document's URI.
    */
   uri: URI;
-}
+};
 
 /**
  * A change event for a notebook document.
  *
  * @since 3.17.0
  */
-export interface NotebookDocumentChangeEvent {
+export type NotebookDocumentChangeEvent = {
   /**
    * The changed meta data if any.
    */
@@ -3180,7 +3188,7 @@ export interface NotebookDocumentChangeEvent {
       changes: readonly TextDocumentContentChangeEvent[];
     }>;
   };
-}
+};
 
 /**
  * A change describing how to move a `NotebookCell`
@@ -3188,7 +3196,7 @@ export interface NotebookDocumentChangeEvent {
  *
  * @since 3.17.0
  */
-export interface NotebookCellArrayChange {
+export type NotebookCellArrayChange = {
   /**
    * The start offset of the cell that changed.
    */
@@ -3203,26 +3211,26 @@ export interface NotebookCellArrayChange {
    * The new cells, if any
    */
   cells?: readonly NotebookCell[];
-}
+};
 
 /**
  * Params of the `notebookDocument/didSave` notification.
  *
  * @since 3.17.0
  */
-export interface DidSaveNotebookDocumentParams {
+export type DidSaveNotebookDocumentParams = {
   /**
    * The notebook document that got saved.
    */
   notebookDocument: NotebookDocumentIdentifier;
-}
+};
 
 /**
  * Params of the `notebookDocument/didClose` notification.
  *
  * @since 3.17.0
  */
-export interface DidCloseNotebookDocumentParams {
+export type DidCloseNotebookDocumentParams = {
   /**
    * The notebook document that got closed.
    */
@@ -3233,24 +3241,24 @@ export interface DidCloseNotebookDocumentParams {
    * of a notebook cell that got closed.
    */
   cellTextDocuments: TextDocumentIdentifier[];
-}
+};
 
 /**
  * A literal to identify a notebook document in the client.
  *
  * @since 3.17.0
  */
-export interface NotebookDocumentIdentifier {
+export type NotebookDocumentIdentifier = {
   /**
    * The notebook document's URI.
    */
   uri: URI;
-}
+};
 
 /*********************
  * Language Features *
  *********************/
-export interface DeclarationClientCapabilities {
+export type DeclarationClientCapabilities = {
   /**
    * Whether declaration supports dynamic registration. If this is set to
    * `true` the client supports the new `DeclarationRegistrationOptions`
@@ -3262,7 +3270,7 @@ export interface DeclarationClientCapabilities {
    * The client supports additional metadata in the form of declaration links.
    */
   linkSupport?: boolean;
-}
+};
 
 export interface DeclarationOptions extends WorkDoneProgressOptions {}
 
@@ -3279,7 +3287,7 @@ export interface DeclarationParams
     WorkDoneProgressParams,
     PartialResultParams {}
 
-export interface DefinitionClientCapabilities {
+export type DefinitionClientCapabilities = {
   /**
    * Whether definition supports dynamic registration.
    */
@@ -3291,7 +3299,7 @@ export interface DefinitionClientCapabilities {
    * @since 3.14.0
    */
   linkSupport?: boolean;
-}
+};
 
 export interface DefinitionOptions extends WorkDoneProgressOptions {}
 
@@ -3307,7 +3315,7 @@ export interface DefinitionParams
     WorkDoneProgressParams,
     PartialResultParams {}
 
-export interface TypeDefinitionClientCapabilities {
+export type TypeDefinitionClientCapabilities = {
   /**
    * Whether implementation supports dynamic registration. If this is set to
    * `true` the client supports the new `TypeDefinitionRegistrationOptions`
@@ -3321,7 +3329,7 @@ export interface TypeDefinitionClientCapabilities {
    * @since 3.14.0
    */
   linkSupport?: boolean;
-}
+};
 
 export interface TypeDefinitionOptions extends WorkDoneProgressOptions {}
 
@@ -3338,7 +3346,7 @@ export interface TypeDefinitionParams
     WorkDoneProgressParams,
     PartialResultParams {}
 
-export interface ImplementationClientCapabilities {
+export type ImplementationClientCapabilities = {
   /**
    * Whether implementation supports dynamic registration. If this is set to
    * `true` the client supports the new `ImplementationRegistrationOptions`
@@ -3352,7 +3360,7 @@ export interface ImplementationClientCapabilities {
    * @since 3.14.0
    */
   linkSupport?: boolean;
-}
+};
 
 export interface ImplementationOptions extends WorkDoneProgressOptions {}
 
@@ -3369,12 +3377,12 @@ export interface ImplementationParams
     WorkDoneProgressParams,
     PartialResultParams {}
 
-export interface ReferenceClientCapabilities {
+export type ReferenceClientCapabilities = {
   /**
    * Whether references supports dynamic registration.
    */
   dynamicRegistration?: boolean;
-}
+};
 
 export interface ReferenceOptions extends WorkDoneProgressOptions {}
 
@@ -3392,14 +3400,14 @@ export interface ReferenceParams
   context: ReferenceContext;
 }
 
-export interface ReferenceContext {
+export type ReferenceContext = {
   /**
    * Include the declaration of the current symbol.
    */
   includeDeclaration: boolean;
-}
+};
 
-export interface CallHierarchyClientCapabilities {
+export type CallHierarchyClientCapabilities = {
   /**
    * Whether implementation supports dynamic registration. If this is set to
    * `true` the client supports the new `(TextDocumentRegistrationOptions &
@@ -3407,7 +3415,7 @@ export interface CallHierarchyClientCapabilities {
    * capability as well.
    */
   dynamicRegistration?: boolean;
-}
+};
 
 export interface CallHierarchyOptions extends WorkDoneProgressOptions {}
 
@@ -3423,7 +3431,7 @@ export interface CallHierarchyPrepareParams
   extends TextDocumentPositionParams,
     WorkDoneProgressParams {}
 
-export interface CallHierarchyItem {
+export type CallHierarchyItem = {
   /**
    * The name of this item.
    */
@@ -3467,7 +3475,7 @@ export interface CallHierarchyItem {
    * incoming calls or outgoing calls requests.
    */
   data?: unknown;
-}
+};
 
 /**
  * Params of the `callHierarchy/incomingCalls` request.
@@ -3478,7 +3486,7 @@ export interface CallHierarchyIncomingCallsParams
   item: CallHierarchyItem;
 }
 
-export interface CallHierarchyIncomingCall {
+export type CallHierarchyIncomingCall = {
   /**
    * The item that makes the call.
    */
@@ -3489,7 +3497,7 @@ export interface CallHierarchyIncomingCall {
    * denoted by [`this.from`](#CallHierarchyIncomingCall.from).
    */
   fromRanges: readonly Range[];
-}
+};
 
 /**
  * Params of the `callHierarchy/outgoingCalls` request.
@@ -3500,7 +3508,7 @@ export interface CallHierarchyOutgoingCallsParams
   item: CallHierarchyItem;
 }
 
-export interface CallHierarchyOutgoingCall {
+export type CallHierarchyOutgoingCall = {
   /**
    * The item that is called.
    */
@@ -3511,9 +3519,9 @@ export interface CallHierarchyOutgoingCall {
    * the caller, e.g the item passed to `callHierarchy/outgoingCalls` request.
    */
   fromRanges: readonly Range[];
-}
+};
 
-export interface TypeHierarchyClientCapabilities {
+export type TypeHierarchyClientCapabilities = {
   /**
    * Whether implementation supports dynamic registration. If this is set to
    * `true` the client supports the new `(TextDocumentRegistrationOptions &
@@ -3521,7 +3529,7 @@ export interface TypeHierarchyClientCapabilities {
    * capability as well.
    */
   dynamicRegistration?: boolean;
-}
+};
 
 export interface TypeHierarchyOptions extends WorkDoneProgressOptions {}
 
@@ -3537,7 +3545,7 @@ export interface TypeHierarchyPrepareParams
   extends TextDocumentPositionParams,
     WorkDoneProgressParams {}
 
-export interface TypeHierarchyItem {
+export type TypeHierarchyItem = {
   /**
    * The name of this item.
    */
@@ -3583,7 +3591,7 @@ export interface TypeHierarchyItem {
    * resolving supertypes and subtypes.
    */
   data?: LSPAny;
-}
+};
 
 /**
  * Params of the `typeHierarchy/supertypes` request.
@@ -3599,12 +3607,12 @@ export interface TypeHierarchySubtypesParams extends WorkDoneProgressParams, Par
   item: TypeHierarchyItem;
 }
 
-export interface DocumentHighlightClientCapabilities {
+export type DocumentHighlightClientCapabilities = {
   /**
    * Whether document highlight supports dynamic registration.
    */
   dynamicRegistration?: boolean;
-}
+};
 
 export interface DocumentHighlightOptions extends WorkDoneProgressOptions {}
 
@@ -3626,7 +3634,7 @@ export interface DocumentHighlightParams
  * the background color of its range.
  *
  */
-export interface DocumentHighlight {
+export type DocumentHighlight = {
   /**
    * The range this highlight applies to.
    */
@@ -3636,7 +3644,7 @@ export interface DocumentHighlight {
    * The highlight kind, default is DocumentHighlightKind.Text.
    */
   kind?: DocumentHighlightKind;
-}
+};
 
 /**
  * A document highlight kind.
@@ -3664,7 +3672,7 @@ export namespace DocumentHighlightKind {
   export const Write = 3;
 }
 
-export interface DocumentLinkClientCapabilities {
+export type DocumentLinkClientCapabilities = {
   /**
    * Whether document link supports dynamic registration.
    */
@@ -3676,7 +3684,7 @@ export interface DocumentLinkClientCapabilities {
    * @since 3.15.0
    */
   tooltipSupport?: boolean;
-}
+};
 
 export interface DocumentLinkOptions extends WorkDoneProgressOptions {
   /**
@@ -3703,7 +3711,7 @@ export interface DocumentLinkParams extends WorkDoneProgressParams, PartialResul
  * A document link is a range in a text document that links to an internal or
  * external resource, like another text document or a web site.
  */
-export interface DocumentLink {
+export type DocumentLink = {
   /**
    * The range this link applies to.
    */
@@ -3731,9 +3739,9 @@ export interface DocumentLink {
    * DocumentLinkRequest and a DocumentLinkResolveRequest.
    */
   data?: LSPAny;
-}
+};
 
-export interface HoverClientCapabilities {
+export type HoverClientCapabilities = {
   /**
    * Whether hover supports dynamic registration.
    */
@@ -3745,7 +3753,7 @@ export interface HoverClientCapabilities {
    * The order describes the preferred format of the client.
    */
   contentFormat?: MarkupKind[];
-}
+};
 
 export interface HoverOptions extends WorkDoneProgressOptions {}
 
@@ -3759,7 +3767,7 @@ export interface HoverParams extends TextDocumentPositionParams, WorkDoneProgres
 /**
  * The result of a hover request.
  */
-export interface Hover {
+export type Hover = {
   /**
    * The hover's content
    */
@@ -3770,7 +3778,7 @@ export interface Hover {
    * that is used to visualize a hover, e.g. by changing the background color.
    */
   range?: Range;
-}
+};
 
 /**
  * MarkedString can be used to render human readable text. It is either a
@@ -3791,12 +3799,12 @@ export interface Hover {
  */
 type MarkedString = string | { language: string; value: string };
 
-export interface CodeLensClientCapabilities {
+export type CodeLensClientCapabilities = {
   /**
    * Whether code lens supports dynamic registration.
    */
   dynamicRegistration?: boolean;
-}
+};
 
 export interface CodeLensOptions extends WorkDoneProgressOptions {
   /**
@@ -3827,7 +3835,7 @@ export interface CodeLensParams extends WorkDoneProgressParams, PartialResultPar
  * performance reasons the creation of a code lens and resolving should be done
  * in two stages.
  */
-export interface CodeLens {
+export type CodeLens = {
   /**
    * The range in which this code lens is valid. Should only span a single
    * line.
@@ -3844,9 +3852,9 @@ export interface CodeLens {
    * a code lens and a code lens resolve request.
    */
   data?: LSPAny;
-}
+};
 
-export interface CodeLensWorkspaceClientCapabilities {
+export type CodeLensWorkspaceClientCapabilities = {
   /**
    * Whether the client implementation supports a refresh request sent from the
    * server to the client.
@@ -3857,9 +3865,9 @@ export interface CodeLensWorkspaceClientCapabilities {
    * change that requires such a calculation.
    */
   refreshSupport?: boolean;
-}
+};
 
-export interface FoldingRangeClientCapabilities {
+export type FoldingRangeClientCapabilities = {
   /**
    * Whether implementation supports dynamic registration for folding range
    * providers. If this is set to `true` the client supports the new
@@ -3910,7 +3918,7 @@ export interface FoldingRangeClientCapabilities {
      */
     collapsedText?: boolean;
   };
-}
+};
 
 export interface FoldingRangeOptions extends WorkDoneProgressOptions {}
 
@@ -3963,7 +3971,7 @@ export namespace FoldingRangeKind {
  * than zero and smaller than the number of lines in the document. Clients
  * are free to ignore invalid ranges.
  */
-export interface FoldingRange {
+export type FoldingRange = {
   /**
    * The zero-based start line of the range to fold. The folded area starts
    * after the line's last character. To be valid, the end must be zero or
@@ -4006,9 +4014,9 @@ export interface FoldingRange {
    * @since 3.17.0 - proposed
    */
   collapsedText?: string;
-}
+};
 
-export interface SelectionRangeClientCapabilities {
+export type SelectionRangeClientCapabilities = {
   /**
    * Whether implementation supports dynamic registration for selection range
    * providers. If this is set to `true` the client supports the new
@@ -4016,7 +4024,7 @@ export interface SelectionRangeClientCapabilities {
    * server capability as well.
    */
   dynamicRegistration?: boolean;
-}
+};
 
 export interface SelectionRangeOptions extends WorkDoneProgressOptions {}
 
@@ -4040,7 +4048,7 @@ export interface SelectionRangeParams extends WorkDoneProgressParams, PartialRes
   positions: readonly Position[];
 }
 
-export interface SelectionRange {
+export type SelectionRange = {
   /**
    * The [range](#Range) of this selection range.
    */
@@ -4051,9 +4059,9 @@ export interface SelectionRange {
    * `parent.range` must contain `this.range`.
    */
   parent?: SelectionRange;
-}
+};
 
-export interface DocumentSymbolClientCapabilities {
+export type DocumentSymbolClientCapabilities = {
   /**
    * Whether document symbol supports dynamic registration.
    */
@@ -4103,7 +4111,7 @@ export interface DocumentSymbolClientCapabilities {
    * @since 3.16.0
    */
   labelSupport?: boolean;
-}
+};
 
 export interface DocumentSymbolOptions extends WorkDoneProgressOptions {
   /**
@@ -4189,7 +4197,7 @@ export namespace SymbolTag {
  * have two ranges: one that encloses its definition and one that points to its
  * most interesting range, e.g. the range of an identifier.
  */
-export interface DocumentSymbol {
+export type DocumentSymbol = {
   /**
    * The name of this symbol. Will be displayed in the user interface and
    * therefore must not be an empty string or a string only consisting of
@@ -4239,7 +4247,7 @@ export interface DocumentSymbol {
    * Children of this symbol, e.g. properties of a class.
    */
   children?: readonly DocumentSymbol[];
-}
+};
 
 /**
  * Represents information about programming constructs like variables, classes,
@@ -4247,7 +4255,7 @@ export interface DocumentSymbol {
  *
  * @deprecated use DocumentSymbol or WorkspaceSymbol instead.
  */
-export interface SymbolInformation {
+export type SymbolInformation = {
   /**
    * The name of this symbol.
    */
@@ -4292,7 +4300,7 @@ export interface SymbolInformation {
    * symbols.
    */
   containerName?: string;
-}
+};
 
 export enum SemanticTokenTypes {
   namespace = "namespace",
@@ -4346,7 +4354,7 @@ export namespace TokenFormat {
   export const Relative = "relative";
 }
 
-export interface SemanticTokensLegend {
+export type SemanticTokensLegend = {
   /**
    * The token types a server uses.
    */
@@ -4356,9 +4364,9 @@ export interface SemanticTokensLegend {
    * The token modifiers a server uses.
    */
   tokenModifiers: readonly string[];
-}
+};
 
-interface SemanticTokensClientCapabilities {
+type SemanticTokensClientCapabilities = {
   /**
    * Whether implementation supports dynamic registration. If this is set to
    * `true` the client supports the new `(TextDocumentRegistrationOptions &
@@ -4447,7 +4455,7 @@ interface SemanticTokensClientCapabilities {
    * @since 3.17.0
    */
   augmentsSyntaxTokens?: boolean;
-}
+};
 
 export interface SemanticTokensOptions extends WorkDoneProgressOptions {
   /**
@@ -4489,7 +4497,7 @@ export interface SemanticTokensParams extends WorkDoneProgressParams, PartialRes
   textDocument: TextDocumentIdentifier;
 }
 
-export interface SemanticTokens {
+export type SemanticTokens = {
   /**
    * An optional result id. If provided and clients support delta updating
    * the client will include the result id in the next semantic token request.
@@ -4502,11 +4510,11 @@ export interface SemanticTokens {
    * The actual tokens.
    */
   data: readonly uinteger[];
-}
+};
 
-export interface SemanticTokensPartialResult {
+export type SemanticTokensPartialResult = {
   data: readonly uinteger[];
-}
+};
 
 /**
  * Params of the `textDocument/semanticTokens/full/delta` request.
@@ -4524,16 +4532,16 @@ export interface SemanticTokensDeltaParams extends WorkDoneProgressParams, Parti
   previousResultId: string;
 }
 
-export interface SemanticTokensDelta {
+export type SemanticTokensDelta = {
   readonly resultId?: string;
   /**
    * The semantic token edits to transform a previous result into a new
    * result.
    */
   edits: readonly SemanticTokensEdit[];
-}
+};
 
-export interface SemanticTokensEdit {
+export type SemanticTokensEdit = {
   /**
    * The start offset of the edit.
    */
@@ -4548,11 +4556,11 @@ export interface SemanticTokensEdit {
    * The elements to insert.
    */
   data?: readonly uinteger[];
-}
+};
 
-export interface SemanticTokensDeltaPartialResult {
+export type SemanticTokensDeltaPartialResult = {
   edits: readonly SemanticTokensEdit[];
-}
+};
 
 /**
  * Params of the `textDocument/semanticTokens/range` request.
@@ -4569,7 +4577,7 @@ export interface SemanticTokensRangeParams extends WorkDoneProgressParams, Parti
   range: Range;
 }
 
-export interface SemanticTokensWorkspaceClientCapabilities {
+export type SemanticTokensWorkspaceClientCapabilities = {
   /**
    * Whether the client implementation supports a refresh request sent from
    * the server to the client.
@@ -4580,14 +4588,14 @@ export interface SemanticTokensWorkspaceClientCapabilities {
    * wide change that requires such a calculation.
    */
   refreshSupport?: boolean;
-}
+};
 
 /**
  * Inlay hint client capabilities.
  *
  * @since 3.17.0
  */
-export interface InlayHintClientCapabilities {
+export type InlayHintClientCapabilities = {
   /**
    * Whether inlay hints support dynamic registration.
    */
@@ -4603,7 +4611,7 @@ export interface InlayHintClientCapabilities {
      */
     properties: readonly string[];
   };
-}
+};
 
 /**
  * Inlay hint options used during static registration.
@@ -4650,7 +4658,7 @@ export interface InlayHintParams extends WorkDoneProgressParams {
  *
  * @since 3.17.0
  */
-export interface InlayHint {
+export type InlayHint = {
   /**
    * The position of this hint.
    *
@@ -4716,14 +4724,14 @@ export interface InlayHint {
    * a `textDocument/inlayHint` and a `inlayHint/resolve` request.
    */
   data?: LSPAny;
-}
+};
 
 /**
  * An inlay hint label part allows for interactive and composite labels of inlay hints.
  *
  * @since 3.17.0
  */
-export interface InlayHintLabelPart {
+export type InlayHintLabelPart = {
   /**
    * The value of this label part.
    */
@@ -4758,7 +4766,7 @@ export interface InlayHintLabelPart {
    * might resolve this property late using the resolve request.
    */
   command?: Command;
-}
+};
 
 /**
  * Inlay hint kind.
@@ -4789,7 +4797,7 @@ export namespace InlayHintKind {
  *
  * @since 3.17.0
  */
-export interface InlayHintWorkspaceClientCapabilities {
+export type InlayHintWorkspaceClientCapabilities = {
   /**
    * Whether the client implementation supports a refresh request sent from
    * the server to the client.
@@ -4800,20 +4808,20 @@ export interface InlayHintWorkspaceClientCapabilities {
    * change that requires such a calculation.
    */
   refreshSupport?: boolean;
-}
+};
 
 /**
  * Client capabilities specific to inline values.
  *
  * @since 3.17.0
  */
-export interface InlineValueClientCapabilities {
+export type InlineValueClientCapabilities = {
   /**
    * Whether implementation supports dynamic registration for inline
    * value providers.
    */
   dynamicRegistration?: boolean;
-}
+};
 
 /**
  * Inline value options used during static registration.
@@ -4858,7 +4866,7 @@ export interface InlineValueParams extends WorkDoneProgressParams {
 /**
  * @since 3.17.0
  */
-export interface InlineValueContext {
+export type InlineValueContext = {
   /**
    * The stack frame (as a DAP Id) where the execution has stopped.
    */
@@ -4870,14 +4878,14 @@ export interface InlineValueContext {
    * inline values are shown.
    */
   stoppedLocation: Range;
-}
+};
 
 /**
  * Provide inline value as text.
  *
  * @since 3.17.0
  */
-export interface InlineValueText {
+export type InlineValueText = {
   /**
    * The document range for which the inline value applies.
    */
@@ -4887,7 +4895,7 @@ export interface InlineValueText {
    * The text of the inline value.
    */
   text: string;
-}
+};
 
 /**
  * Provide inline value through a variable lookup.
@@ -4899,7 +4907,7 @@ export interface InlineValueText {
  *
  * @since 3.17.0
  */
-export interface InlineValueVariableLookup {
+export type InlineValueVariableLookup = {
   /**
    * The document range for which the inline value applies.
    * The range is used to extract the variable name from the underlying
@@ -4916,7 +4924,7 @@ export interface InlineValueVariableLookup {
    * How to perform the lookup.
    */
   caseSensitiveLookup: boolean;
-}
+};
 
 /**
  * Provide an inline value through an expression evaluation.
@@ -4928,7 +4936,7 @@ export interface InlineValueVariableLookup {
  *
  * @since 3.17.0
  */
-export interface InlineValueEvaluatableExpression {
+export type InlineValueEvaluatableExpression = {
   /**
    * The document range for which the inline value applies.
    * The range is used to extract the evaluatable expression from the
@@ -4940,7 +4948,7 @@ export interface InlineValueEvaluatableExpression {
    * If specified the expression overrides the extracted expression.
    */
   expression?: string;
-}
+};
 
 /**
  * Inline value information can be provided by different means:
@@ -4961,7 +4969,7 @@ export type InlineValue =
  *
  * @since 3.17.0
  */
-export interface InlineValueWorkspaceClientCapabilities {
+export type InlineValueWorkspaceClientCapabilities = {
   /**
    * Whether the client implementation supports a refresh request sent from
    * the server to the client.
@@ -4972,9 +4980,9 @@ export interface InlineValueWorkspaceClientCapabilities {
    * change that requires such a calculation.
    */
   refreshSupport?: boolean;
-}
+};
 
-interface MonikerClientCapabilities {
+type MonikerClientCapabilities = {
   /**
    * Whether implementation supports dynamic registration. If this is set to
    * `true` the client supports the new `(TextDocumentRegistrationOptions &
@@ -4982,7 +4990,7 @@ interface MonikerClientCapabilities {
    * capability as well.
    */
   dynamicRegistration?: boolean;
-}
+};
 
 export interface MonikerOptions extends WorkDoneProgressOptions {}
 
@@ -5049,7 +5057,7 @@ export enum MonikerKind {
 /**
  * Moniker definition to match LSIF 0.5 moniker definition.
  */
-export interface Moniker {
+export type Moniker = {
   /**
    * The scheme of the moniker. For example tsc or .Net
    */
@@ -5070,9 +5078,9 @@ export interface Moniker {
    * The moniker kind if known.
    */
   kind?: MonikerKind;
-}
+};
 
-export interface CompletionClientCapabilities {
+export type CompletionClientCapabilities = {
   /**
    * Whether completion supports dynamic registration.
    */
@@ -5218,7 +5226,7 @@ export interface CompletionClientCapabilities {
      */
     itemDefaults?: readonly string[];
   };
-}
+};
 
 /**
  * Completion options.
@@ -5328,7 +5336,7 @@ export namespace CompletionTriggerKind {
  * Contains additional information about the context in which a completion
  * request is triggered.
  */
-export interface CompletionContext {
+export type CompletionContext = {
   /**
    * How the completion was triggered.
    */
@@ -5340,13 +5348,13 @@ export interface CompletionContext {
    * `triggerKind !== CompletionTriggerKind.TriggerCharacter`
    */
   triggerCharacter?: string;
-}
+};
 
 /**
  * Represents a collection of [completion items](#CompletionItem) to be
  * presented in the editor.
  */
-export interface CompletionList {
+export type CompletionList = {
   /**
    * This list is not complete. Further typing should result in recomputing
    * this list.
@@ -5417,7 +5425,7 @@ export interface CompletionList {
    * The completion items.
    */
   items: readonly CompletionItem[];
-}
+};
 
 /**
  * Defines whether the insert text in a completion item should be interpreted as
@@ -5472,7 +5480,7 @@ export namespace CompletionItemTag {
  *
  * @since 3.16.0
  */
-export interface InsertReplaceEdit {
+export type InsertReplaceEdit = {
   /**
    * The string to be inserted.
    */
@@ -5487,7 +5495,7 @@ export interface InsertReplaceEdit {
    * The range if the replace is requested.
    */
   replace: Range;
-}
+};
 
 /**
  * How whitespace and indentation is handled during completion item insertion.
@@ -5528,7 +5536,7 @@ export namespace InsertTextMode {
  *
  * @since 3.17.0
  */
-export interface CompletionItemLabelDetails {
+export type CompletionItemLabelDetails = {
   /**
    * An optional string which is rendered less prominently directly after
    * {@link CompletionItem.label label}, without any spacing. Should be
@@ -5542,9 +5550,9 @@ export interface CompletionItemLabelDetails {
    * names or file path.
    */
   description?: string;
-}
+};
 
-export interface CompletionItem {
+export type CompletionItem = {
   /**
    * The label of this completion item.
    *
@@ -5724,7 +5732,7 @@ export interface CompletionItem {
    * a completion and a completion resolve request.
    */
   data?: LSPAny;
-}
+};
 
 /**
  * The kind of a completion entry.
@@ -5762,7 +5770,7 @@ export namespace CompletionItemKind {
   export const TypeParameter = 25;
 }
 
-export interface PublishDiagnosticsClientCapabilities {
+export type PublishDiagnosticsClientCapabilities = {
   /**
    * Whether the clients accepts diagnostics with related information.
    */
@@ -5804,12 +5812,12 @@ export interface PublishDiagnosticsClientCapabilities {
    * @since 3.16.0
    */
   dataSupport?: boolean;
-}
+};
 
 /**
  * Params of the `textDocument/publishDiagnostics` notification.
  */
-export interface PublishDiagnosticsParams {
+export type PublishDiagnosticsParams = {
   /**
    * The URI for which diagnostic information is reported.
    */
@@ -5827,14 +5835,14 @@ export interface PublishDiagnosticsParams {
    * An array of diagnostic information items.
    */
   diagnostics: Diagnostic[];
-}
+};
 
 /**
  * Client capabilities specific to diagnostic pull requests.
  *
  * @since 3.17.0
  */
-export interface DiagnosticClientCapabilities {
+export type DiagnosticClientCapabilities = {
   /**
    * Whether implementation supports dynamic registration. If this is set to
    * `true` the client supports the new
@@ -5848,7 +5856,7 @@ export interface DiagnosticClientCapabilities {
    * pulls.
    */
   relatedDocumentSupport?: boolean;
-}
+};
 
 /**
  * Diagnostic options.
@@ -5953,7 +5961,7 @@ export namespace DocumentDiagnosticReportKind {
  *
  * @since 3.17.0
  */
-export interface FullDocumentDiagnosticReport {
+export type FullDocumentDiagnosticReport = {
   /**
    * A full document diagnostic report.
    */
@@ -5970,7 +5978,7 @@ export interface FullDocumentDiagnosticReport {
    * The actual items.
    */
   items: readonly Diagnostic[];
-}
+};
 
 /**
  * A diagnostic report indicating that the last returned
@@ -5978,7 +5986,7 @@ export interface FullDocumentDiagnosticReport {
  *
  * @since 3.17.0
  */
-export interface UnchangedDocumentDiagnosticReport {
+export type UnchangedDocumentDiagnosticReport = {
   /**
    * A document diagnostic report indicating
    * no changes to the last result. A server can
@@ -5992,7 +6000,7 @@ export interface UnchangedDocumentDiagnosticReport {
    * diagnostic request for the same document.
    */
   resultId: string;
-}
+};
 
 /**
  * A full diagnostic report with a set of related documents.
@@ -6040,20 +6048,20 @@ export interface RelatedUnchangedDocumentDiagnosticReport
  *
  * @since 3.17.0
  */
-export interface DocumentDiagnosticReportPartialResult {
+export type DocumentDiagnosticReportPartialResult = {
   relatedDocuments: {
     [uri: DocumentUri]: FullDocumentDiagnosticReport | UnchangedDocumentDiagnosticReport;
   };
-}
+};
 
 /**
  * Cancellation data returned from a diagnostic request.
  *
  * @since 3.17.0
  */
-export interface DiagnosticServerCancellationData {
+export type DiagnosticServerCancellationData = {
   retriggerRequest: boolean;
-}
+};
 
 /**
  * Params of the `workspace/diagnostic` request.
@@ -6078,7 +6086,7 @@ export interface WorkspaceDiagnosticParams extends WorkDoneProgressParams, Parti
  *
  * @since 3.17.0
  */
-export interface PreviousResultId {
+export type PreviousResultId = {
   /**
    * The URI for which the client knows a
    * result id.
@@ -6089,16 +6097,16 @@ export interface PreviousResultId {
    * The value of the previous result id.
    */
   value: string;
-}
+};
 
 /**
  * A workspace diagnostic report.
  *
  * @since 3.17.0
  */
-export interface WorkspaceDiagnosticReport {
+export type WorkspaceDiagnosticReport = {
   items: readonly WorkspaceDocumentDiagnosticReport[];
-}
+};
 
 /**
  * A full document diagnostic report for a workspace diagnostic result.
@@ -6151,16 +6159,16 @@ export type WorkspaceDocumentDiagnosticReport =
  *
  * @since 3.17.0
  */
-export interface WorkspaceDiagnosticReportPartialResult {
+export type WorkspaceDiagnosticReportPartialResult = {
   items: readonly WorkspaceDocumentDiagnosticReport[];
-}
+};
 
 /**
  * Workspace client capabilities specific to diagnostic pull requests.
  *
  * @since 3.17.0
  */
-export interface DiagnosticWorkspaceClientCapabilities {
+export type DiagnosticWorkspaceClientCapabilities = {
   /**
    * Whether the client implementation supports a refresh request sent from
    * the server to the client.
@@ -6171,9 +6179,9 @@ export interface DiagnosticWorkspaceClientCapabilities {
    * wide change that requires such a calculation.
    */
   refreshSupport?: boolean;
-}
+};
 
-export interface SignatureHelpClientCapabilities {
+export type SignatureHelpClientCapabilities = {
   /**
    * Whether signature help supports dynamic registration.
    */
@@ -6221,7 +6229,7 @@ export interface SignatureHelpClientCapabilities {
    * @since 3.15.0
    */
   contextSupport?: boolean;
-}
+};
 
 export interface SignatureHelpOptions extends WorkDoneProgressOptions {
   /**
@@ -6292,7 +6300,7 @@ export namespace SignatureHelpTriggerKind {
  *
  * @since 3.15.0
  */
-export interface SignatureHelpContext {
+export type SignatureHelpContext = {
   /**
    * Action that caused signature help to be triggered.
    */
@@ -6322,13 +6330,13 @@ export interface SignatureHelpContext {
    * updated based on the user navigating through available signatures.
    */
   activeSignatureHelp?: SignatureHelp;
-}
+};
 
 /**
  * Signature help represents the signature of something callable. There can be multiple signature
  * but only one active and only one active parameter.
  */
-export interface SignatureHelp {
+export type SignatureHelp = {
   /**
    * One or more signatures. If no signatures are available the signature help
    * request should return `null`.
@@ -6358,14 +6366,14 @@ export interface SignatureHelp {
    * active signature does have any.
    */
   activeParameter?: uinteger;
-}
+};
 
 /**
  * Represents the signature of something callable. A signature
  * can have a label, like a function-name, a doc-comment, and
  * a set of parameters.
  */
-export interface SignatureInformation {
+export type SignatureInformation = {
   /**
    * The label of this signature. Will be shown in
    * the UI.
@@ -6391,13 +6399,13 @@ export interface SignatureInformation {
    * @since 3.16.0
    */
   activeParameter?: uinteger;
-}
+};
 
 /**
  * Represents a parameter of a callable-signature. A parameter can
  * have a label and a doc-comment.
  */
-export interface ParameterInformation {
+export type ParameterInformation = {
   /**
    * The label of this parameter information.
    *
@@ -6417,9 +6425,9 @@ export interface ParameterInformation {
    * in the UI but can be omitted.
    */
   documentation?: string | MarkupContent;
-}
+};
 
-export interface CodeActionClientCapabilities {
+export type CodeActionClientCapabilities = {
   /**
    * Whether code action supports dynamic registration.
    */
@@ -6493,7 +6501,7 @@ export interface CodeActionClientCapabilities {
    * @since 3.16.0
    */
   honorsChangeAnnotations?: boolean;
-}
+};
 
 export interface CodeActionOptions extends WorkDoneProgressOptions {
   /**
@@ -6635,7 +6643,7 @@ export namespace CodeActionKind {
  * Contains additional diagnostic information about the context in which
  * a code action is run.
  */
-export interface CodeActionContext {
+export type CodeActionContext = {
   /**
    * An array of diagnostics known on the client side overlapping the range
    * provided to the `textDocument/codeAction` request. They are provided so
@@ -6660,7 +6668,7 @@ export interface CodeActionContext {
    * @since 3.17.0
    */
   triggerKind?: CodeActionTriggerKind;
-}
+};
 
 /**
  * The reason why code actions were requested.
@@ -6697,7 +6705,7 @@ export namespace CodeActionTriggerKind {
  * A CodeAction must set either `edit` and/or a `command`. If both are supplied,
  * the `edit` is applied first, then the `command` is executed.
  */
-export interface CodeAction {
+export type CodeAction = {
   /**
    * A short, human-readable, title for this code action.
    */
@@ -6775,14 +6783,14 @@ export interface CodeAction {
    * @since 3.16.0
    */
   data?: LSPAny;
-}
+};
 
-export interface DocumentColorClientCapabilities {
+export type DocumentColorClientCapabilities = {
   /**
    * Whether document color supports dynamic registration.
    */
   dynamicRegistration?: boolean;
-}
+};
 
 export interface DocumentColorOptions extends WorkDoneProgressOptions {}
 
@@ -6801,7 +6809,7 @@ export interface DocumentColorParams extends WorkDoneProgressParams, PartialResu
   textDocument: TextDocumentIdentifier;
 }
 
-export interface ColorInformation {
+export type ColorInformation = {
   /**
    * The range in the document where this color appears.
    */
@@ -6811,12 +6819,12 @@ export interface ColorInformation {
    * The actual color value for this color range.
    */
   color: Color;
-}
+};
 
 /**
  * Represents a color in RGBA space.
  */
-export interface Color {
+export type Color = {
   /**
    * The red component of this color in the range [0-1].
    */
@@ -6836,7 +6844,7 @@ export interface Color {
    * The alpha component of this color in the range [0-1].
    */
   readonly alpha: decimal;
-}
+};
 
 /**
  * Params of the `textDocument/colorPresentation` request.
@@ -6858,7 +6866,7 @@ export interface ColorPresentationParams extends WorkDoneProgressParams, Partial
   range: Range;
 }
 
-export interface ColorPresentation {
+export type ColorPresentation = {
   /**
    * The label of this color presentation. It will be shown on the color
    * picker header. By default this is also the text that is inserted when
@@ -6877,14 +6885,14 @@ export interface ColorPresentation {
    * main [edit](#ColorPresentation.textEdit) nor with themselves.
    */
   additionalTextEdits?: readonly TextEdit[];
-}
+};
 
-export interface DocumentFormattingClientCapabilities {
+export type DocumentFormattingClientCapabilities = {
   /**
    * Whether formatting supports dynamic registration.
    */
   dynamicRegistration?: boolean;
-}
+};
 
 export interface DocumentFormattingOptions extends WorkDoneProgressOptions {}
 
@@ -6910,7 +6918,7 @@ export interface DocumentFormattingParams extends WorkDoneProgressParams {
 /**
  * Value-object describing what options formatting should use.
  */
-export interface FormattingOptions {
+export type FormattingOptions = {
   /**
    * Size of a tab in spaces.
    */
@@ -6949,14 +6957,14 @@ export interface FormattingOptions {
    * Signature for further properties.
    */
   [key: string]: boolean | integer | string;
-}
+};
 
-export interface DocumentRangeFormattingClientCapabilities {
+export type DocumentRangeFormattingClientCapabilities = {
   /**
    * Whether formatting supports dynamic registration.
    */
   dynamicRegistration?: boolean;
-}
+};
 
 export interface DocumentRangeFormattingOptions extends WorkDoneProgressOptions {}
 
@@ -6984,14 +6992,14 @@ export interface DocumentRangeFormattingParams extends WorkDoneProgressParams {
   options: FormattingOptions;
 }
 
-export interface DocumentOnTypeFormattingClientCapabilities {
+export type DocumentOnTypeFormattingClientCapabilities = {
   /**
    * Whether on type formatting supports dynamic registration.
    */
   dynamicRegistration?: boolean;
-}
+};
 
-export interface DocumentOnTypeFormattingOptions {
+export type DocumentOnTypeFormattingOptions = {
   /**
    * A character on which formatting should be triggered, like `{`.
    */
@@ -7001,7 +7009,7 @@ export interface DocumentOnTypeFormattingOptions {
    * More trigger characters.
    */
   moreTriggerCharacter?: readonly string[];
-}
+};
 
 export interface DocumentOnTypeFormattingRegistrationOptions
   extends TextDocumentRegistrationOptions,
@@ -7010,7 +7018,7 @@ export interface DocumentOnTypeFormattingRegistrationOptions
 /**
  * Params of the `textDocument/onTypeFormatting` request.
  */
-export interface DocumentOnTypeFormattingParams {
+export type DocumentOnTypeFormattingParams = {
   /**
    * The document to format.
    */
@@ -7035,7 +7043,7 @@ export interface DocumentOnTypeFormattingParams {
    * The formatting options.
    */
   options: FormattingOptions;
-}
+};
 
 export type PrepareSupportDefaultBehavior =
   (typeof PrepareSupportDefaultBehavior)[keyof typeof PrepareSupportDefaultBehavior];
@@ -7048,7 +7056,7 @@ export namespace PrepareSupportDefaultBehavior {
   export const Identifier = 1;
 }
 
-export interface RenameClientCapabilities {
+export type RenameClientCapabilities = {
   /**
    * Whether rename supports dynamic registration.
    */
@@ -7083,7 +7091,7 @@ export interface RenameClientCapabilities {
    * @since 3.16.0
    */
   honorsChangeAnnotations?: boolean;
-}
+};
 
 export interface RenameOptions extends WorkDoneProgressOptions {
   /**
@@ -7118,7 +7126,7 @@ export interface LinkedEditingRangeRegistrationOptions
     LinkedEditingRangeOptions,
     StaticRegistrationOptions {}
 
-export interface LinkedEditingRangeClientCapabilities {
+export type LinkedEditingRangeClientCapabilities = {
   /**
    * Whether the implementation supports dynamic registration.
    * If this is set to `true` the client supports the new
@@ -7126,7 +7134,7 @@ export interface LinkedEditingRangeClientCapabilities {
    * return value for the corresponding server capability as well.
    */
   dynamicRegistration?: boolean;
-}
+};
 
 /**
  * Params of the `textDocument/linkedEditingRange` request.
@@ -7135,7 +7143,7 @@ export interface LinkedEditingRangeParams
   extends TextDocumentPositionParams,
     WorkDoneProgressParams {}
 
-export interface LinkedEditingRanges {
+export type LinkedEditingRanges = {
   /**
    * A list of ranges that can be renamed together. The ranges must have
    * identical length and contain identical text content. The ranges cannot
@@ -7149,7 +7157,7 @@ export interface LinkedEditingRanges {
    * configuration's word pattern will be used.
    */
   wordPattern?: string;
-}
+};
 
 /**********************
  * Workspace Features *
@@ -7157,7 +7165,7 @@ export interface LinkedEditingRanges {
 /**
  * Workspace symbol client capabilities.
  */
-export interface WorkspaceSymbolClientCapabilities {
+export type WorkspaceSymbolClientCapabilities = {
   /**
    * Symbol request supports dynamic registration.
    */
@@ -7208,7 +7216,7 @@ export interface WorkspaceSymbolClientCapabilities {
      */
     properties: readonly string[];
   };
-}
+};
 
 export interface WorkspaceSymbolOptions extends WorkDoneProgressOptions {
   /**
@@ -7238,7 +7246,7 @@ export interface WorkspaceSymbolParams extends WorkDoneProgressParams, PartialRe
  *
  * @since 3.17.0
  */
-export interface WorkspaceSymbol {
+export type WorkspaceSymbol = {
   /**
    * The name of this symbol.
    */
@@ -7276,16 +7284,16 @@ export interface WorkspaceSymbol {
    * workspace symbol request and a workspace symbol resolve request.
    */
   data?: LSPAny;
-}
+};
 
 /**
  * Params of the `workspace/configuration` request.
  */
-export interface ConfigurationParams {
+export type ConfigurationParams = {
   items: readonly ConfigurationItem[];
-}
+};
 
-export interface ConfigurationItem {
+export type ConfigurationItem = {
   /**
    * The scope to get the configuration section for.
    */
@@ -7295,26 +7303,26 @@ export interface ConfigurationItem {
    * The configuration section asked for.
    */
   section?: string;
-}
+};
 
-export interface DidChangeConfigurationClientCapabilities {
+export type DidChangeConfigurationClientCapabilities = {
   /**
    * Did change configuration notification supports dynamic registration.
    */
   dynamicRegistration?: boolean;
-}
+};
 
 /**
  * Params of the `workspace/didChangeConfiguration` notification.
  */
-export interface DidChangeConfigurationParams {
+export type DidChangeConfigurationParams = {
   /**
    * The actual changed settings
    */
   settings: LSPAny;
-}
+};
 
-export interface WorkspaceFoldersServerCapabilities {
+export type WorkspaceFoldersServerCapabilities = {
   /**
    * The server has support for workspace folders
    */
@@ -7330,9 +7338,9 @@ export interface WorkspaceFoldersServerCapabilities {
    * using the `client/unregisterCapability` request.
    */
   changeNotifications?: string | boolean;
-}
+};
 
-export interface WorkspaceFolder {
+export type WorkspaceFolder = {
   /**
    * The associated URI for this workspace folder.
    */
@@ -7343,22 +7351,22 @@ export interface WorkspaceFolder {
    * workspace folder in the user interface.
    */
   name: string;
-}
+};
 
 /**
  * Params of the `workspace/didChangeWorkspaceFolders` notification.
  */
-export interface DidChangeWorkspaceFoldersParams {
+export type DidChangeWorkspaceFoldersParams = {
   /**
    * The actual workspace folder change event.
    */
   event: WorkspaceFoldersChangeEvent;
-}
+};
 
 /**
  * The workspace folder change event.
  */
-export interface WorkspaceFoldersChangeEvent {
+export type WorkspaceFoldersChangeEvent = {
   /**
    * The array of added workspace folders
    */
@@ -7368,19 +7376,19 @@ export interface WorkspaceFoldersChangeEvent {
    * The array of the removed workspace folders
    */
   removed: readonly WorkspaceFolder[];
-}
+};
 
 /**
  * The options to register for file operations.
  *
  * @since 3.16.0
  */
-export interface FileOperationRegistrationOptions {
+export type FileOperationRegistrationOptions = {
   /**
    * The actual filters.
    */
   filters: readonly FileOperationFilter[];
-}
+};
 
 /**
  * A pattern kind describing if a glob pattern matches a file a folder or both.
@@ -7412,12 +7420,12 @@ export namespace FileOperationPatternKind {
  *
  * @since 3.16.0
  */
-export interface FileOperationPatternOptions {
+export type FileOperationPatternOptions = {
   /**
    * The pattern should be matched ignoring casing.
    */
   ignoreCase?: boolean;
-}
+};
 
 /**
  * A pattern to describe in which file operation requests or notifications
@@ -7425,7 +7433,7 @@ export interface FileOperationPatternOptions {
  *
  * @since 3.16.0
  */
-export interface FileOperationPattern {
+export type FileOperationPattern = {
   /* eslint-disable no-irregular-whitespace */
   /**
    * The glob pattern to match. Glob patterns can have the following syntax:
@@ -7454,7 +7462,7 @@ export interface FileOperationPattern {
    * Additional options used during matching.
    */
   options?: FileOperationPatternOptions;
-}
+};
 
 /**
  * A filter to describe in which file operation requests or notifications
@@ -7462,7 +7470,7 @@ export interface FileOperationPattern {
  *
  * @since 3.16.0
  */
-export interface FileOperationFilter {
+export type FileOperationFilter = {
   /**
    * A Uri like `file` or `untitled`.
    */
@@ -7472,51 +7480,51 @@ export interface FileOperationFilter {
    * The actual file operation pattern.
    */
   pattern: FileOperationPattern;
-}
+};
 
 /**
  * The parameters sent in notifications/requests for user-initiated creation of files.
  *
  * @since 3.16.0
  */
-export interface CreateFilesParams {
+export type CreateFilesParams = {
   /**
    * An array of all files/folders created in this operation.
    */
   files: readonly FileCreate[];
-}
+};
 
 /**
  * Represents information on a file/folder create.
  *
  * @since 3.16.0
  */
-export interface FileCreate {
+export type FileCreate = {
   /**
    * A file:// URI for the location of the file/folder being created.
    */
   uri: string;
-}
+};
 
 /**
  * The parameters sent in notifications/requests for user-initiated renames of files.
  *
  * @since 3.16.0
  */
-export interface RenameFilesParams {
+export type RenameFilesParams = {
   /**
    * An array of all files/folders renamed in this operation. When a folder
    * is renamed, only the folder will be included, and not its children.
    */
   files: readonly FileRename[];
-}
+};
 
 /**
  * Represents information on a file/folder rename.
  *
  * @since 3.16.0
  */
-export interface FileRename {
+export type FileRename = {
   /**
    * A file:// URI for the original location of the file/folder being renamed.
    */
@@ -7526,33 +7534,33 @@ export interface FileRename {
    * A file:// URI for the new location of the file/folder being renamed.
    */
   newUri: string;
-}
+};
 
 /**
  * The parameters sent in notifications/requests for user-initiated deletes of files.
  *
  * @since 3.16.0
  */
-export interface DeleteFilesParams {
+export type DeleteFilesParams = {
   /**
    * An array of all files/folders deleted in this operation.
    */
   files: readonly FileDelete[];
-}
+};
 
 /**
  * Represents information on a file/folder delete.
  *
  * @since 3.16.0
  */
-export interface FileDelete {
+export type FileDelete = {
   /**
    * A file:// URI for the location of the file/folder being deleted.
    */
   uri: string;
-}
+};
 
-export interface DidChangeWatchedFilesClientCapabilities {
+export type DidChangeWatchedFilesClientCapabilities = {
   /**
    * Did change watched files notification supports dynamic registration.
    * Please note that the current protocol doesn't support static
@@ -7567,17 +7575,17 @@ export interface DidChangeWatchedFilesClientCapabilities {
    * @since 3.17.0
    */
   relativePatternSupport?: boolean;
-}
+};
 
 /**
  * Describe options to be used when registering for file system change events.
  */
-export interface DidChangeWatchedFilesRegistrationOptions {
+export type DidChangeWatchedFilesRegistrationOptions = {
   /**
    * The watchers to register.
    */
   watchers: readonly FileSystemWatcher[];
-}
+};
 
 /* eslint-disable no-irregular-whitespace */
 /**
@@ -7606,7 +7614,7 @@ export type Pattern = string;
  *
  * @since 3.17.0
  */
-export interface RelativePattern {
+export type RelativePattern = {
   /**
    * A workspace folder or a base URI to which this pattern will be matched
    * against relatively.
@@ -7617,7 +7625,7 @@ export interface RelativePattern {
    * The actual glob pattern;
    */
   pattern: Pattern;
-}
+};
 
 /**
  * The glob pattern. Either a string pattern or a relative pattern.
@@ -7626,7 +7634,7 @@ export interface RelativePattern {
  */
 export type GlobPattern = Pattern | RelativePattern;
 
-export interface FileSystemWatcher {
+export type FileSystemWatcher = {
   /**
    * The glob pattern to watch. See {@link GlobPattern glob pattern}
    * for more detail.
@@ -7641,7 +7649,7 @@ export interface FileSystemWatcher {
    * which is 7.
    */
   kind?: WatchKind;
-}
+};
 
 export type WatchKind = (typeof WatchKind)[keyof typeof WatchKind];
 // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -7665,17 +7673,17 @@ export namespace WatchKind {
 /**
  * Params of the `workspace/didChangeWatchedFiles` notification.
  */
-export interface DidChangeWatchedFilesParams {
+export type DidChangeWatchedFilesParams = {
   /**
    * The actual file events.
    */
   changes: readonly FileEvent[];
-}
+};
 
 /**
  * An event describing a file change.
  */
-interface FileEvent {
+type FileEvent = {
   /**
    * The file's URI.
    */
@@ -7684,7 +7692,7 @@ interface FileEvent {
    * The change type.
    */
   type: FileChangeType;
-}
+};
 
 /**
  * The file event type.
@@ -7709,12 +7717,12 @@ export namespace FileChangeType {
   export const Deleted = 3;
 }
 
-export interface ExecuteCommandClientCapabilities {
+export type ExecuteCommandClientCapabilities = {
   /**
    * Execute command supports dynamic registration.
    */
   dynamicRegistration?: boolean;
-}
+};
 export interface ExecuteCommandOptions extends WorkDoneProgressOptions {
   /**
    * The commands to be executed on the server
@@ -7744,7 +7752,7 @@ export interface ExecuteCommandParams extends WorkDoneProgressParams {
 /**
  * Params of the `workspace/applyEdit` request.
  */
-export interface ApplyWorkspaceEditParams {
+export type ApplyWorkspaceEditParams = {
   /**
    * An optional label of the workspace edit. This label is
    * presented in the user interface for example on an undo
@@ -7756,12 +7764,12 @@ export interface ApplyWorkspaceEditParams {
    * The edits to apply.
    */
   edit: WorkspaceEdit;
-}
+};
 
 /**
  * Result of the `workspace/applyEdit` request.
  */
-export interface ApplyWorkspaceEditResult {
+export type ApplyWorkspaceEditResult = {
   /**
    * Indicates whether the edit was applied or not.
    */
@@ -7781,7 +7789,7 @@ export interface ApplyWorkspaceEditResult {
    * in its client capabilities.
    */
   failedChange?: uinteger;
-}
+};
 
 /*******************
  * Window Features *
@@ -7789,7 +7797,7 @@ export interface ApplyWorkspaceEditResult {
 /**
  * Params of the `window/showMessage` notification.
  */
-export interface ShowMessageParams {
+export type ShowMessageParams = {
   /**
    * The message type. See {@link MessageType}.
    */
@@ -7799,7 +7807,7 @@ export interface ShowMessageParams {
    * The actual message.
    */
   message: string;
-}
+};
 
 /**
  * Message type of the `window/showMessage`, `window/showMessageRequest` and `window/logMessage`
@@ -7840,7 +7848,7 @@ export namespace MessageType {
 /**
  * Show message request client capabilities
  */
-export interface ShowMessageRequestClientCapabilities {
+export type ShowMessageRequestClientCapabilities = {
   /**
    * Capabilities specific to the `MessageActionItem` type.
    */
@@ -7852,12 +7860,12 @@ export interface ShowMessageRequestClientCapabilities {
      */
     additionalPropertiesSupport?: boolean;
   };
-}
+};
 
 /**
  * Params of the `window/showMessageRequest` request.
  */
-export interface ShowMessageRequestParams {
+export type ShowMessageRequestParams = {
   /**
    * The message type. See {@link MessageType}.
    */
@@ -7872,34 +7880,34 @@ export interface ShowMessageRequestParams {
    * The message action items to present.
    */
   actions?: readonly MessageActionItem[];
-}
+};
 
-interface MessageActionItem {
+type MessageActionItem = {
   /**
    * A short title like 'Retry', 'Open Log' etc.
    */
   title: string;
-}
+};
 
 /**
  * Client capabilities for the show document request.
  *
  * @since 3.16.0
  */
-export interface ShowDocumentClientCapabilities {
+export type ShowDocumentClientCapabilities = {
   /**
    * The client has support for the show document
    * request.
    */
   support: boolean;
-}
+};
 
 /**
  * Params of the `window/showDocument` request.
  *
  * @since 3.16.0
  */
-export interface ShowDocumentParams {
+export type ShowDocumentParams = {
   /**
    * The uri to show.
    */
@@ -7927,24 +7935,24 @@ export interface ShowDocumentParams {
    * file.
    */
   selection?: Range;
-}
+};
 
 /**
  * Result of the `window/showDocument` request.
  *
  * @since 3.16.0
  */
-export interface ShowDocumentResult {
+export type ShowDocumentResult = {
   /**
    * A boolean indicating if the show was successful.
    */
   success: boolean;
-}
+};
 
 /**
  * Params of the `window/logMessage` notification.
  */
-export interface LogMessageParams {
+export type LogMessageParams = {
   /**
    * The message type. See {@link MessageType}.
    */
@@ -7954,24 +7962,24 @@ export interface LogMessageParams {
    * The actual message
    */
   message: string;
-}
+};
 
 /**
  * Params of the `window/workDoneProgress/create` request.
  */
-export interface WorkDoneProgressCreateParams {
+export type WorkDoneProgressCreateParams = {
   /**
    * The token to be used to report progress.
    */
   token: ProgressToken;
-}
+};
 
 /**
  * Params of the `window/workDoneProgress/cancel` notification.
  */
-export interface WorkDoneProgressCancelParams {
+export type WorkDoneProgressCancelParams = {
   /**
    * The token to be used to report progress.
    */
   token: ProgressToken;
-}
+};
