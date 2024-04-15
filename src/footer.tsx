@@ -76,8 +76,10 @@ export const FooterPanel: FC<FooterPanelOptions> = ({ copilot, open = true }) =>
 
   // Initialize account status
   useEffect(() => {
+    let statusCheckCount = 0;
     const onCopilotInitialized = async () => {
       const { status } = await copilot.request.checkStatus().catch((e) => {
+        if (statusCheckCount++ < 25) setTimeout(() => void onCopilotInitialized(), 200);
         logger.error("Failed to check Copilot account status.", e);
         return { status: "CheckFailed" as const };
       });
