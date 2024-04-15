@@ -2,7 +2,7 @@ import { forkNode } from "@modules/child_process";
 import * as path from "@modules/path";
 import { pathToFileURL } from "@modules/url";
 
-import debounce from "lodash-es/debounce";
+import { debounce } from "radash";
 
 import { createCopilotClient } from "./client";
 import { createCompletionTaskManager } from "./completion";
@@ -545,31 +545,37 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
   /**
    * Callback to be invoked when markdown text changed.
    */
-  // @ts-expect-error - Unused parameter `oldMarkdown`
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const onChangeMarkdown = debounce((newMarkdown: string, oldMarkdown: string) => {
-    /* Tell Copilot that file has changed */
-    const version = ++copilot.version;
-    copilot.notification.textDocument.didChange({
-      textDocument: { version, uri: pathToFileURL(taskManager.activeFilePathname).href },
-      contentChanges: [{ text: newMarkdown }],
-    });
 
-    /* Fetch completion from Copilot if cursor position exists */
-    const cursorPos = getCaretPosition();
-    if (!cursorPos) return;
+  const onChangeMarkdown = debounce(
+    { delay: 500 },
+    (
+      newMarkdown: string,
+      // @ts-expect-error - Unused parameter `oldMarkdown`
+      oldMarkdown: string,
+    ) => {
+      /* Tell Copilot that file has changed */
+      const version = ++copilot.version;
+      copilot.notification.textDocument.didChange({
+        textDocument: { version, uri: pathToFileURL(taskManager.activeFilePathname).href },
+        contentChanges: [{ text: newMarkdown }],
+      });
 
-    taskManager.cancelAll();
-    // Fetch completion from Copilot
-    taskManager.startOne({
-      position: cursorPos,
-      onCompletion: (comp) => {
-        completion.reject?.();
-        if (editor.sourceView.inSourceMode) insertCompletionTextToCodeMirror(cm, comp);
-        else insertCompletionTextToEditor(comp);
-      },
-    });
-  }, 500);
+      /* Fetch completion from Copilot if cursor position exists */
+      const cursorPos = getCaretPosition();
+      if (!cursorPos) return;
+
+      taskManager.cancelAll();
+      // Fetch completion from Copilot
+      taskManager.startOne({
+        position: cursorPos,
+        onCompletion: (comp) => {
+          completion.reject?.();
+          if (editor.sourceView.inSourceMode) insertCompletionTextToCodeMirror(cm, comp);
+          else insertCompletionTextToEditor(comp);
+        },
+      });
+    },
+  );
 
   /*********************
    * Initialize states *

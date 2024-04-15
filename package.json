@@ -44,8 +44,8 @@
   "dependencies": {
     "@preact/signals": "^1.2.2",
     "core-js": "^3.36.1",
-    "lodash-es": "^4.17.21",
     "preact": "^10.19.7",
+    "radash": "^12.1.0",
     "ts-pattern": "^5.0.8"
   },
   "devDependencies": {
