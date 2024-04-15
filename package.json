@@ -26,7 +26,7 @@
   "main": "./index.js",
   "scripts": {
     "build:dev": "npm run prebuild && rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript && cpy {package.json,README.md,README.zh-CN.md,bin,docs,language-server} dist",
-    "build:release": "npm run prebuild && rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript && prettier --log-level=silent --print-width 80 --write dist/**/* && cpy {package.json,README.md,README.zh-CN.md,bin,docs,language-server} dist",
+    "build:release": "npm run prebuild && rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript && prettier --log-level=silent --print-width 80 --write dist/**/* --ignore-path !dist/ && cpy {package.json,README.md,README.zh-CN.md,bin,docs,language-server} dist",
     "build:watch": "npm run prebuild && cpy {package.json,README.md,README.zh-CN.md,bin,docs,language-server} dist && rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript --watch",
     "clean": "rimraf dist",
     "format": "prettier --write {src,test}/**/*.{json,js,jsx,ts,tsx} *.{js,cjs,mjs,ts,cts,mts,json,md} && prettier --write --parser json .hintrc",
