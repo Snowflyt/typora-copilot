@@ -28,7 +28,7 @@ const parseNodeVersion = (version: string): number[] =>
 
 /**
  * Start a Node process with the given module path.
- * @returns A Node process with stdio enabled.
+ * @returns A Node server that can send and receive messages.
  */
 export const forkNode: (modulePath: string) => Promise<NodeServer> = (() => {
   if (File.isNode) {
