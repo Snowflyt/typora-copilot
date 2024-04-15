@@ -1,6 +1,6 @@
 {
   "name": "typora-copilot",
-  "version": "0.2.8",
+  "version": "0.2.9-dev",
   "private": true,
   "description": "GitHub Copilot plugin for Typora",
   "keywords": [
@@ -76,7 +76,6 @@
     "eslint-plugin-sonarjs": "^0.24.0",
     "eslint-plugin-sort-destructure-keys": "^1.5.0",
     "happy-dom": "^13.10.1",
-    "hotscript": "^1.0.13",
     "husky": "^9.0.11",
     "lint-staged": "^15.2.2",
     "postcss": "^8.4.36",

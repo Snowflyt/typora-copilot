@@ -18,7 +18,7 @@ import {
   getWorkspaceFolder,
   waitUntilEditorInitialized,
 } from "./typora-utils";
-import { $S, getCaretCoordinate } from "./utils/dom";
+import { getCaretCoordinate } from "./utils/dom";
 import { setGlobalVar, sliceTextByRange } from "./utils/tools";
 
 import "./styles.scss";
@@ -250,7 +250,7 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
     };
     editor.writingArea.addEventListener("keydown", keydownHandler, true);
 
-    $S(editor.writingArea).once("caretMove", () => {
+    $(editor.writingArea).once("caretMove", () => {
       if (cleared) return;
 
       taskManager.cancelAll();
