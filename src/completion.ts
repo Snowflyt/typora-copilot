@@ -71,8 +71,9 @@ export const createCompletionTaskManager = (
       .getCompletions({
         position,
         path: _activeFilePathname,
-        relativePath: _workspaceFolder
-          ? path.relative(_workspaceFolder, _activeFilePathname)
+        relativePath:
+          _workspaceFolder ?
+            path.relative(_workspaceFolder, _activeFilePathname)
           : _activeFilePathname,
       })
       .then(({ cancellationReason, completions }): void => {

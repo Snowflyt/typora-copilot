@@ -30,8 +30,9 @@ logger.info("Copilot plugin activated. Version:", VERSION);
 /**
  * Fake temporary workspace folder, only used when no folder is opened.
  */
-const FAKE_TEMP_WORKSPACE_FOLDER = File.isWin
-  ? "C:\\Users\\FakeUser\\FakeTyporaCopilotWorkspace"
+const FAKE_TEMP_WORKSPACE_FOLDER =
+  File.isWin ?
+    "C:\\Users\\FakeUser\\FakeTyporaCopilotWorkspace"
   : "/home/fakeuser/faketyporacopilotworkspace";
 const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
 
@@ -288,18 +289,18 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
 
     const cloneHistory = (history: CodeMirrorHistory): CodeMirrorHistory => ({
       done: history.done.map((item) =>
-        "primIndex" in item
-          ? // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-            new (item.constructor as any)([...(item as any).ranges], item.primIndex)
-          : // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-            { ...item, changes: [...(item as any).changes] },
+        "primIndex" in item ?
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+          new (item.constructor as any)([...(item as any).ranges], item.primIndex)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+        : { ...item, changes: [...(item as any).changes] },
       ),
       undone: history.undone.map((item) =>
-        "primIndex" in item
-          ? // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-            new (item.constructor as any)([...(item as any).ranges], item.primIndex)
-          : // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-            { ...item, changes: [...(item as any).changes] },
+        "primIndex" in item ?
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+          new (item.constructor as any)([...(item as any).ranges], item.primIndex)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+        : { ...item, changes: [...(item as any).changes] },
       ),
     });
 
@@ -505,12 +506,10 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
   const onChangeWorkspaceFolder = (newFolder: string | null, oldFolder: string | null) => {
     copilot.notification.workspace.didChangeWorkspaceFolders({
       event: {
-        added: newFolder
-          ? [{ uri: pathToFileURL(newFolder).href, name: path.basename(newFolder) }]
-          : [],
-        removed: oldFolder
-          ? [{ uri: pathToFileURL(oldFolder).href, name: path.basename(oldFolder) }]
-          : [],
+        added:
+          newFolder ? [{ uri: pathToFileURL(newFolder).href, name: path.basename(newFolder) }] : [],
+        removed:
+          oldFolder ? [{ uri: pathToFileURL(oldFolder).href, name: path.basename(oldFolder) }] : [],
       },
     });
   };

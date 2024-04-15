@@ -50,21 +50,20 @@ function _getCursorPlacement(placement) {
       function e(node, n) {
         return (
           (n = n || 0),
-          node
-            ? node.get("before")
-              ? e(node.get("before"), n + g(node.get("before")))
-              : node.get("parent")
-                ? e(node.get("parent"), n + (node.get("parent").get("ahead") || 0))
-                : n
+          node ?
+            node.get("before") ? e(node.get("before"), n + g(node.get("before")))
+            : node.get("parent") ? e(node.get("parent"), n + (node.get("parent").get("ahead") || 0))
             : n
+          : n
         );
       }
       i = e(activeNode) + (activeNode.get("ahead") || 0);
       if (Node.isType(activeNode, Node.TYPE.fences))
         return (
           (s = !/`|~/.exec(activeNode.get("pattern") || "```")) || i++,
-          ((placement = document.activeElement.classList.contains("ty-cm-lang-input")
-            ? { line: -1, before: activeNode.get("pattern") || "```" }
+          ((placement =
+            document.activeElement.classList.contains("ty-cm-lang-input") ?
+              { line: -1, before: activeNode.get("pattern") || "```" }
             : /** @type {Typora.CaretPlacement} */ (
                 // THIS IS TO FIX A BUG IN TYPORA, THE IMPLEMENTATION IS NOT THE SAME AS THE ORIGINAL
                 // Typora originally just mutate the cursor in place and return itself, which can cause bugs.
@@ -87,8 +86,8 @@ function _getCursorPlacement(placement) {
           placement
         );
       if (Node.isType(activeNode, Node.TYPE.math_block))
-        return this.editor.mathBlock.currentCm
-          ? (((placement = this.editor.mathBlock.currentCm.doc.getCursor()).line =
+        return this.editor.mathBlock.currentCm ?
+            (((placement = this.editor.mathBlock.currentCm.doc.getCursor()).line =
               placement.line + i + 1),
             placement)
           : { line: i, ch: -1 };
@@ -121,8 +120,8 @@ function _getCursorPlacement(placement) {
           before: (r = r.substring(r.lastIndexOf("\\n"))),
         };
       if (Node.isType(activeNode, Node.TYPE.html_block))
-        return this.editor.htmlBlock.currentCm
-          ? (((placement = this.editor.htmlBlock.currentCm.doc.getCursor()).line =
+        return this.editor.htmlBlock.currentCm ?
+            (((placement = this.editor.htmlBlock.currentCm.doc.getCursor()).line =
               placement.line + i),
             placement)
           : { line: i + 2, ch: -1 };
@@ -164,13 +163,15 @@ function g(node, t) {
    */
   function h(tailOrTailNode, t) {
     var tail = "number" == typeof tailOrTailNode ? tailOrTailNode : tailOrTailNode.get("tail");
-    return undefined === tail
-      ? undefined === t
-        ? /** @type {Typora.Node} */ (tailOrTailNode).get("after")
-          ? 1
+    return (
+      undefined === tail ?
+        undefined === t ?
+          /** @type {Typora.Node} */ (tailOrTailNode).get("after") ?
+            1
           : 0
         : t
-      : tail;
+      : tail
+    );
   }
 
   /**
@@ -201,15 +202,19 @@ function g(node, t) {
       return (
         (node.get("ahead") || 0) +
         ((
-          node.get("pattern") ||
-          (!Node.isType(node.get("parent"), Node.TYPE.list_item) &&
-          (1 == File.option.headingStyle || 3 == File.option.headingStyle) &&
-          node.get("depth") <= 2
-            ? "==="
+          (
+            node.get("pattern") ||
+            ((
+              !Node.isType(node.get("parent"), Node.TYPE.list_item) &&
+              (1 == File.option.headingStyle || 3 == File.option.headingStyle) &&
+              node.get("depth") <= 2
+            ) ?
+              "==="
             : "#")
-        ).match(/[-=]/)
-          ? 2
-          : 1) +
+          ).match(/[-=]/)
+        ) ?
+          2
+        : 1) +
         h(node)
       );
     case Node.TYPE.paragraph:
@@ -262,10 +267,12 @@ function g(node, t) {
         (node.get("text").match(/\n/g) || []).length +
         h(
           node,
-          Node.isType(node.get("before"), Node.TYPE.paragraph) &&
-            Node.isType(node.get("after"), Node.TYPE.paragraph)
-            ? 0
-            : 1,
+          (
+            Node.isType(node.get("before"), Node.TYPE.paragraph) &&
+              Node.isType(node.get("after"), Node.TYPE.paragraph)
+          ) ?
+            0
+          : 1,
         )
       );
     case Node.TYPE.hr:
