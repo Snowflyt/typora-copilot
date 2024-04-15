@@ -434,7 +434,8 @@ export const createClient = <
   };
 
   const logger = createLogger({
-    prefix: `\x1b[1m${serverName && serverName + " "}LSP:\x1b[0m `,
+    prefix: `%c${serverName && serverName + " "}LSP:%c `,
+    styles: ["font-weight: bold", "font-weight: normal"],
     block: {
       prefix: `${serverName && serverName + " "}LSP `,
     },

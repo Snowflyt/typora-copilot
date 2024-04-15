@@ -12,6 +12,10 @@ export interface SimpleLoggerOptions {
    * Prefix to display before the text.
    */
   prefix?: string;
+  /**
+   * Styles applied to the text (the count of styles should match the count of `%c`).
+   */
+  styles?: readonly string[];
 }
 
 /**
@@ -20,7 +24,7 @@ export interface SimpleLoggerOptions {
  * @returns
  */
 export const createSimpleLogger = (options?: SimpleLoggerOptions) => {
-  const { prefix = "" } = options ?? {};
+  const { prefix = "", styles } = options ?? {};
 
   return {
     /**
@@ -30,6 +34,7 @@ export const createSimpleLogger = (options?: SimpleLoggerOptions) => {
     debug: (...data: unknown[]) =>
       console.debug(
         ...(data.length > 0 && typeof data[0] === "string" ? [prefix + data[0]] : []),
+        ...(styles ?? []),
         ...(data.length > 1 ? data.slice(1) : []),
       ),
     /**
@@ -39,6 +44,7 @@ export const createSimpleLogger = (options?: SimpleLoggerOptions) => {
     info: (...data: unknown[]) =>
       console.log(
         ...(data.length > 0 && typeof data[0] === "string" ? [prefix + data[0]] : []),
+        ...(styles ?? []),
         ...(data.length > 1 ? data.slice(1) : []),
       ),
     /**
@@ -48,6 +54,7 @@ export const createSimpleLogger = (options?: SimpleLoggerOptions) => {
     warn: (...data: unknown[]) =>
       console.warn(
         ...(data.length > 0 && typeof data[0] === "string" ? [prefix + data[0]] : []),
+        ...(styles ?? []),
         ...(data.length > 1 ? data.slice(1) : []),
       ),
     /**
@@ -57,6 +64,7 @@ export const createSimpleLogger = (options?: SimpleLoggerOptions) => {
     error: (...data: unknown[]) =>
       console.error(
         ...(data.length > 0 && typeof data[0] === "string" ? [prefix + data[0]] : []),
+        ...(styles ?? []),
         ...(data.length > 1 ? data.slice(1) : []),
       ),
 
