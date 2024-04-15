@@ -103,12 +103,8 @@ const _prepareConsoleBlockParams = (options: {
 /**
  * Options for block logger.
  */
-type BlockLoggerOptions = Omit<
-  Parameters<typeof _prepareConsoleBlockParams>[0],
-  "text"
-> extends infer U
-  ? _Id<U>
-  : never;
+type BlockLoggerOptions =
+  Omit<Parameters<typeof _prepareConsoleBlockParams>[0], "text"> extends infer U ? _Id<U> : never;
 
 /**
  * Create a logger that logs a block-formatted message to the console.

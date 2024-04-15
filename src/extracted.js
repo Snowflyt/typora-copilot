@@ -54,8 +54,8 @@ function _getCursorPlacement(placement) {
             ? node.get("before")
               ? e(node.get("before"), n + g(node.get("before")))
               : node.get("parent")
-              ? e(node.get("parent"), n + (node.get("parent").get("ahead") || 0))
-              : n
+                ? e(node.get("parent"), n + (node.get("parent").get("ahead") || 0))
+                : n
             : n
         );
       }

@@ -234,7 +234,7 @@ const _prepareProtocolRequestHandlers = () =>
        * registration for that capability.
        */
       // @ts-expect-error - Unused parameters
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
       handler: (params: RegistrationParams, success, error, context) => {
         // To be implemented by an actual implementation
         success(null);
@@ -248,13 +248,13 @@ const _prepareProtocolRequestHandlers = () =>
        * a previously registered capability.
        */
       // @ts-expect-error - Unused parameters
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
       handler: (params: UnregistrationParams, success, error, context) => {
         // To be implemented by an actual implementation
         success(null);
       },
     },
-  } satisfies ReadonlyRecord<string, RequestHandler>);
+  }) satisfies ReadonlyRecord<string, RequestHandler>;
 
 /**
  * Protocol notification handlers.
@@ -271,7 +271,7 @@ const _prepareProtocolNotificationHandlers = () =>
      * Invoked when received a `$/cancelRequest` notification from the server.
      */
     // @ts-expect-error - Unused parameters
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     "$/cancelRequest": (params: CancelParams, context) => {
       // TODO: Implement it
     },
@@ -280,7 +280,7 @@ const _prepareProtocolNotificationHandlers = () =>
      * Invoked when received a `$/progress` notification from the server.
      */
     // @ts-expect-error - Unused parameters
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     "$/progress": (params: ProgressParams, context) => {
       // To be implemented by an actual implementation
     },
@@ -295,11 +295,11 @@ const _prepareProtocolNotificationHandlers = () =>
      * messages, the server should send `window/logMessage` notifications.
      */
     // @ts-expect-error - Unused parameters
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     "$/logTrace": (params: LogTraceParams, context) => {
       // To be implemented by an actual implementation
     },
-  } satisfies ReadonlyRecord<string, NotificationHandler>);
+  }) satisfies ReadonlyRecord<string, NotificationHandler>;
 
 /**
  * Client options.
@@ -350,10 +350,10 @@ export type ValidateClientOptions<Options extends ClientOptions<any, any>> = {
       ? ValidateRequestHandlers<Options[P]>
       : never
     : P extends "notificationHandlers"
-    ? Options[P] extends ReadonlyRecord<string, NotificationHandler>
-      ? ValidateNotificationHandlers<Options[P]>
-      : never
-    : Options[P];
+      ? Options[P] extends ReadonlyRecord<string, NotificationHandler>
+        ? ValidateNotificationHandlers<Options[P]>
+        : never
+      : Options[P];
 };
 
 /**
@@ -666,8 +666,8 @@ export const createClient = <
                 request.method in _protocolRequestHandlers
                   ? "[Protocol] "
                   : requestHandlers[payload.method]
-                  ? ""
-                  : "[Ignored] "
+                    ? ""
+                    : "[Ignored] "
               }${request.method} Request`,
               ...(request.params !== undefined ? [request.params] : []),
             );
@@ -1019,7 +1019,7 @@ export const createClient = <
 
   const _request = result.request;
   // @ts-expect-error - Planned to use in the future
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   const _query = result.query;
   const _mutate = result.mutate;
   const _notify = result.notify;

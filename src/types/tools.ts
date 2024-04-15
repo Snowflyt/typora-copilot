@@ -36,9 +36,8 @@ export type ReadonlyRecordL<K extends PropertyKey, T extends Lazy> = {
 /**
  * Check if two types are equal.
  */
-export type Equals<T, U> = (<G>() => G extends T ? 1 : 2) extends <G>() => G extends U ? 1 : 2
-  ? true
-  : false;
+export type Equals<T, U> =
+  (<G>() => G extends T ? 1 : 2) extends <G>() => G extends U ? 1 : 2 ? true : false;
 
 /**
  * Tell TS to evaluate an object type immediately. Actually does nothing, but
