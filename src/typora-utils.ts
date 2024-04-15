@@ -5,7 +5,7 @@
 import * as path from "@modules/path";
 import { fileURLToPath } from "@modules/url";
 
-import { PlatformError } from "./errors";
+import { NoFreePortError, PlatformError } from "./errors";
 import { getCaretPlacement } from "./extracted";
 
 import type { Position } from "./types/lsp";
@@ -472,6 +472,7 @@ export const runShellCommand = (command: string, options?: { cwd?: string }): Pr
  * Find a free localhost port.
  *
  * **⚠️ Warning:** This function only works on macOS and Linux.
+ * @throws {NoFreePortError} If no free port is found.
  */
 export const findFreePort = async (startAt = 6190): Promise<number> => {
   const command = /* bash */ `
@@ -481,7 +482,7 @@ export const findFreePort = async (startAt = 6190): Promise<number> => {
   `;
   const output = await runShellCommand(command);
   const port = Number.parseInt(output.trim());
-  if (Number.isNaN(port)) throw new Error("Cannot find free port.");
+  if (Number.isNaN(port)) throw new NoFreePortError("Cannot find free port.");
   return port;
 };
 
