@@ -126,12 +126,12 @@ export const forkNode: (modulePath: string) => Promise<NodeServer> = (() => {
         const nvmExists =
           (
             await runShellCommand(`
-          if [ -f ~/.nvm/nvm.sh ]; then
-            echo "true";
-          else
-            echo "false";
-          fi
-        `)
+              if [ -f ~/.nvm/nvm.sh ]; then
+                echo "true";
+              else
+                echo "false";
+              fi
+            `)
           ).trim() === "true";
         const availableVersions =
           nvmExists ?
@@ -159,14 +159,14 @@ export const forkNode: (modulePath: string) => Promise<NodeServer> = (() => {
               title: "Typora Copilot: Node.js is required on macOS",
               type: "error",
               html: /* html */ `
-              <div style="text-align: center; margin-top: 8px;">
-                <p>Node.js >= 18 is required to run this plugin.</p>
-                <p>
-                  Please install <a href="https://nodejs.org/en/download/" target="_blank">Node.js</a>
-                  >= 18 and restart Typora to use this plugin.
-                </p>
-              </div>
-            `,
+                <div style="text-align: center; margin-top: 8px;">
+                  <p>Node.js >= 18 is required to run this plugin.</p>
+                  <p>
+                    Please install <a href="https://nodejs.org/en/download/" target="_blank">Node.js</a>
+                    >= 18 and restart Typora to use this plugin.
+                  </p>
+                </div>
+              `,
               buttons: ["I understand"],
             });
           });
