@@ -712,7 +712,10 @@ export const createClient = <
       } else if (isNotificationMessage(payload)) {
         let loggingSuppressed = false;
 
-        void notificationHandlers[payload.method]?.(payload.params as never, {
+        void (
+          notificationHandlers[payload.method] ??
+          _protocolNotificationHandlers[payload.method as never]
+        )?.(payload.params as never, {
           ...context,
           suppressLogging: () => {
             loggingSuppressed = true;
