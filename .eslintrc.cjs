@@ -2,6 +2,19 @@
 
 /* eslint-env node */
 
+/**
+ * @typedef {{ [key: string]: string | LocaleMap }} LocaleMap
+ */
+
+/**
+ * @param {LocaleMap} o
+ * @returns {string[]}
+ */
+const pathOf = (o) =>
+  Object.entries(o).flatMap(([k, v]) =>
+    typeof v === "string" ? [k] : pathOf(v).map((x) => `${k}.${x}`),
+  );
+
 /** @satisfies {import("eslint").Linter.Config} */
 const config = {
   root: true,
@@ -30,6 +43,7 @@ const config = {
     "@typescript-eslint/no-unsafe-return": "off",
     "@typescript-eslint/no-unsafe-assignment": "off",
     "@typescript-eslint/no-unused-vars": "off", // Already enabled in `tsconfig.json`
+    "@typescript-eslint/no-var-requires": ["error", { allow: ["\\.json$"] }],
     "import/consistent-type-specifier-style": ["error", "prefer-top-level"],
     "import/namespace": "off",
     "import/no-unresolved": "off",
@@ -56,6 +70,10 @@ const config = {
     ],
     "no-undef": "off",
     "sonarjs/cognitive-complexity": "off",
+    "sonarjs/no-duplicate-string": [
+      "error",
+      { ignoreStrings: pathOf(require("./src/i18n/en.json")).join(",") },
+    ],
     "sort-destructure-keys/sort-destructure-keys": "error",
     "sort-imports": [
       "error",

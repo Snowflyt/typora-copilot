@@ -3,6 +3,7 @@ import * as path from "./path";
 import type { ChildProcessWithoutNullStreams } from "node:child_process";
 
 import { PLUGIN_DIR } from "@/constants";
+import { t } from "@/i18n";
 import { logger } from "@/logging";
 import { File, findFreePort, runShellCommand, waitUntilEditorInitialized } from "@/typora-utils";
 import { wrapNodeChildProcess } from "@/utils/server";
@@ -69,8 +70,8 @@ export const forkNode: (modulePath: string) => Promise<NodeServer> = (() => {
               </p>
             </div>
           `,
-          // eslint-disable-next-line sonarjs/no-duplicate-string
-          buttons: ["I understand"],
+
+          buttons: [t("button.understand")],
         });
       });
 
@@ -99,7 +100,7 @@ export const forkNode: (modulePath: string) => Promise<NodeServer> = (() => {
               </p>
             </div>
           `,
-          buttons: ["I understand"],
+          buttons: [t("button.understand")],
         });
       });
 
@@ -167,7 +168,7 @@ export const forkNode: (modulePath: string) => Promise<NodeServer> = (() => {
                   </p>
                 </div>
               `,
-              buttons: ["I understand"],
+              buttons: [t("button.understand")],
             });
           });
 
@@ -194,7 +195,7 @@ export const forkNode: (modulePath: string) => Promise<NodeServer> = (() => {
                 </p>
               </div>
             `,
-            buttons: ["I understand"],
+            buttons: [t("button.understand")],
           });
         });
 
