@@ -43,7 +43,6 @@
   },
   "dependencies": {
     "@preact/signals": "^1.2.3",
-    "core-js": "^3.36.1",
     "preact": "^10.20.2",
     "radash": "^12.1.0",
     "ts-pattern": "^5.1.1"
