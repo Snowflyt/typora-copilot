@@ -1,5 +1,89 @@
 {
   "button": {
+    "ok": "确定",
     "understand": "我知道了"
+  },
+  "copilot-status": {
+    "Normal": "就绪",
+    "Warning": "警告",
+    "InProgress": "正在生成"
+  },
+  "dialog": {
+    "sign-in": {
+      "title": "登录 GitHub Copilot",
+      "html": [
+        "<span>你的 GitHub 设备激活码为：</span>",
+        "<div style=\"margin-top: 8px; margin-bottom: 8px; font-size: 14pt; font-weight: bold;\">",
+        "  {{USER_CODE}}",
+        "</div>",
+        "<span>该激活码已复制到剪贴板。请在浏览器中打开以下链接，并粘贴代码以登录：</span>",
+        "<div style=\"margin-top: 8px; margin-bottom: 8px;\">",
+        "  <a href=\"{{VERIFICATION_URI}}\" target=\"_blank\" rel=\"noopener noreferrer\">",
+        "    打开验证页面",
+        "  </a>",
+        "</div>",
+        "<span>在完成验证<strong>之后</strong>点击“确定”。</span>"
+      ]
+    },
+    "signed-in": {
+      "title": "已登录 GitHub Copilot",
+      "html": ["<p>您已成功登录 Copilot。</p>", "<p>按“确定”继续。</p>"]
+    },
+    "warn-nodejs-required-for-typora-under-1-6": {
+      "title": "需要安装 Node.js 才能在 Typora 1.6 以下版本中运行此插件",
+      "html": [
+        "<p>需要 Node.js >= 18 或 Typora >= 1.6 才能运行此插件。</p>",
+        "<p>当前 Typora 版本为 <code>{{TYPORA_VERSION}}</code>。</p>",
+        "<p>",
+        "  请安装 <a href=\"https://nodejs.org/en/download/\" target=\"_blank\">Node.js</a>",
+        "  >= 18 或升级 <a href=\"https://typora.io/#download\" target=\"_blank\">Typora</a>",
+        "  >= 1.6.",
+        "</p>"
+      ]
+    },
+    "warn-nodejs-above-18-required-for-typora-under-1-6": {
+      "title": "需要安装 Node.js >= 18 才能在 Typora 1.6 以下版本中运行此插件",
+      "html": [
+        "<p>需要 Node.js >= 18 或 Typora >= 1.6 才能运行此插件。</p>",
+        "<p>当前 Typora 版本为 <code>{{TYPORA_VERSION}}</code>。</p>",
+        "<p>当前 Node 版本为 <code>{{NODE_VERSION}}</code>。</p>",
+        "<p>",
+        "  请安装 <a href=\"https://nodejs.org/en/download/\" target=\"_blank\">Node.js</a>",
+        "  >= 18 或升级 <a href=\"https://typora.io/#download\" target=\"_blank\">Typora</a>",
+        "  >= 1.6.",
+        "</p>"
+      ]
+    },
+    "warn-nodejs-required-on-macOS": {
+      "title": "需要安装 Node.js 才能运行此插件",
+      "html": [
+        "<p>需要 Node.js >= 18 才能在 macOS 上运行此插件。</p>",
+        "<p>",
+        "  请安装 <a href=\"https://nodejs.org/en/download/\" target=\"_blank\">Node.js</a>",
+        "  >= 18 并重新启动 Typora 以使用此插件。",
+        "</p>"
+      ]
+    },
+    "warn-nodejs-above-18-required-on-macOS": {
+      "title": "需要安装 Node.js >= 18 才能运行此插件",
+      "html": [
+        "<p>需要 Node.js >= 18 才能在 macOS 上运行此插件。</p>",
+        "<p>当前 Node 版本为 <code>{{NODE_VERSION}}</code>。</p>",
+        "<p>",
+        "  请安装 <a href=\"https://nodejs.org/en/download/\" target=\"_blank\">Node.js</a>",
+        "  >= 18 并重新启动 Typora 以使用此插件。",
+        "</p>"
+      ]
+    }
+  },
+  "footer": {
+    "menu": {
+      "sign-in": "登录以认证 Copilot",
+      "sign-out": "退出登录",
+      "not-authorized": "你的 GitHub 账户尚未订阅 Copilot"
+    }
+  },
+  "hint": {
+    "generated-by-copilot": "由 GitHub Copilot 生成"
   }
 }

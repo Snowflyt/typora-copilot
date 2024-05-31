@@ -1,9 +1,9 @@
 import { useSignal } from "@preact/signals";
 import { render } from "preact";
 import { useEffect, useMemo } from "preact/hooks";
-import { match } from "ts-pattern";
 
 import CopilotIcon from "./components/CopilotIcon";
+import { t } from "./i18n";
 import { logger } from "./logging";
 import { File } from "./typora-utils";
 
@@ -119,38 +119,27 @@ export const FooterPanel: FC<FooterPanelOptions> = ({ copilot, open = true }) =>
     void navigator.clipboard.writeText(userCode);
     // Open verification URI in browser
     File.editor?.EditHelper.showDialog({
-      title: "Copilot Sign In",
+      title: t("dialog.sign-in.title"),
       html: /* html */ `
         <div style="text-align: center; margin-top: 8px;">
-          <span>The device activation code is:</span>
-          <div style="margin-top: 8px; margin-bottom: 8px; font-size: 14pt; font-weight: bold;">
-            ${userCode}
-          </div>
-          <span>
-            It has been copied to your clipboard. Please open the following link in your browser
-            and paste the code to sign in:
-          </span>
-          <div style="margin-top: 8px; margin-bottom: 8px;">
-            <a href="${verificationUri}" target="_blank" rel="noopener noreferrer">
-              Open verification page
-            </a>
-          </div>
-          <span>Press OK <strong>after</strong> you have completed the verification.</span>
+          ${t("dialog.sign-in.html")
+            .replace("{{USER_CODE}}", userCode)
+            .replace("{{VERIFICATION_URI}}", verificationUri)}
         </div>
       `,
-      buttons: ["OK"],
+      buttons: [t("button.ok")],
       callback: () => {
         void copilot.request.signInConfirm({ userCode }).then(({ status }) => {
           accountStatus.value = status;
           copilot.status = "Normal";
           File.editor?.EditHelper.showDialog({
-            title: "Copilot Signed In",
+            title: t("dialog.signed-in.title"),
             html: /* html */ `
               <div style="text-align: center; margin-top: 8px;">
-                <span>Sign in to Copilot successful!</span>
+                ${t("dialog.signed-in.html")}
               </div>
             `,
-            buttons: ["OK"],
+            buttons: [t("button.ok")],
           });
         });
       },
@@ -172,16 +161,14 @@ export const FooterPanel: FC<FooterPanelOptions> = ({ copilot, open = true }) =>
         ...(!open && { display: "none" }),
       }}>
       {accountStatus.value === "NotAuthorized" && (
-        <div className="footer-copilot-panel-hint">
-          Your GitHub account is not subscribed to Copilot
-        </div>
+        <div className="footer-copilot-panel-hint">{t("footer.menu.not-authorized")}</div>
       )}
       {accountStatus.value === "NotSignedIn" && (
         <button
           type="button"
           className="footer-copilot-panel-btn"
           onClick={() => void handleSignIn()}>
-          Sign in to authenticate Copilot
+          {t("footer.menu.sign-in")}
         </button>
       )}
       {accountStatus.value !== "NotSignedIn" && (
@@ -189,7 +176,7 @@ export const FooterPanel: FC<FooterPanelOptions> = ({ copilot, open = true }) =>
           type="button"
           className="footer-copilot-panel-btn"
           onClick={() => void handleSignOut()}>
-          Sign out
+          {t("footer.menu.sign-out")}
         </button>
       )}
     </div>
@@ -254,10 +241,7 @@ export const Footer: FC<FooterOptions> = ({ copilot }) => {
       <div
         className="footer-item footer-item-right"
         id="footer-copilot"
-        ty-hint={`Copilot (${match(status.value)
-          .with("Normal", () => "Ready")
-          .with("InProgress", () => "In Progress")
-          .otherwise(() => status.value)})`}
+        ty-hint={"Copilot (" + t(`copilot-status.${status.value}`) + ")"}
         data-lg="Menu"
         aria-label="Copilot"
         role="button"

@@ -13,12 +13,17 @@ import zhCN from "./zh-CN.json";
  * ```
  */
 export type PathOf<O> = keyof {
-  [P in keyof O & (string | number) as O[P] extends string ? P : `${P}.${PathOf<O[P]>}`]: void;
+  [P in keyof O & (string | number) as O[P] extends string ? P
+  : O[P] extends readonly string[] ? P
+  : `${P}.${PathOf<O[P]>}`]: void;
 };
 
 interface LocaleMap {
-  [key: string]: string | LocaleMap;
+  [key: string]: string | readonly string[] | LocaleMap;
 }
+
+const isStringArray = (x: unknown): x is readonly string[] =>
+  Array.isArray(x) && x.every((v) => typeof v === "string");
 
 /**
  * Get locale string by path.
@@ -65,7 +70,7 @@ export const t = (path: PathOf<typeof en>): string => {
           `Cannot find translation for "${path}": "${key}" not found` +
           (visitedKeys.length > 0 ? ` in "${visitedKeys.join(".")}".` : ".")
         );
-      if (typeof x === "string")
+      if (typeof x === "string" || isStringArray(x))
         throw `Cannot find translation for "${path}": "${[...visitedKeys, key].join(".")}" is not an object.`;
       tmp = x;
       visitedKeys.push(key);
@@ -78,9 +83,9 @@ export const t = (path: PathOf<typeof en>): string => {
         `Cannot find translation for "${path}": "${lastKey}" not found` +
         (visitedKeys.length > 0 ? ` in "${visitedKeys.join(".")}".` : ".")
       );
-    if (typeof res !== "string")
+    if (typeof res !== "string" && !isStringArray(res))
       throw `Cannot find translation for "${path}": "${path}" is not a string.`;
-    return res;
+    return typeof res === "string" ? res : res.join("\n");
   } catch (e) {
     console.warn(e);
     return path;

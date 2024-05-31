@@ -57,20 +57,16 @@ export const forkNode: (modulePath: string) => Promise<NodeServer> = (() => {
 
       void waitUntilEditorInitialized().then(() => {
         File.editor!.EditHelper.showDialog({
-          title: "Typora Copilot: Node.js is required under Typora < 1.6",
+          title: `Typora Copilot: ${t("dialog.warn-nodejs-required-for-typora-under-1-6.title")}`,
           type: "error",
           html: /* html */ `
             <div style="text-align: center; margin-top: 8px;">
-              <p>Node.js >= 18 or Typora >= 1.6 is required to run this plugin.</p>
-              <p>The current Typora version is <code>${window._options.appVersion}</code>.</p>
-              <p>
-                Either install <a href="https://nodejs.org/en/download/" target="_blank">Node.js</a>
-                >= 18 or upgrade <a href="https://typora.io/#download" target="_blank">Typora</a> to
-                >= 1.6.
-              </p>
+              ${t("dialog.warn-nodejs-required-for-typora-under-1-6.html").replace(
+                "{{TYPORA_VERSION}}",
+                window._options.appVersion,
+              )}
             </div>
           `,
-
           buttons: [t("button.understand")],
         });
       });
@@ -86,18 +82,13 @@ export const forkNode: (modulePath: string) => Promise<NodeServer> = (() => {
 
       void waitUntilEditorInitialized().then(() => {
         File.editor!.EditHelper.showDialog({
-          title: "Typora Copilot: Node.js >= 18 is required under Typora < 1.6",
+          title: `Typora Copilot: ${t("dialog.warn-nodejs-above-18-required-for-typora-under-1-6.title")}`,
           type: "error",
           html: /* html */ `
             <div style="text-align: center; margin-top: 8px;">
-              <p>Node.js >= 18 or Typora >= 1.6 is required to run this plugin.</p>
-              <P>The current Typora version is <code>${window._options.appVersion}</code>.</p>
-              <p>The current Node version is <code>${shellNodeVersion}</code>.</p>
-              <p>
-                Either install <a href="https://nodejs.org/en/download/" target="_blank">Node.js</a>
-                >= 18 or upgrade <a href="https://typora.io/#download" target="_blank">Typora</a> to
-                >= 1.6.
-              </p>
+              ${t("dialog.warn-nodejs-above-18-required-for-typora-under-1-6.html")
+                .replace("{{TYPORA_VERSION}}", window._options.appVersion)
+                .replace("{{NODE_VERSION}}", shellNodeVersion)}
             </div>
           `,
           buttons: [t("button.understand")],
@@ -121,7 +112,7 @@ export const forkNode: (modulePath: string) => Promise<NodeServer> = (() => {
     void (async () => {
       let shellNodeVersion = "";
       try {
-        shellNodeVersion = await runShellCommand("node -v");
+        shellNodeVersion = (await runShellCommand("node -v")).trim();
       } catch (err) {
         // Detect if NVM is installed
         const nvmExists =
@@ -149,7 +140,7 @@ export const forkNode: (modulePath: string) => Promise<NodeServer> = (() => {
             if (aVersion[1] !== bVersion[1]) return bVersion[1]! - aVersion[1]!;
             return bVersion[2]! - aVersion[2]!;
           });
-          shellNodeVersion = availableVersions[0]!;
+          shellNodeVersion = availableVersions[0]!.trim();
           nodePath = `~/.nvm/versions/node/${shellNodeVersion}/bin/node`;
         } else {
           const errorMessage = "Node not found in shell, please install Node >= 18";
@@ -157,15 +148,11 @@ export const forkNode: (modulePath: string) => Promise<NodeServer> = (() => {
 
           void waitUntilEditorInitialized().then(() => {
             File.editor!.EditHelper.showDialog({
-              title: "Typora Copilot: Node.js is required on macOS",
+              title: `Typora Copilot: ${t("dialog.warn-nodejs-required-on-macOS.title")}`,
               type: "error",
               html: /* html */ `
                 <div style="text-align: center; margin-top: 8px;">
-                  <p>Node.js >= 18 is required to run this plugin.</p>
-                  <p>
-                    Please install <a href="https://nodejs.org/en/download/" target="_blank">Node.js</a>
-                    >= 18 and restart Typora to use this plugin.
-                  </p>
+                  ${t("dialog.warn-nodejs-required-on-macOS.html")}
                 </div>
               `,
               buttons: [t("button.understand")],
@@ -184,15 +171,14 @@ export const forkNode: (modulePath: string) => Promise<NodeServer> = (() => {
 
         void waitUntilEditorInitialized().then(() => {
           File.editor!.EditHelper.showDialog({
-            title: "Typora Copilot: Node.js >= 18 is required",
+            title: `Typora Copilot: ${t("dialog.warn-nodejs-above-18-required-on-macOS.title")}`,
             type: "error",
             html: /* html */ `
               <div style="text-align: center; margin-top: 8px;">
-                <p>Node.js >= 18 is required to run this plugin.</p>
-                <p>
-                  Please install <a href="https://nodejs.org/en/download/" target="_blank">Node.js</a>
-                  >= 18 and restart Typora to use this plugin.
-                </p>
+                ${t("dialog.warn-nodejs-above-18-required-on-macOS.html").replace(
+                  "{{NODE_VERSION}}",
+                  shellNodeVersion,
+                )}
               </div>
             `,
             buttons: [t("button.understand")],
