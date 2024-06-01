@@ -606,8 +606,8 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
    * Initialize task manager *
    ***************************/
   const taskManager = createCompletionTaskManager(copilot, {
-    activeFilePathname: getWorkspaceFolder() ?? FAKE_TEMP_WORKSPACE_FOLDER,
-    workspaceFolder:
+    workspaceFolder: getWorkspaceFolder() ?? FAKE_TEMP_WORKSPACE_FOLDER,
+    activeFilePathname:
       getActiveFilePathname() ?? path.join(FAKE_TEMP_WORKSPACE_FOLDER, FAKE_TEMP_FILENAME),
   });
 
@@ -658,7 +658,8 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
       taskManager.workspaceFolder = newWorkspaceFolder;
       onChangeWorkspaceFolder(newWorkspaceFolder, oldWorkspaceFolder);
     }
-    const newActiveFilePathname = getActiveFilePathname() ?? FAKE_TEMP_FILENAME;
+    const newActiveFilePathname =
+      getActiveFilePathname() ?? path.join(FAKE_TEMP_WORKSPACE_FOLDER, FAKE_TEMP_FILENAME);
     if (newActiveFilePathname !== taskManager.activeFilePathname) {
       const oldActiveFilePathname = taskManager.activeFilePathname;
       taskManager.activeFilePathname = newActiveFilePathname;
