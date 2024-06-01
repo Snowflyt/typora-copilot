@@ -37,7 +37,7 @@ const FAKE_TEMP_WORKSPACE_FOLDER =
 const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
 
 (async () => {
-  const server = await forkNode(path.join(PLUGIN_DIR, "language-server", "agent.cjs"));
+  const server = await forkNode(path.join(PLUGIN_DIR, "language-server", "language-server.cjs"));
   logger.debug("Copilot LSP server started. PID:", server.pid);
 
   /**
