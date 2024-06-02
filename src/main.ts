@@ -835,6 +835,7 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
 
   /* Watch for markdown change in live preview mode */
   editor.on("change", (_, { newMarkdown, oldMarkdown }) => {
+    if (settings.disableCompletions) return;
     if (sourceView.inSourceMode) return;
 
     // If not literally changed, simply return
@@ -856,7 +857,8 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
   });
 
   /* Watch for markdown change in source mode */
-  cm.on("change", (cm, change) => {
+  cm.on("change", (cm, change): void => {
+    if (settings.disableCompletions) return;
     if (!editor.sourceView.inSourceMode) return;
 
     const newMarkdown = cm.getValue(File.useCRLF ? "\r\n" : "\n");

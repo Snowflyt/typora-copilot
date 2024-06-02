@@ -6,6 +6,7 @@ import CopilotIcon from "./components/CopilotIcon";
 import SettingsPanel from "./components/SettingsPanel";
 import { t } from "./i18n";
 import { logger } from "./logging";
+import { settings } from "./settings";
 import { File } from "./typora-utils";
 
 import "./footer.scss";
@@ -74,6 +75,7 @@ export interface FooterPanelOptions {
  */
 export const FooterPanel: FC<FooterPanelOptions> = ({ copilot, open = true }) => {
   const accountStatus = useSignal<CopilotAccountStatus>("NotSignedIn");
+  const disableCompletions = useSignal(settings.disableCompletions);
 
   // Initialize account status
   useEffect(() => {
@@ -96,6 +98,16 @@ export const FooterPanel: FC<FooterPanelOptions> = ({ copilot, open = true }) =>
         // Delay `checkStatus` call to next tick to avoid a maybe BUG of GitHub Copilot LSP server
         void Promise.resolve(null).then(onCopilotInitialized);
       });
+  }, []);
+
+  // Sync settings
+  useEffect(() => {
+    const unlistenSettingsChange = settings.onChangeProperty("disableCompletions", (value) => {
+      disableCompletions.value = value;
+    });
+    return () => {
+      unlistenSettingsChange();
+    };
   }, []);
 
   /**
@@ -195,6 +207,15 @@ export const FooterPanel: FC<FooterPanelOptions> = ({ copilot, open = true }) =>
           type="button"
           className="footer-copilot-panel-btn"
           onClick={() => {
+            disableCompletions.value = !disableCompletions.value;
+            settings.disableCompletions = disableCompletions.value;
+          }}>
+          {t(`footer.menu.${disableCompletions.value ? "enable" : "disable"}-completions`)}
+        </button>
+        <button
+          type="button"
+          className="footer-copilot-panel-btn"
+          onClick={() => {
             settingsPanelOpen.value = true;
           }}>
           {t("footer.menu.settings")}
@@ -212,15 +233,21 @@ export interface FooterOptions {
  * Footer of the plugin with an icon.
  */
 export const Footer: FC<FooterOptions> = ({ copilot }) => {
-  const status = useSignal<CopilotStatus>(copilot.status);
+  const status = useSignal<CopilotStatus | "Disabled">(
+    settings.disableCompletions ? "Disabled" : copilot.status,
+  );
 
   // Sync status
   useEffect(() => {
+    const unlistenSettingsChange = settings.onChangeProperty("disableCompletions", (value) => {
+      status.value = value ? "Disabled" : copilot.status;
+    });
     const handler: CopilotClientEventHandler<"changeStatus"> = ({ newStatus }) => {
       status.value = newStatus;
     };
     copilot.on("changeStatus", handler);
     return () => {
+      unlistenSettingsChange();
       copilot.off("changeStatus", handler);
     };
   }, []);

@@ -6,7 +6,8 @@
   "copilot-status": {
     "Normal": "Ready",
     "Warning": "Warning",
-    "InProgress": "In Progress"
+    "InProgress": "In Progress",
+    "Disabled": "Disabled"
   },
   "dialog": {
     "sign-in": {
@@ -84,6 +85,8 @@
       "sign-in": "Sign in to authenticate Copilot",
       "sign-out": "Sign out",
       "not-authorized": "Your GitHub account is not subscribed to Copilot",
+      "disable-completions": "Disable completions",
+      "enable-completions": "Enable completions",
       "settings": "Settings"
     }
   },
@@ -94,6 +97,10 @@
     "title": "Copilot: Settings",
     "general": {
       "title": "General",
+      "disable-completions": {
+        "label": "Disable completions",
+        "description": "Disable completions or suggestions from Copilot in Typora"
+      },
       "use-inline-completion-text-in-source": {
         "label": "Use inline completion text in source mode (Beta)",
         "description": "Use inline completion text in source mode instead of suggestion panel"

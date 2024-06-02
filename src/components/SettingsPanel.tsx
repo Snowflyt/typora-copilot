@@ -1,3 +1,5 @@
+/* eslint-disable sonarjs/no-duplicate-string */
+
 import { useSignal } from "@preact/signals";
 
 import ModalBody from "./ModalBody";
@@ -17,6 +19,7 @@ export interface SettingsPanelProps {
 }
 
 const SettingsPanel: FC<SettingsPanelProps> = ({ onClose }) => {
+  const disableCompletion = useSignal(settings.disableCompletions);
   const useInlineCompletionTextInSource = useSignal(settings.useInlineCompletionTextInSource);
   const useInlineCompletionTextInPreviewCodeBlocks = useSignal(
     settings.useInlineCompletionTextInPreviewCodeBlocks,
@@ -48,6 +51,37 @@ const SettingsPanel: FC<SettingsPanelProps> = ({ onClose }) => {
               display: "flex",
               flexDirection: "column",
             }}>
+            <div style={{ width: "100%" }}>
+              <div
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}>
+                <span>{t("settings-panel.general.disable-completions.label")}</span>
+                <Switch
+                  value={disableCompletion.value}
+                  onChange={(value) => {
+                    disableCompletion.value = value;
+                    settings.disableCompletions = value;
+                  }}
+                />
+              </div>
+              <div
+                style={{
+                  marginTop: "0.5rem",
+                  fontSize: "0.75rem",
+                  lineHeight: 1,
+                  opacity: 0.75,
+                }}>
+                {t("settings-panel.general.disable-completions.description")}
+              </div>
+            </div>
+
+            <hr style={{ width: "100%", margin: "1.375rem 0 1rem 0" }} />
+
             <div style={{ width: "100%" }}>
               <div
                 style={{
