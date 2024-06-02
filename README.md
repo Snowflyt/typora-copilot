@@ -8,10 +8,6 @@ English | [简体中文](./README.zh-CN.md)
 
 This plugin uses the LSP server extracted from Copilot.vim to provide suggestions in real-time right from your editor.
 
-> [!WARNING]
->
-> This plugin is still in development and may not work properly. Please use it with caution.
-
 ## Compatibility
 
 > [!NOTE]
