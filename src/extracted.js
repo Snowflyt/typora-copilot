@@ -67,7 +67,7 @@ function _getCursorPlacement(placement) {
             : /** @type {Typora.CaretPlacement} */ (
                 // THIS IS TO FIX A BUG IN TYPORA, THE IMPLEMENTATION IS NOT THE SAME AS THE ORIGINAL
                 // Typora originally just mutate the cursor in place and return itself, which can cause bugs.
-                // Here I use a immutable way by creating a new one, which is slower but safer.
+                // Here I use an immutable way by creating a new one, which is slower but safer.
                 new /** @type {new (line: number, ch: number, sticky?: unknown) => CodeMirror.Position} */ (
                   this.editor.fences.getCm(activeNode.cid).doc.getCursor().constructor
                 )(
@@ -87,8 +87,18 @@ function _getCursorPlacement(placement) {
         );
       if (Node.isType(activeNode, Node.TYPE.math_block))
         return this.editor.mathBlock.currentCm ?
-            (((placement = this.editor.mathBlock.currentCm.doc.getCursor()).line =
-              placement.line + i + 1),
+            (((placement = /** @type {Typora.CaretPlacement} */ (
+              // THIS IS TO FIX A BUG IN TYPORA, THE IMPLEMENTATION IS NOT THE SAME AS THE ORIGINAL
+              // Typora originally just mutate the cursor in place and return itself, which can cause bugs.
+              // Here I use an immutable way by creating a new one, which is slower but safer.
+              new /** @type {new (line: number, ch: number, sticky?: unknown) => CodeMirror.Position} */ (
+                this.editor.mathBlock.currentCm.doc.getCursor().constructor
+              )(
+                this.editor.mathBlock.currentCm.doc.getCursor().line,
+                this.editor.mathBlock.currentCm.doc.getCursor().ch,
+                this.editor.mathBlock.currentCm.doc.getCursor().sticky,
+              )
+            )).line = placement.line + i + 1),
             placement)
           : { line: i, ch: -1 };
       if (Node.isType(activeNode, Node.TYPE.toc)) return { line: i, before: "]" };
@@ -121,8 +131,18 @@ function _getCursorPlacement(placement) {
         };
       if (Node.isType(activeNode, Node.TYPE.html_block))
         return this.editor.htmlBlock.currentCm ?
-            (((placement = this.editor.htmlBlock.currentCm.doc.getCursor()).line =
-              placement.line + i),
+            (((placement = /** @type {Typora.CaretPlacement} */ (
+              // THIS IS TO FIX A BUG IN TYPORA, THE IMPLEMENTATION IS NOT THE SAME AS THE ORIGINAL
+              // Typora originally just mutate the cursor in place and return itself, which can cause bugs.
+              // Here I use an immutable way by creating a new one, which is slower but safer.
+              new /** @type {new (line: number, ch: number, sticky?: unknown) => CodeMirror.Position} */ (
+                this.editor.htmlBlock.currentCm.doc.getCursor().constructor
+              )(
+                this.editor.htmlBlock.currentCm.doc.getCursor().line,
+                this.editor.htmlBlock.currentCm.doc.getCursor().ch,
+                this.editor.htmlBlock.currentCm.doc.getCursor().sticky,
+              )
+            )).line = placement.line + i),
             placement)
           : { line: i + 2, ch: -1 };
       if ("" === r && Node.isType(activeNode, Node.TYPE.paragraph, Node.TYPE.heading)) {
