@@ -224,8 +224,10 @@ export const Footer: FC<FooterOptions> = ({ copilot }) => {
       isPanelOpen.value = false;
     };
     document.addEventListener("click", listener);
+    $("content").on("click", listener);
     return () => {
       document.removeEventListener("click", listener);
+      $("content").off("click", listener);
     };
   });
 
