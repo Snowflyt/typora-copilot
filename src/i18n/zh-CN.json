@@ -82,8 +82,8 @@
       "sign-in": "登录以认证 Copilot",
       "sign-out": "退出登录",
       "not-authorized": "你的 GitHub 账户尚未订阅 Copilot",
-      "disable-completions": "禁用补全",
-      "enable-completions": "启用补全",
+      "disable-completions": "禁用建议",
+      "enable-completions": "启用建议",
       "settings": "设置"
     }
   },
@@ -95,16 +95,16 @@
     "general": {
       "title": "通用设置",
       "disable-completions": {
-        "label": "禁用补全",
+        "label": "禁用建议",
         "description": "在 Typora 中禁用 Copilot 生成的补全或建议"
       },
       "use-inline-completion-text-in-source": {
-        "label": "在源代码模式中使用行内补全文本（Beta）",
-        "description": "在源代码模式中使用行内补全文本，而不是建议面板"
+        "label": "在源代码模式下使用内联补全文本（Beta）",
+        "description": "在源代码模式下使用内联补全文本，而不是建议面板"
       },
       "use-inline-completion-text-in-preview-code-blocks": {
-        "label": "在预览模式代码块中使用行内补全文本（Early alpha）",
-        "description": "在预览模式的代码块中使用行内补全文本，而不是建议面板",
+        "label": "在预览模式代码块中使用内联补全文本（Early alpha）",
+        "description": "在预览模式的代码块中使用内联补全文本，而不是建议面板",
         "warning": "此功能仍处于早期阶段，很可能会损坏你的文档。请谨慎使用。"
       }
     }
