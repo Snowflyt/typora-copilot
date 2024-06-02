@@ -3,6 +3,7 @@ import { render } from "preact";
 import { useEffect, useMemo } from "preact/hooks";
 
 import CopilotIcon from "./components/CopilotIcon";
+import SettingsPanel from "./components/SettingsPanel";
 import { t } from "./i18n";
 import { logger } from "./logging";
 import { File } from "./typora-utils";
@@ -152,34 +153,54 @@ export const FooterPanel: FC<FooterPanelOptions> = ({ copilot, open = true }) =>
     copilot.status = "Warning";
   };
 
+  const settingsPanelOpen = useSignal(false);
+
   return (
-    <div
-      id="footer-copilot-panel"
-      className="dropdown-menu"
-      style={{
-        bottom: bottom.value,
-        ...(!open && { display: "none" }),
-      }}>
-      {accountStatus.value === "NotAuthorized" && (
-        <div className="footer-copilot-panel-hint">{t("footer.menu.not-authorized")}</div>
+    <>
+      {settingsPanelOpen.value && (
+        <SettingsPanel
+          onClose={() => {
+            settingsPanelOpen.value = false;
+          }}
+        />
       )}
-      {accountStatus.value === "NotSignedIn" && (
+
+      <div
+        id="footer-copilot-panel"
+        className="dropdown-menu"
+        style={{
+          bottom: bottom.value,
+          ...(!open && { display: "none" }),
+        }}>
+        {accountStatus.value === "NotAuthorized" && (
+          <div className="footer-copilot-panel-hint">{t("footer.menu.not-authorized")}</div>
+        )}
+        {accountStatus.value === "NotSignedIn" && (
+          <button
+            type="button"
+            className="footer-copilot-panel-btn"
+            onClick={() => void handleSignIn()}>
+            {t("footer.menu.sign-in")}
+          </button>
+        )}
+        {accountStatus.value !== "NotSignedIn" && (
+          <button
+            type="button"
+            className="footer-copilot-panel-btn"
+            onClick={() => void handleSignOut()}>
+            {t("footer.menu.sign-out")}
+          </button>
+        )}
         <button
           type="button"
           className="footer-copilot-panel-btn"
-          onClick={() => void handleSignIn()}>
-          {t("footer.menu.sign-in")}
+          onClick={() => {
+            settingsPanelOpen.value = true;
+          }}>
+          {t("footer.menu.settings")}
         </button>
-      )}
-      {accountStatus.value !== "NotSignedIn" && (
-        <button
-          type="button"
-          className="footer-copilot-panel-btn"
-          onClick={() => void handleSignOut()}>
-          {t("footer.menu.sign-out")}
-        </button>
-      )}
-    </div>
+      </div>
+    </>
   );
 };
 

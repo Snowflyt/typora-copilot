@@ -158,6 +158,10 @@ interface Window {
       cb: (results: [boolean, string, string, string]) => void,
     ): void;
   };
+
+  getCodeMirrorMode: (
+    lang: Typora.LanguageId,
+  ) => NonNullable<CodeMirror.EditorConfiguration["mode"]>;
 }
 
 /**********

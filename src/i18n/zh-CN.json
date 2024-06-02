@@ -80,10 +80,26 @@
     "menu": {
       "sign-in": "登录以认证 Copilot",
       "sign-out": "退出登录",
-      "not-authorized": "你的 GitHub 账户尚未订阅 Copilot"
+      "not-authorized": "你的 GitHub 账户尚未订阅 Copilot",
+      "settings": "设置"
     }
   },
   "hint": {
     "generated-by-copilot": "由 GitHub Copilot 生成"
+  },
+  "settings-panel": {
+    "title": "Copilot：设置",
+    "general": {
+      "title": "通用设置",
+      "use-inline-completion-text-in-source": {
+        "label": "在源代码模式中使用行内补全文本（Beta）",
+        "description": "在源代码模式中使用行内补全文本，而不是建议面板"
+      },
+      "use-inline-completion-text-in-preview-code-blocks": {
+        "label": "在预览模式代码块中使用行内补全文本（Early alpha）",
+        "description": "在预览模式的代码块中使用行内补全文本，而不是建议面板",
+        "warning": "此功能仍处于早期阶段，很可能会损坏你的文档。请谨慎使用。"
+      }
+    }
   }
 }

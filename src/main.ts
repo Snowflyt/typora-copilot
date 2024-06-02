@@ -1,3 +1,6 @@
+/* eslint-disable sonarjs/no-identical-functions */
+/* eslint-disable sonarjs/no-duplicate-string */
+
 import { forkNode } from "@modules/child_process";
 import * as path from "@modules/path";
 import { pathToFileURL } from "@modules/url";
@@ -10,11 +13,13 @@ import { attachSuggestionPanel } from "./components/SuggestionPanel";
 import { PLUGIN_DIR, VERSION } from "./constants";
 import { attachFooter } from "./footer";
 import { logger } from "./logging";
+import { settings } from "./settings";
 import {
   File,
   TYPORA_VERSION,
   getActiveFilePathname,
   getCaretPosition,
+  getCodeMirror,
   getWorkspaceFolder,
   waitUntilEditorInitialized,
 } from "./typora-utils";
@@ -57,7 +62,8 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
    * @returns
    */
   const insertCompletionTextToEditor = (options: Completion) => {
-    const { displayText, position, range, text } = options;
+    const { position, range } = options;
+    let { displayText, text } = options;
 
     const activeElement = document.activeElement;
     if (!activeElement) return;
@@ -72,58 +78,87 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
     // When not in writer, do not insert completion text
     if ("BODY" === activeElement.tagName) return;
 
-    // If in a CodeMirror instance, try to use the cm way to insert completion text
-    if ("TEXTAREA" === activeElement.tagName) {
-      const cms = $(activeElement).closest(".CodeMirror");
-      if (!cms || !cms.length) return;
-      const cm = (cms[0] as unknown as { CodeMirror: CodeMirror.Editor }).CodeMirror;
-      const subCmCompletion = { ...options };
+    let mode: NonNullable<CodeMirror.EditorConfiguration["mode"]> | null = null;
+    let fontSize: string | null = null;
+    let backgroundColor: string | null = null;
+    // If in a CodeMirror instance, prune completion text to only include text before code block starter
+    if ("TEXTAREA" === activeElement.tagName && getCodeMirror(activeElement)) {
+      const cm = getCodeMirror(activeElement)!;
+
       const startPos = getCaretPosition()!;
       startPos.line -=
         cm.getValue(File.useCRLF ? "\r\n" : "\n").split(File.useCRLF ? "\r\n" : "\n").length - 1;
       startPos.character -= cm.getCursor().ch;
-      // Set `position` and `range` to be relative to `startPos`
-      subCmCompletion.position = {
-        line: position.line - startPos.line,
-        character: position.character - startPos.character,
-      };
-      subCmCompletion.range = {
-        start: {
-          line: range.start.line - startPos.line,
-          character: range.start.character - startPos.character,
-        },
-        end: {
-          line: range.end.line - startPos.line,
-          character: range.end.character - startPos.character,
-        },
-      };
+      if (startPos.character < 0) startPos.character = 0;
+
       // Get starter of CodeMirror to determine whether it is a code block, formula, etc.
-      let cmStarter = state.markdown.split(File.useCRLF ? "\r\n" : "\n")[startPos.line - 1];
+      const cmStarter = state.markdown.split(File.useCRLF ? "\r\n" : "\n")[startPos.line - 1];
 
-      // eslint-disable-next-line sonarjs/no-collapsible-if
       if (cmStarter) {
-        if (cmStarter.startsWith("```") || cmStarter.startsWith("~~~")) {
-          // * Code block *
-          cmStarter = cmStarter.slice(0, 3);
-          // Get only completion text before code block starter, as in Typora code block it is not possible
-          // to insert a new code block or end one using "```" or "~~~"
-          const indexOfCodeBlockStarter = subCmCompletion.text.indexOf(cmStarter);
-          if (indexOfCodeBlockStarter !== -1) {
-            subCmCompletion.displayText = subCmCompletion.displayText.slice(
-              0,
-              subCmCompletion.displayText.indexOf(cmStarter),
-            );
-            subCmCompletion.text = subCmCompletion.text.slice(0, indexOfCodeBlockStarter);
-            const textAfterCodeBlockStarter = subCmCompletion.text.slice(indexOfCodeBlockStarter);
-            // Reduce `subCmCompletion.range` to only include text before code block starter
-            const rows = textAfterCodeBlockStarter.split(File.useCRLF ? "\r\n" : "\n").length - 1;
-            subCmCompletion.range.end.line -= rows;
-            subCmCompletion.range.end.character = textAfterCodeBlockStarter
-              .split(File.useCRLF ? "\r\n" : "\n")
-              .pop()!.length;
-          }
-          insertCompletionTextToCodeMirror(cm, subCmCompletion);
+        const cmElement = cm.getWrapperElement();
 
+        let handled = false;
+        // * Code block *
+        if (cmStarter.startsWith("```") || cmStarter.startsWith("~~~")) {
+          handled = true;
+          const lang = (cmElement as unknown as { lang: string }).lang;
+          mode = window.getCodeMirrorMode(lang);
+          fontSize = window.getComputedStyle(cmElement).fontSize;
+          backgroundColor = window.getComputedStyle(cmElement).backgroundColor;
+
+          // Keep only completion text before code block ender, as in Typora code block it is not possible
+          // to insert a new code block or end one using "```" or "~~~"
+          const ender = cmStarter.match(/^(.)\1*/)![0];
+          const indexOfEnder = text.indexOf(ender);
+          if (indexOfEnder !== -1) {
+            displayText = displayText.slice(0, displayText.indexOf(ender));
+            text = text.slice(0, indexOfEnder);
+            const textAfterEnder = text.slice(indexOfEnder);
+            // Reduce `range` to only include text before ender
+            const rows = textAfterEnder.split(File.useCRLF ? "\r\n" : "\n").length - 1;
+            range.end.line -= rows;
+            range.end.character = textAfterEnder.split(File.useCRLF ? "\r\n" : "\n").pop()!.length;
+          }
+        }
+        // * Math block *
+        else if (cmStarter === "$$") {
+          handled = true;
+          mode = "stex";
+
+          const match = text.match(/(?<!\\)\$\$/);
+          const indexOfEnder = match ? match.index : -1;
+          if (indexOfEnder !== -1) {
+            const match = displayText.match(/(?<!\\)\$\$/);
+            if (match) displayText = displayText.slice(0, match.index);
+            text = text.slice(0, indexOfEnder);
+            const textAfterEnder = text.slice(indexOfEnder);
+            // Reduce `range` to only include text before ender
+            const rows = textAfterEnder.split(File.useCRLF ? "\r\n" : "\n").length - 1;
+            range.end.line -= rows;
+            range.end.character = textAfterEnder.split(File.useCRLF ? "\r\n" : "\n").pop()!.length;
+          }
+        }
+
+        if (handled && settings.useInlineCompletionTextInPreviewCodeBlocks) {
+          const subCmCompletion = { ...options };
+
+          // Set `position` and `range` to be relative to `startPos`
+          subCmCompletion.position = {
+            line: position.line - startPos.line,
+            character: position.character - startPos.character,
+          };
+          subCmCompletion.range = {
+            start: {
+              line: range.start.line - startPos.line,
+              character: range.start.character - startPos.character,
+            },
+            end: {
+              line: range.end.line - startPos.line,
+              character: range.end.character - startPos.character,
+            },
+          };
+
+          insertCompletionTextToCodeMirror(cm, subCmCompletion);
           return;
         }
       }
@@ -137,7 +172,10 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
     if (!pos) return;
 
     // Insert a suggestion panel below the cursor
-    const unattachSuggestionPanel = attachSuggestionPanel(displayText);
+    const unattachSuggestionPanel = attachSuggestionPanel(displayText, mode, {
+      backgroundColor,
+      fontSize,
+    });
 
     copilot.notification.notifyShown({ uuid: options.uuid });
 
@@ -495,6 +533,123 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
     completion.accept = accept;
   };
 
+  /**
+   * Insert suggestion panel to CodeMirror.
+   * @param cm
+   * @param param_1
+   * @returns
+   */
+  const insertSuggestionPanelToCodeMirror = (
+    cm: CodeMirror.Editor,
+    { displayText, range, text, uuid }: Completion,
+  ) => {
+    // Insert a suggestion panel below the cursor
+    const unattachSuggestionPanel = attachSuggestionPanel(displayText, null, { cm });
+
+    copilot.notification.notifyShown({ uuid });
+
+    /**
+     * Reject the completion.
+     *
+     * **Warning:** It should only be called when no more changes is applied after
+     * completion text is inserted, otherwise history will be corrupted.
+     */
+    const _reject = () => {
+      if (completion.reject === reject) completion.reject = null;
+      if (completion.accept === accept) completion.accept = null;
+      if (finished) return;
+
+      finished = true;
+
+      unattachSuggestionPanel();
+
+      copilot.notification.notifyRejected({ uuids: [uuid] });
+
+      logger.debug("Rejected completion", uuid);
+    };
+    /**
+     * Accept the completion.
+     */
+    const _accept = () => {
+      if (completion.accept === accept) completion.accept = null;
+      if (completion.accept === accept) completion.accept = null;
+      if (finished) return;
+
+      finished = true;
+
+      // Insert completion text
+      cm.replaceRange(
+        text,
+        { line: range.start.line, ch: range.start.character },
+        { line: range.end.line, ch: range.end.character },
+      );
+
+      copilot.notification.notifyAccepted({ uuid });
+
+      logger.debug("Accepted completion");
+    };
+
+    /**
+     * Whether completion is already accepted or rejected.
+     */
+    let finished = false;
+    /**
+     * Whether completion listeners attached for this completion are cleared.
+     */
+    let cleared = false;
+    /**
+     * Clear completion listeners.
+     */
+    const clearListeners = () => {
+      cleared = true;
+      cm.off("keydown", keydownHandler);
+      cm.off("cursorActivity", cursorMoveHandler);
+    };
+
+    /**
+     * Intercept `Tab` key once and change it to accept completion.
+     * @param event
+     * @returns
+     */
+
+    const keydownHandler = (_: CodeMirror.Editor, event: KeyboardEvent) => {
+      if (cleared) return;
+
+      // Prevent tab key to trigger tab once
+      if (event.key === "Tab") {
+        event.preventDefault();
+        event.stopPropagation();
+        clearListeners();
+        _accept();
+      }
+    };
+    cm.on("keydown", keydownHandler);
+
+    /**
+     * Reject completion if cursor moved.
+     */
+    const cursorMoveHandler = () => {
+      if (cleared) return;
+
+      taskManager.cancelAll();
+
+      clearListeners();
+      _reject();
+    };
+    cm.on("cursorActivity", cursorMoveHandler);
+
+    const reject = () => {
+      clearListeners();
+      _reject();
+    };
+    completion.reject = reject;
+    const accept = () => {
+      clearListeners();
+      _accept();
+    };
+    completion.accept = accept;
+  };
+
   /*******************
    * Change handlers *
    *******************/
@@ -569,7 +724,10 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
         position: cursorPos,
         onCompletion: (comp) => {
           completion.reject?.();
-          if (editor.sourceView.inSourceMode) insertCompletionTextToCodeMirror(cm, comp);
+          if (editor.sourceView.inSourceMode)
+            if (settings.useInlineCompletionTextInSource)
+              insertCompletionTextToCodeMirror(cm, comp);
+            else insertSuggestionPanelToCodeMirror(cm, comp);
           else insertCompletionTextToEditor(comp);
         },
       });

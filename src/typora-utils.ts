@@ -486,6 +486,17 @@ export const findFreePort = async (startAt = 6190): Promise<number> => {
   return port;
 };
 
+/**
+ * Get closest CodeMirror instance from an element, if any.
+ * @param element Element to search.
+ * @returns CodeMirror instance if found, otherwise `null`.
+ */
+export const getCodeMirror = (element: Element): CodeMirror.Editor | null => {
+  const cms = $(element).closest(".CodeMirror");
+  if (!cms || !cms.length) return null;
+  return (cms[0] as unknown as { CodeMirror: CodeMirror.Editor }).CodeMirror;
+};
+
 /*******************************************************************************************
  * Extracted functions (Extracted from Typora's bundled code, I don't understand them all) *
  *******************************************************************************************/

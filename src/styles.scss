@@ -5,3 +5,17 @@
 .font-italic {
   font-style: italic !important;
 }
+
+.unset-button {
+  all: unset;
+  display: inline-block;
+  cursor: pointer;
+  text-align: center;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
