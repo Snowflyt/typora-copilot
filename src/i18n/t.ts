@@ -48,6 +48,7 @@ const isStringArray = (x: unknown): x is readonly string[] =>
  */
 export const t = (path: PathOf<typeof en>): string => {
   const locale =
+    window._options.userLocale ||
     window._options.appLocale ||
     (navigator.languages && navigator.languages[0]) ||
     navigator.language ||

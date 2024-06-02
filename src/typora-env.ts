@@ -24,6 +24,7 @@ import("rangy");
  * declared here.
  */
 declare var _options: {
+  userLocale?: string;
   appLocale?: string;
   appVersion: string;
 };
