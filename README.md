@@ -40,14 +40,49 @@ _\*Note: `/` means not tested._
 
 ## Installation
 
-### Script Install (Recommended)
+### Automated Installation (Recommended)
 
-For all platform users, first download the latest release from [the releases page](https://github.com/Snowfly-T/typora-copilot/releases) and unzip it.
+To install the plugin, you can just copy and paste the following command into your terminal:
 
 <details>
   <summary><strong>Windows</strong></summary>
 
-For Windows users, locate to the folder where you unzipped the release and run the following command in PowerShell **as administrator**:
+Run the following command in PowerShell **as administrator**:
+
+```powershell
+iwr -Uri "https://raw.githubusercontent.com/Snowflyt/typora-copilot/main/install.ps1" | iex
+```
+
+</details>
+
+<details>
+  <summary><strong>macOS</strong></summary>
+
+Run the following command in your terminal:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Snowflyt/typora-copilot/main/install.sh | sudo bash
+```
+
+</details>
+
+<details>
+  <summary><strong>Linux</strong></summary>
+
+Run the following command in your terminal:
+
+```bash
+wget -O - https://raw.githubusercontent.com/Snowflyt/typora-copilot/main/install.sh | sudo bash
+```
+
+</details>
+
+### Script Install
+
+<details>
+  <summary><strong>Windows</strong></summary>
+
+For Windows users, first download the latest release from [the releases page](https://github.com/Snowfly-T/typora-copilot/releases) and unzip it. Then locate to the folder where you unzipped the release and run the following command in PowerShell **as administrator**:
 
 ```powershell
 .\bin\install_windows.ps1
@@ -66,7 +101,7 @@ If the script fails to find Typora, you can specify the path to Typora manually:
 <details>
   <summary><strong>macOS</strong></summary>
 
-For macOS users, locate to the folder where you unzipped the release and run the following command in terminal:
+For macOS users, first download the latest release from [the releases page](https://github.com/Snowfly-T/typora-copilot/releases) and unzip it. Then locate to the folder where you unzipped the release and run the following command in terminal:
 
 ```bash
 sudo bash ./bin/install_macos.sh
@@ -87,7 +122,7 @@ You’ll see a message logging the installation directory of the plugin. _Keep i
 <details>
   <summary><strong>Linux</strong></summary>
 
-For Linux users, locate to the folder where you unzipped the release and run the following command in terminal:
+For Linux users, first download the latest release from [the releases page](https://github.com/Snowfly-T/typora-copilot/releases) and unzip it. THen locate to the folder where you unzipped the release and run the following command in terminal:
 
 ```bash
 sudo bash ./bin/install_linux.sh
@@ -135,7 +170,44 @@ Follow the prompts to authenticate Copilot plugin:
 
 ## Uninstallation
 
-### Script Uninstall (Recommended)
+### Automated Uninstallation (Recommended)
+
+To uninstall the plugin, you can just copy and paste the following command into your terminal:
+
+<details>
+  <summary><strong>Windows</strong></summary>
+
+Run the following command in PowerShell **as administrator**:
+
+```powershell
+iwr -Uri "https://raw.githubusercontent.com/Snowflyt/typora-copilot/main/bin/uninstall_windows.ps1" | iex
+```
+
+</details>
+
+<details>
+  <summary><strong>macOS</strong></summary>
+
+Run the following command in your terminal:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Snowflyt/typora-copilot/main/bin/uninstall_macos.sh | sudo bash
+```
+
+</details>
+
+<details>
+  <summary><strong>Linux</strong></summary>
+
+Run the following command in your terminal:
+
+```bash
+wget -O - https://raw.githubusercontent.com/Snowflyt/typora-copilot/main/bin/uninstall_linux.sh | sudo bash
+```
+
+</details>
+
+### Script Uninstall
 
 <details>
   <summary><strong>Windows</strong></summary>

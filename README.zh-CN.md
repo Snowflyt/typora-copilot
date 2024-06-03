@@ -40,14 +40,49 @@ _\*注：`/` 表示未经过测试。_
 
 ## 安装
 
-### 脚本安装（推荐）
+### 一键安装（推荐）
 
-对于所有平台的用户，首先从[发布页面](https://github.com/Snowfly-T/typora-copilot/releases)下载最新版本并解压。
+你可以直接将以下命令复制粘贴到你的终端中来安装插件：
 
 <details>
   <summary><strong>Windows</strong></summary>
 
-对于 Windows 用户，定位到你解压的文件夹并在 PowerShell 中**以管理员身份**运行以下命令：
+以**管理员身份**在 PowerShell 中运行以下命令：
+
+```powershell
+iwr -Uri "https://raw.githubusercontent.com/Snowflyt/typora-copilot/main/install.ps1" | iex
+```
+
+</details>
+
+<details>
+  <summary><strong>macOS</strong></summary>
+
+在终端中运行以下命令：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Snowflyt/typora-copilot/main/install.sh | sudo bash
+```
+
+</details>
+
+<details>
+  <summary><strong>Linux</strong></summary>
+
+在终端中运行以下命令：
+
+```bash
+wget -O - https://raw.githubusercontent.com/Snowflyt/typora-copilot/main/install.sh | sudo bash
+```
+
+</details>
+
+### 脚本安装
+
+<details>
+  <summary><strong>Windows</strong></summary>
+
+对于 Windows 用户，首先从[发布页面](https://github.com/Snowfly-T/typora-copilot/releases)下载最新版本并解压。然后定位到你解压的文件夹并在 PowerShell 中**以管理员身份**运行以下命令：
 
 ```powershell
 .\bin\install_windows.ps1
@@ -68,7 +103,7 @@ _\*注：`/` 表示未经过测试。_
 <details>
   <summary><strong>macOS</strong></summary>
 
-对于 macOS 用户，定位到你解压的文件夹并在终端中运行以下命令：
+对于 macOS 用户，首先从[发布页面](https://github.com/Snowfly-T/typora-copilot/releases)下载最新版本并解压。然后定位到你解压的文件夹并在终端中运行以下命令：
 
 ```bash
 sudo bash ./bin/install_macos.sh
@@ -89,7 +124,7 @@ sudo bash ./bin/install_macos.sh --path "/Applications/Typora.app/" # 替换为�
 <details>
   <summary><strong>Linux</strong></summary>
 
-对于 Linux 用户，定位到你解压的文件夹并在终端中运行以下命令：
+对于 Linux 用户，首先从[发布页面](https://github.com/Snowfly-T/typora-copilot/releases)下载最新版本并解压。然后定位到你解压的文件夹并在终端中运行以下命令：
 
 ```bash
 sudo bash ./bin/install_linux.sh
@@ -138,12 +173,49 @@ sudo bash ./bin/install_linux.sh --path "/usr/share/typora/" # 替换为你的 T
 1. 用户代码会自动复制到你的剪贴板。
 2. 遵照弹出提示上的说明，打开 GitHub 身份验证页面。
 3. 将用户代码粘贴到 GitHub 身份验证页面中。
-4. 返回 Typora 并在对话框中按 OK。
+4. 返回 Typora 并在对话框中按下“确定”按钮。
 5. 如果你在**几秒钟后**看到一个“已登录 GitHub Copilot”对话框，Copilot 插件应该就可以正常工作了（在中国大陆，你可能需要等待更长的时间）。
 
 ## 卸载
 
-### 脚本卸载（推荐）
+### 一键卸载（推荐）
+
+要卸载插件，你可以直接将以下命令复制粘贴到你的终端中：
+
+<details>
+  <summary><strong>Windows</strong></summary>
+
+以**管理员身份**在 PowerShell 中运行以下命令：
+
+```powershell
+iwr -Uri "https://raw.githubusercontent.com/Snowflyt/typora-copilot/main/bin/uninstall_windows.ps1" | iex
+```
+
+</details>
+
+<details>
+  <summary><strong>macOS</strong></summary>
+
+在终端中运行以下命令：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Snowflyt/typora-copilot/main/bin/uninstall_macos.sh | sudo bash
+```
+
+</details>
+
+<details>
+  <summary><strong>Linux</strong></summary>
+
+在终端中运行以下命令：
+
+```bash
+wget -O - https://raw.githubusercontent.com/Snowflyt/typora-copilot/main/bin/uninstall_linux.sh | sudo bash
+```
+
+</details>
+
+### 脚本卸载
 
 <details>
   <summary><strong>Windows</strong></summary>
