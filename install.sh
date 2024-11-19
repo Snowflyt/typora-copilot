@@ -8,7 +8,7 @@ fi
 latest_release=$(curl -s https://api.github.com/repos/Snowflyt/typora-copilot/releases/latest)
 download_url=$(echo "$latest_release" | grep '"browser_download_url"' | head -n 1 | sed -E 's/.*"browser_download_url": "(.*)".*/\1/')
 tag_name=$(echo "$latest_release" | grep '"tag_name"' | head -n 1 | sed -E 's/.*"tag_name": "(.*)".*/\1/')
-curl -L $download_url -o "typora-copilot-$tag_name.zip"
+curl -L "$download_url" -o "typora-copilot-$tag_name.zip"
 if [ -d "typora-copilot-$tag_name" ]; then
   rm -rf "typora-copilot-$tag_name"
 fi
