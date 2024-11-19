@@ -30,7 +30,7 @@ declare var _options: {
 /**
  * The CodeMirror constructor.
  */
-var CodeMirror: typeof CodeMirror;
+// var CodeMirror: typeof CodeMirror;
 
 /**
  * The actual type of `File` in Typora application.
