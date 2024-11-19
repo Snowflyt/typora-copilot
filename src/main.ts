@@ -483,11 +483,11 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
      * @param cm
      * @param param_1
      */
-    const cmChangeFixer = (
-      cm: CodeMirror.Editor,
-      { cancel, from, origin, text, to }: CodeMirror.EditorChangeCancellable,
-    ) => {
+    const cmChangeFixer = (cm: CodeMirror.Editor, change: CodeMirror.EditorChangeCancellable) => {
       if (cleared) return;
+
+      const { from, origin, text, to } = change;
+      const cancel = change.cancel.bind(change);
 
       clearListeners();
       // Cancel the change temporarily
