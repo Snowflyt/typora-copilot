@@ -3,7 +3,7 @@
 /* eslint-env node */
 
 /**
- * @typedef {{ [key: string]: string | LocaleMap }} LocaleMap
+ * @typedef {{ [key: string]: string | string[] | LocaleMap }} LocaleMap
  */
 
 /**
@@ -12,8 +12,10 @@
  */
 const pathOf = (o) =>
   Object.entries(o).flatMap(([k, v]) =>
-    typeof v === "string" ? [k] : pathOf(v).map((x) => `${k}.${x}`),
+    typeof v === "string" || isStringArray(v) ? [k] : pathOf(v).map((x) => `${k}.${x}`),
   );
+const isStringArray = (/** @type {unknown} */ value) =>
+  Array.isArray(value) && value.every((v) => typeof v === "string");
 
 /** @satisfies {import("eslint").Linter.Config} */
 const config = {
@@ -37,13 +39,20 @@ const config = {
   ignorePatterns: ["!.lintstagedrc.js"],
   plugins: ["sort-destructure-keys"],
   rules: {
-    "@typescript-eslint/consistent-type-imports": ["error", { prefer: "type-imports" }],
+    "@typescript-eslint/consistent-type-imports": [
+      "error",
+      { prefer: "type-imports", disallowTypeAnnotations: false },
+    ],
+    "@typescript-eslint/no-empty-object-type": "off",
+    "@typescript-eslint/no-namespace": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
+    "@typescript-eslint/no-require-imports": ["error", { allow: ["\\.json$"] }],
+    "@typescript-eslint/no-unsafe-argument": "off",
+    "@typescript-eslint/no-unsafe-assignment": "off",
     "@typescript-eslint/no-unsafe-call": "off",
     "@typescript-eslint/no-unsafe-return": "off",
-    "@typescript-eslint/no-unsafe-assignment": "off",
     "@typescript-eslint/no-unused-vars": "off", // Already enabled in `tsconfig.json`
-    "@typescript-eslint/no-var-requires": ["error", { allow: ["\\.json$"] }],
+    "import/export": "off",
     "import/consistent-type-specifier-style": ["error", "prefer-top-level"],
     "import/namespace": "off",
     "import/no-unresolved": "off",
@@ -68,7 +77,15 @@ const config = {
         "newlines-between": "always",
       },
     ],
+    "no-restricted-syntax": [
+      "error",
+      {
+        selector: "CallExpression[callee.property.name='push'] > SpreadElement.arguments",
+        message: "Do not use spread arguments in Array#push",
+      },
+    ],
     "no-undef": "off",
+    "object-shorthand": "error",
     "sonarjs/cognitive-complexity": "off",
     "sonarjs/no-duplicate-string": [
       "error",

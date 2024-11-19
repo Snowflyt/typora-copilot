@@ -5,10 +5,8 @@
 /// it's not worth the effort to declare all the types.                                        ///
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-/* eslint-disable @typescript-eslint/consistent-type-imports */
+/* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-redundant-type-constituents */
-/* eslint-disable @typescript-eslint/no-namespace */
-
 /* eslint-disable no-var */
 
 import("codemirror");
@@ -32,7 +30,7 @@ declare var _options: {
 /**
  * The CodeMirror constructor.
  */
-declare var CodeMirror: typeof CodeMirror;
+var CodeMirror: typeof CodeMirror;
 
 /**
  * The actual type of `File` in Typora application.

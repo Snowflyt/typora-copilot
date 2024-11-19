@@ -26,7 +26,7 @@ const server = wrapNodeChildProcess(
 console.log("Copilot LSP server started. PID:", server.pid);
 
 const startWebSocketServer = () => {
-  const wss = new WebSocketServer({ port: port });
+  const wss = new WebSocketServer({ port });
 
   wss.on("connection", (ws) => {
     console.log(`➕➕ Connection (${wss.clients.size})`);

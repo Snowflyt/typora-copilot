@@ -147,7 +147,6 @@ export type ResponseError = {
   data?: LSPAny;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace ErrorCodes {
   // Defined by JSON-RPC
   export const ParseError = -32700;
@@ -433,7 +432,7 @@ export type PositionEncodingKind = (typeof PositionEncodingKind)[keyof typeof Po
  *
  * @since 3.17.0
  */
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace PositionEncodingKind {
   /**
    * Character offsets count UTF-8 code units (e.g bytes).
@@ -948,7 +947,7 @@ export type DiagnosticSeverity = (typeof DiagnosticSeverity)[keyof typeof Diagno
 /**
  * Diagnostic severities and tags supported by the protocol.
  */
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace DiagnosticSeverity {
   /**
    * Reports an error.
@@ -982,7 +981,7 @@ export type DiagnosticTag = (typeof DiagnosticTag)[keyof typeof DiagnosticTag];
  *
  * @since 3.15.0
  */
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace DiagnosticTag {
   /**
    * Unused or unnecessary code.
@@ -1069,7 +1068,7 @@ export type MarkupKind = (typeof MarkupKind)[keyof typeof MarkupKind];
  * Please note that `MarkupKinds` must not start with a `$`. This kinds are reserved for internal
  * usage.
  */
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace MarkupKind {
   /**
    * Plain text is supported as a content format
@@ -1400,7 +1399,7 @@ export type ResourceOperationKind =
 /**
  * The kind of resource operations supported by the client.
  */
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace ResourceOperationKind {
   /**
    * Supports creating new files and folders.
@@ -1425,7 +1424,7 @@ export type FailureHandlingKind = (typeof FailureHandlingKind)[keyof typeof Fail
 /**
  * The failure handling strategy of a client if applying the workspace edit.
  */
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace FailureHandlingKind {
   /**
    * Applying the workspace change is simply aborted if one of the changes
@@ -2153,7 +2152,7 @@ export type InitializeErrorCodes = (typeof InitializeErrorCodes)[keyof typeof In
 /**
  * Known error codes for an `InitializeErrorCodes`.
  */
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace InitializeErrorCodes {
   /**
    * If the protocol version provided by the client can't be handled by
@@ -2570,7 +2569,7 @@ export type TextDocumentSyncKind = (typeof TextDocumentSyncKind)[keyof typeof Te
 /**
  * Defines how the host (editor) should sync document changes to the language server.
  */
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace TextDocumentSyncKind {
   /**
    * Documents should not be synced at all.
@@ -2732,7 +2731,7 @@ export type TextDocumentSaveReason =
 /**
  * Represents reasons why a text document is saved.
  */
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace TextDocumentSaveReason {
   /**
    * Manually triggered, e.g. by the user pressing save, by starting debugging, or by an API call.
@@ -2898,7 +2897,7 @@ export type NotebookCellKind = (typeof NotebookCellKind)[keyof typeof NotebookCe
  *
  * @since 3.17.0
  */
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace NotebookCellKind {
   /**
    * A markup-cell is formatted source that is used for display.
@@ -3654,7 +3653,7 @@ export type DocumentHighlightKind =
 /**
  * A document highlight kind.
  */
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace DocumentHighlightKind {
   /**
    * A textual occurrence.
@@ -3948,7 +3947,7 @@ export type FoldingRangeKind =
 /**
  * A set of predefined range kinds.
  */
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace FoldingRangeKind {
   /**
    * Folding range for a comment
@@ -4144,7 +4143,7 @@ export type SymbolKind = (typeof SymbolKind)[keyof typeof SymbolKind];
 /**
  * Symbol kinds.
  */
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace SymbolKind {
   export const File = 1;
   export const Module = 2;
@@ -4183,7 +4182,7 @@ export type SymbolTag = (typeof SymbolTag)[keyof typeof SymbolTag];
  *
  * @since 3.16
  */
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace SymbolTag {
   /**
    * Render a symbol as obsolete, usually using a strike-out.
@@ -4349,7 +4348,7 @@ export enum SemanticTokenModifiers {
 }
 
 export type TokenFormat = (typeof TokenFormat)[keyof typeof TokenFormat];
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace TokenFormat {
   export const Relative = "relative";
 }
@@ -4779,7 +4778,7 @@ export type InlayHintKind = (typeof InlayHintKind)[keyof typeof InlayHintKind];
  *
  * @since 3.17.0
  */
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace InlayHintKind {
   /**
    * An inlay hint that for a type annotation.
@@ -5311,7 +5310,7 @@ export type CompletionTriggerKind =
 /**
  * How a completion was triggered.
  */
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace CompletionTriggerKind {
   /**
    * Completion was triggered by typing an identifier (24x7 code
@@ -5436,7 +5435,7 @@ export type InsertTextFormat = (typeof InsertTextFormat)[keyof typeof InsertText
  * Defines whether the insert text in a completion item should be interpreted as
  * plain text or a snippet.
  */
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace InsertTextFormat {
   /**
    * The primary text to be inserted is treated as a plain string.
@@ -5467,7 +5466,7 @@ export type CompletionItemTag = (typeof CompletionItemTag)[keyof typeof Completi
  *
  * @since 3.15.0
  */
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace CompletionItemTag {
   /**
    * Render a completion as obsolete, usually using a strike-out.
@@ -5508,7 +5507,7 @@ export type InsertTextMode = (typeof InsertTextMode)[keyof typeof InsertTextMode
  *
  * @since 3.16.0
  */
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace InsertTextMode {
   /**
    * The insertion or replace strings is taken as it is. If the
@@ -5741,7 +5740,7 @@ export type CompletionItemKind = (typeof CompletionItemKind)[keyof typeof Comple
 /**
  * The kind of a completion entry.
  */
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace CompletionItemKind {
   export const Text = 1;
   export const Method = 2;
@@ -5941,7 +5940,7 @@ export type DocumentDiagnosticReportKind =
  *
  * @since 3.17.0
  */
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace DocumentDiagnosticReportKind {
   /**
    * A diagnostic report with a full
@@ -6277,7 +6276,7 @@ export type SignatureHelpTriggerKind =
  *
  * @since 3.15.0
  */
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace SignatureHelpTriggerKind {
   /**
    * Signature help was invoked manually by the user or by a command.
@@ -6558,7 +6557,7 @@ export type CodeActionKind = string;
 /**
  * A set of predefined code action kinds.
  */
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace CodeActionKind {
   /**
    * Empty kind.
@@ -6682,7 +6681,7 @@ export type CodeActionTriggerKind =
  *
  * @since 3.17.0
  */
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace CodeActionTriggerKind {
   /**
    * Code actions were explicitly requested by the user or by an extension.
@@ -7047,7 +7046,7 @@ export type DocumentOnTypeFormattingParams = {
 
 export type PrepareSupportDefaultBehavior =
   (typeof PrepareSupportDefaultBehavior)[keyof typeof PrepareSupportDefaultBehavior];
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace PrepareSupportDefaultBehavior {
   /**
    * The client's default behavior is to select the identifier
@@ -7402,7 +7401,7 @@ export type FileOperationPatternKind =
  *
  * @since 3.16.0
  */
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace FileOperationPatternKind {
   /**
    * The pattern matches a file only.
@@ -7652,7 +7651,7 @@ export type FileSystemWatcher = {
 };
 
 export type WatchKind = (typeof WatchKind)[keyof typeof WatchKind];
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace WatchKind {
   /**
    * Interested in create events.
@@ -7701,7 +7700,7 @@ export type FileChangeType = (typeof FileChangeType)[keyof typeof FileChangeType
 /**
  * The file event type.
  */
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace FileChangeType {
   /**
    * The file got created.
@@ -7818,7 +7817,7 @@ export type MessageType = (typeof MessageType)[keyof typeof MessageType];
  * Message type of the `window/showMessage`, `window/showMessageRequest` and `window/logMessage`
  * request.
  */
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace MessageType {
   /**
    * An error message.
