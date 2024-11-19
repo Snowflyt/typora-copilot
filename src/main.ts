@@ -397,7 +397,7 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
 
       if (!sourceView.inSourceMode) {
         editor.undo.commandStack.length = 0;
-        editor.undo.commandStack.push(...commandStackBefore);
+        Array.prototype.push.apply(editor.undo.commandStack, commandStackBefore);
       }
 
       copilot.notification.notifyRejected({ uuids: [uuid] });
@@ -428,7 +428,7 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
 
       if (!sourceView.inSourceMode) {
         editor.undo.commandStack.length = 0;
-        editor.undo.commandStack.push(...commandStackBefore);
+        Array.prototype.push.apply(editor.undo.commandStack, commandStackBefore);
       }
 
       // Insert completion text
