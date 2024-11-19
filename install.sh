@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [ "$(id -u)" -ne 0 ]; then
   echo "Please run as root"
