@@ -31,7 +31,7 @@ import type { NodeServer } from "@modules/child_process";
 
 import { ErrorCodes, JSONRPC_VERSION, MessageType } from "@/types/lsp";
 import { createLogger, formatErrorCode, formatId, formatMethod } from "@/utils/logging";
-import { isNotificationMessage, isRequestMessage, isResponseMessage } from "@/utils/lsp";
+import { isNotificationMessage, isRequestMessage, isResponseMessage, toJSError } from "@/utils/lsp";
 import { isKeyOf } from "@/utils/tools";
 
 /**
@@ -822,7 +822,7 @@ export const createClient = <
               method,
               (reason) => {
                 result.status = "rejected";
-                reject(reason);
+                reject(toJSError(reason));
               },
             ]);
           }),

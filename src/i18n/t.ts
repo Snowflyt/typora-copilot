@@ -25,6 +25,12 @@ interface LocaleMap {
 const isStringArray = (x: unknown): x is readonly string[] =>
   Array.isArray(x) && x.every((v) => typeof v === "string");
 
+class TranslationError extends Error {
+  constructor(message: string) {
+    super(message);
+  }
+}
+
 /**
  * Get locale string by path.
  * @param path The path of the locale string.
@@ -67,28 +73,33 @@ export const t = (path: PathOf<typeof en>): string => {
     for (const key of keys.slice(0, -1)) {
       const x = tmp[key];
       if (x === undefined)
-        throw (
+        throw new TranslationError(
           `Cannot find translation for "${path}": "${key}" not found` +
-          (visitedKeys.length > 0 ? ` in "${visitedKeys.join(".")}".` : ".")
+            (visitedKeys.length > 0 ? ` in "${visitedKeys.join(".")}".` : "."),
         );
       if (typeof x === "string" || isStringArray(x))
-        throw `Cannot find translation for "${path}": "${[...visitedKeys, key].join(".")}" is not an object.`;
+        throw new TranslationError(
+          `Cannot find translation for "${path}": "${[...visitedKeys, key].join(".")}" is not an object.`,
+        );
       tmp = x;
       visitedKeys.push(key);
     }
     const lastKey = keys.at(-1);
-    if (lastKey === undefined) throw "Empty path is not allowed.";
+    if (lastKey === undefined) throw new TranslationError("Empty path is not allowed.");
     const res = tmp[lastKey];
     if (res === undefined)
-      throw (
+      throw new TranslationError(
         `Cannot find translation for "${path}": "${lastKey}" not found` +
-        (visitedKeys.length > 0 ? ` in "${visitedKeys.join(".")}".` : ".")
+          (visitedKeys.length > 0 ? ` in "${visitedKeys.join(".")}".` : "."),
       );
     if (typeof res !== "string" && !isStringArray(res))
-      throw `Cannot find translation for "${path}": "${path}" is not a string.`;
+      throw new TranslationError(
+        `Cannot find translation for "${path}": "${path}" is not a string.`,
+      );
     return typeof res === "string" ? res : res.join("\n");
   } catch (e) {
-    console.warn(e);
+    if (e instanceof TranslationError) console.warn(e.message);
+    else console.error(e);
     return path;
   }
 };

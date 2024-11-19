@@ -6,6 +6,7 @@ import * as path from "@modules/path";
 import { fileURLToPath } from "@modules/url";
 
 import { NoFreePortError, PlatformError } from "./errors";
+import { CommandError } from "./errors/CommandError";
 import { getCaretPlacement } from "./extracted";
 
 import type { Position } from "./types/lsp";
@@ -451,7 +452,7 @@ export const runShellCommand = (command: string, options?: { cwd?: string }): Pr
         { args: command, ...(cwd ? { cwd } : {}) },
         ([success, stdout, stderr]) => {
           if (success) resolve(stdout);
-          else reject(stderr);
+          else reject(new CommandError(stderr));
         },
       );
     });
@@ -460,7 +461,7 @@ export const runShellCommand = (command: string, options?: { cwd?: string }): Pr
     return new Promise((resolve, reject) => {
       window.reqnode!("child_process").exec(command, { cwd }, (error, stdout, stderr) => {
         if (error) reject(error);
-        else if (stderr) reject(stderr);
+        else if (stderr) reject(new CommandError(stderr));
         else resolve(stdout);
       });
     });

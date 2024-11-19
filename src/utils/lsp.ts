@@ -158,6 +158,29 @@ export const isResponseError = (value: unknown): value is ResponseError => {
   );
 };
 
+export const toJSError = (error: ResponseError) => {
+  const ErrorClass = class extends Error {
+    constructor(message?: string) {
+      super(message);
+    }
+  };
+  let errorName = getErrorCodeName(error.code) ?? "UnknownError";
+  if (!errorName.endsWith("Error")) errorName += "Error";
+  Object.defineProperty(ErrorClass, "name", {
+    value: errorName,
+    writable: false,
+    enumerable: false,
+    configurable: true,
+  });
+  Object.defineProperty(ErrorClass.prototype, "name", {
+    value: errorName,
+    writable: true,
+    enumerable: false,
+    configurable: true,
+  });
+  return Object.assign(new ErrorClass(error.message), { code: error.code, data: error.data });
+};
+
 /**
  * Get the name of an error code.
  * @param errorCode The error code.
