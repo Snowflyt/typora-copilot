@@ -34,7 +34,6 @@ export const attachSuggestionPanel = (
     options?.cm ?
       { x: options.cm.cursorCoords().left, y: options.cm.cursorCoords().top }
     : getCaretCoordinate();
-  console.warn({ pos });
   if (!pos) return () => {};
 
   const container = document.createElement("div");
