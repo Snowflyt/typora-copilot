@@ -1,6 +1,6 @@
 import fs from "node:fs";
 
-import replace from "replace-in-file";
+import { replaceInFileSync } from "replace-in-file";
 
 import packageJSON from "./package.json";
 
@@ -17,7 +17,7 @@ const options = {
 if (fs.readFileSync(CONSTANTS_FILE_PATHNAME, "utf-8").includes(options.to)) process.exit(0);
 
 try {
-  replace.sync(options);
+  replaceInFileSync(options);
   console.log("Plugin VERSION updated:", version);
 } catch (error) {
   console.error("Error occurred while updating plugin VERSION:", error);
