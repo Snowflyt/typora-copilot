@@ -12,7 +12,7 @@ This plugin uses the LSP server extracted from Copilot.vim to provide suggestion
 
 > [!NOTE]
 >
-> For Windows / Linux users using Typora < 1.6 or macOS users using any version of Typora, you need to install [Node.js](https://nodejs.org/en/download/) ≥ 18.
+> For Windows / Linux users using Typora < 1.6 or macOS users using any version of Typora, you need to install [Node.js](https://nodejs.org/en/download) ≥ 18.
 
 _\*Note: `/` means not tested._
 

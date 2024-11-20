@@ -12,7 +12,7 @@
 
 > [!NOTE]
 >
-> 对于使用 Typora < 1.6 的 Windows / Linux 用户以及使用任何版本 Typora 的 macOS 用户，你需要安装 [Node.js](https://nodejs.org/en/download/) ≥ 18.
+> 对于使用 Typora < 1.6 的 Windows / Linux 用户以及使用任何版本 Typora 的 macOS 用户，你需要安装 [Node.js](https://nodejs.org/zh-cn/download) ≥ 18.
 
 _\*注：`/` 表示未经过测试。_
 
