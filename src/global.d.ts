@@ -5,12 +5,11 @@
 /// it's not worth the effort to declare all the types.                                        ///
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-/* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 /* eslint-disable no-var */
 
-import("codemirror");
-import("rangy");
+/// <reference types="codemirror" />
+/// <reference types="rangy" />
 
 /*********************
  * Global variables. *
