@@ -26,9 +26,50 @@
         "<span>在完成验证<strong>之后</strong>点击“确定”。</span>"
       ]
     },
+    "sign-in-request-failed": {
+      "title": "GitHub Copilot 登录请求失败",
+      "html": [
+        "<p>无法向 GitHub Copilot 发送登录登录请求。</p>",
+        "<p>这很可能是由于网络问题导致的。请检查您的网络连接并重试。</p>",
+        "<div style=\"border-left: 4px solid #f00; padding: 10px 15px 5px; margin-top: 20px; background: #fef5f5;\">",
+        "  <p style=\"text-align: left;\"><strong>⚠️ 注意：</strong>对于中国大陆用户，请确保您的网络环境能够正常访问 GitHub Copilot 的服务。这通常需要配置代理。</p>",
+        "  <p style=\"text-align: left;\">大多数代理软件默认<strong>只会影响浏览器流量</strong>，<i>不会</i>接管其他应用程序的网络连接，因此<strong>仅开启代理软件可能不足以让 Typora 正常访问 GitHub Copilot，即使您启用了代理软件的“全局模式”</strong>。</p>",
+        "  <p style=\"text-align: left;\">——大多数代理软件的“全局模式”仅意味着将所有请求重定向到代理服务器，这并不能改变它们只接管了浏览器流量的事实。</p>",
+        "</div>",
+        "<div style=\"margin-top: 20px; padding: 10px 15px 20px; background: #f5f8fa; border: 1px solid #ccc; border-radius: 4px;\">",
+        "  <p style=\"text-align: left;\">一些代理软件提供“代理网卡”功能，能够通过虚拟网卡接管所有网络流量，从而使 Typora 也能通过代理访问 GitHub Copilot 的服务。</p>",
+        "  <p style=\"text-align: left;\">此功能在不同的代理软件中有不同的名称：</p>",
+        "  <ul style=\"text-align: left;\">",
+        "    <li>如果您使用 <strong>CFW/Clash Verge/V2RayN</strong>，可以启用“<strong>Tun 模式</strong>”。</li>",
+        "    <li>如果使用 <strong>ClashX Pro</strong>，可以启用“<strong>增强模式</strong>”。</li>",
+        "  </ul>",
+        "</div>"
+      ]
+    },
     "signed-in": {
       "title": "已登录 GitHub Copilot",
       "html": ["<p>您已成功登录 Copilot。</p>", "<p>按“确定”继续。</p>"]
+    },
+    "sign-in-verification-failed": {
+      "title": "GitHub Copilot 登录验证失败",
+      "html": [
+        "<p>未能完成 GitHub Copilot 登录过程。</p>",
+        "<p>请确保您已经在浏览器中完成验证<strong>再</strong>点击 OK。</p>",
+        "<p>如果问题持续，请检查您的网络连接并重试。</p>",
+        "<div style=\"border-left: 4px solid #f00; padding: 10px 15px 5px; margin-top: 20px; background: #fef5f5;\">",
+        "  <p style=\"text-align: left;\"><strong>⚠️ 注意：</strong>对于中国大陆用户，请确保您的网络环境能够正常访问 GitHub Copilot 的服务。这通常需要配置代理。</p>",
+        "  <p style=\"text-align: left;\">大多数代理软件默认<strong>只会影响浏览器流量</strong>，<i>不会</i>接管其他应用程序的网络连接，因此<strong>仅开启代理软件可能不足以让 Typora 正常访问 GitHub Copilot，即使您启用了代理软件的“全局模式”</strong>。</p>",
+        "  <p style=\"text-align: left;\">——大多数代理软件的“全局模式”仅意味着将所有请求重定向到代理服务器，这并不能改变它们只接管了浏览器流量的事实。</p>",
+        "</div>",
+        "<div style=\"margin-top: 20px; padding: 10px 15px 20px; background: #f5f8fa; border: 1px solid #ccc; border-radius: 4px;\">",
+        "  <p style=\"text-align: left;\">一些代理软件提供“代理网卡”功能，能够通过虚拟网卡接管所有网络流量，从而使 Typora 也能通过代理访问 GitHub Copilot 的服务。</p>",
+        "  <p style=\"text-align: left;\">此功能在不同的代理软件中有不同的名称：</p>",
+        "  <ul style=\"text-align: left;\">",
+        "    <li>如果您使用 <strong>CFW/Clash Verge/V2RayN</strong>，可以启用“<strong>Tun 模式</strong>”。</li>",
+        "    <li>如果使用 <strong>ClashX Pro</strong>，可以启用“<strong>增强模式</strong>”。</li>",
+        "  </ul>",
+        "</div>"
+      ]
     },
     "warn-nodejs-required-for-typora-under-1-6": {
       "title": "需要安装 Node.js 才能在 Typora 1.6 以下版本中运行此插件",

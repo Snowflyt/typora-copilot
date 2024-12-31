@@ -29,9 +29,24 @@
         "<span>Press OK <strong>after</strong> you have completed the verification.</span>"
       ]
     },
+    "sign-in-request-failed": {
+      "title": "GitHub Copilot sign-in request failed",
+      "html": [
+        "<p>Could not send the sign-in request to GitHub Copilot.</p>",
+        "<p>This may be due to a network issue. Please check your internet connection and try again.</p>"
+      ]
+    },
     "signed-in": {
       "title": "Signed in to Copilot",
       "html": ["<p>You have successfully signed in to Copilot.</p>", "<p>Press OK to continue.</p>"]
+    },
+    "sign-in-verification-failed": {
+      "title": "GitHub Copilot sign-in verification failed",
+      "html": [
+        "<p>Failed to complete the sign-in process for GitHub Copilot.</p>",
+        "<p>Please ensure that you have finished the verification in your browser <strong>before</strong> clicking OK.</p>",
+        "<p>If the issue persists, check your internet connection and try again.</p>"
+      ]
     },
     "warn-nodejs-required-for-typora-under-1-6": {
       "title": "Node.js is required to run this plugin under Typora < 1.6",

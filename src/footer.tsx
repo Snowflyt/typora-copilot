@@ -89,7 +89,22 @@ export const FooterPanel: FC<FooterPanelOptions> = ({ copilot, open = true }) =>
   }, []);
 
   const handleSignIn = async () => {
-    const { status, userCode, verificationUri } = await copilot.request.signInInitiate();
+    let response!: Awaited<ReturnType<CopilotClient["request"]["signInInitiate"]>>;
+    try {
+      response = await copilot.request.signInInitiate();
+    } catch (e) {
+      File.editor?.EditHelper.showDialog({
+        title: t("dialog.sign-in-request-failed.title"),
+        html: /* html */ `
+          <div style="text-align: center; margin-top: 8px;">
+            ${t("dialog.sign-in-request-failed.html")}
+          </div>
+        `,
+        buttons: [t("button.understand")],
+      });
+      return;
+    }
+    const { status, userCode, verificationUri } = response;
     if (status === "AlreadySignedIn") return;
     // Copy user code to clipboard
     void navigator.clipboard.writeText(userCode);
@@ -105,19 +120,32 @@ export const FooterPanel: FC<FooterPanelOptions> = ({ copilot, open = true }) =>
       `,
       buttons: [t("button.ok")],
       callback: () => {
-        void copilot.request.signInConfirm({ userCode }).then(({ status }) => {
-          accountStatus.value = status;
-          copilot.status = "Normal";
-          File.editor?.EditHelper.showDialog({
-            title: t("dialog.signed-in.title"),
-            html: /* html */ `
+        copilot.request
+          .signInConfirm({ userCode })
+          .then(({ status }) => {
+            accountStatus.value = status;
+            copilot.status = "Normal";
+            File.editor?.EditHelper.showDialog({
+              title: t("dialog.signed-in.title"),
+              html: /* html */ `
               <div style="text-align: center; margin-top: 8px;">
                 ${t("dialog.signed-in.html")}
               </div>
             `,
-            buttons: [t("button.ok")],
+              buttons: [t("button.ok")],
+            });
+          })
+          .catch(() => {
+            File.editor?.EditHelper.showDialog({
+              title: t("dialog.sign-in-verification-failed.title"),
+              html: /* html */ `
+              <div style="text-align: center; margin-top: 8px;">
+                ${t("dialog.sign-in-verification-failed.html")}
+              </div>
+            `,
+              buttons: [t("button.understand")],
+            });
           });
-        });
       },
     });
   };
