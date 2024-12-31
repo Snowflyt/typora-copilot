@@ -8,6 +8,7 @@ import { t } from "./i18n";
 import { logger } from "./logging";
 import { settings } from "./settings";
 import { File } from "./typora-utils";
+import { getCSSClassStyles } from "./utils/dom";
 
 import "./footer.scss";
 
@@ -24,45 +25,7 @@ import type {
  */
 const getFooterBarDOM = () => document.querySelector<HTMLElement>("footer.ty-footer");
 
-const createFooterTextColorGetter = (options?: { className?: string }) => {
-  const { className = "" } = options ?? {};
-
-  let destroyed = false;
-
-  const getter = document.createElement("div");
-  getter.style.height = "0";
-  getter.style.width = "0";
-  getter.style.position = "absolute";
-  getter.style.left = "0";
-  getter.style.top = "0";
-  getter.classList.add(
-    "footer-item",
-    "footer-item-right",
-    ...className.split(/\s+/g).filter((c) => c),
-  );
-  document.body.appendChild(getter);
-
-  return {
-    getFooterTextColor: () => {
-      if (destroyed) throw new Error("Getter has been destroyed");
-      return window.getComputedStyle(getter).color;
-    },
-
-    destroy: () => {
-      destroyed = true;
-      getter.remove();
-    },
-  };
-};
-
-const footerTextColorGetter = createFooterTextColorGetter();
-/**
- * Text color of the footer of Typora App, updates every second.
- */
-export let footerTextColor = footerTextColorGetter.getFooterTextColor();
-setInterval(() => {
-  footerTextColor = footerTextColorGetter.getFooterTextColor();
-}, 1000);
+const getFooterTextColor = () => getCSSClassStyles("footer-item", "footer-item-right").color;
 
 export interface FooterPanelOptions {
   copilot: CopilotClient;
@@ -301,7 +264,7 @@ export const Footer: FC<FooterOptions> = ({ copilot }) => {
           document.body.classList.remove("ty-show-spell-check", "ty-show-word-count");
           ev.stopPropagation();
         }}>
-        <CopilotIcon status={status.value} textColor={footerTextColor} />
+        <CopilotIcon status={status.value} textColor={getFooterTextColor()} />
       </div>
     </>
   );
