@@ -102,7 +102,7 @@ export const FooterPanel: FC<FooterPanelOptions> = ({ copilot, open = true }) =>
 
   // Sync settings
   useEffect(() => {
-    const unlistenSettingsChange = settings.onChangeProperty("disableCompletions", (value) => {
+    const unlistenSettingsChange = settings.onChange("disableCompletions", (value) => {
       disableCompletions.value = value;
     });
     return () => {
@@ -239,7 +239,7 @@ export const Footer: FC<FooterOptions> = ({ copilot }) => {
 
   // Sync status
   useEffect(() => {
-    const unlistenSettingsChange = settings.onChangeProperty("disableCompletions", (value) => {
+    const unlistenSettingsChange = settings.onChange("disableCompletions", (value) => {
       status.value = value ? "Disabled" : copilot.status;
     });
     const handler: CopilotClientEventHandler<"changeStatus"> = ({ newStatus }) => {

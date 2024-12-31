@@ -1,50 +1,17 @@
+import { mapValues } from "radash";
+import { kebabCase } from "string-ts";
+
+export type Settings = typeof defaultSettings;
+const defaultSettings = {
+  disableCompletions: false,
+  useInlineCompletionTextInSource: true,
+  useInlineCompletionTextInPreviewCodeBlocks: false,
+};
+
 export const settings = (() => {
-  const DISABLE_COMPLETIONS_KEY = "disable-completion";
-  const USE_INLINE_COMPLETION_TEXT_IN_SOURCE_KEY = "use-inline-completion-text-in-source";
-  const USE_INLINE_COMPLETION_TEXT_IN_PREVIEW_CODE_BLOCKS_KEY =
-    "use-inline-completion-text-in-preview-code-blocks";
-
-  const changeListeners = new Map<keyof typeof res, Array<() => void>>();
-
-  const res = {
-    get disableCompletions() {
-      return (localStorage.getItem(DISABLE_COMPLETIONS_KEY) ?? "false") === "true";
-    },
-    set disableCompletions(value: boolean) {
-      localStorage.setItem(DISABLE_COMPLETIONS_KEY, value ? "true" : "false");
-      changeListeners.get("disableCompletions")?.forEach((listener) => listener());
-    },
-
-    get useInlineCompletionTextInSource() {
-      return (localStorage.getItem(USE_INLINE_COMPLETION_TEXT_IN_SOURCE_KEY) ?? "true") === "true";
-    },
-    set useInlineCompletionTextInSource(value: boolean) {
-      localStorage.setItem(USE_INLINE_COMPLETION_TEXT_IN_SOURCE_KEY, value ? "true" : "false");
-      changeListeners.get("useInlineCompletionTextInSource")?.forEach((listener) => listener());
-    },
-
-    get useInlineCompletionTextInPreviewCodeBlocks() {
-      return (
-        (localStorage.getItem(USE_INLINE_COMPLETION_TEXT_IN_PREVIEW_CODE_BLOCKS_KEY) ?? "false") ===
-        "true"
-      );
-    },
-    set useInlineCompletionTextInPreviewCodeBlocks(value: boolean) {
-      localStorage.setItem(
-        USE_INLINE_COMPLETION_TEXT_IN_PREVIEW_CODE_BLOCKS_KEY,
-        value ? "true" : "false",
-      );
-      changeListeners
-        .get("useInlineCompletionTextInPreviewCodeBlocks")
-        ?.forEach((listener) => listener());
-    },
-  };
-
-  const onChangeProperty = <K extends keyof typeof res>(
-    key: K,
-    callback: (value: (typeof res)[K]) => void,
-  ) => {
-    const listener = () => callback(res[key]);
+  const changeListeners = new Map<keyof Settings, Array<() => void>>();
+  const onChange = <K extends keyof Settings>(key: K, callback: (value: Settings[K]) => void) => {
+    const listener = () => callback(settings[key]);
     if (!changeListeners.has(key)) changeListeners.set(key, []);
     changeListeners.get(key)?.push(listener);
     return () => {
@@ -54,8 +21,30 @@ export const settings = (() => {
       if (index !== -1) listeners.splice(index, 1);
     };
   };
-  (res as unknown as { onChangeProperty: typeof onChangeProperty }).onChangeProperty =
-    onChangeProperty;
 
-  return res as typeof res & { onChangeProperty: typeof onChangeProperty };
+  const localStorageKeys = mapValues(defaultSettings, (_, key) => kebabCase(key));
+  return new Proxy({} as Settings & { readonly onChange: typeof onChange }, {
+    get(_target, prop, _receiver) {
+      if (prop === "onChange") return onChange;
+      if (!(prop in defaultSettings)) throw new Error(`Unknown setting: ${String(prop)}`);
+      const unparsedValue = localStorage.getItem(localStorageKeys[prop as keyof Settings]);
+      if (unparsedValue === null) return defaultSettings[prop as keyof Settings];
+      return JSON.parse(unparsedValue);
+    },
+    set(_target, prop, value, _receiver) {
+      if (prop === "onChange") return false;
+      if (!(prop in defaultSettings)) return false;
+      const jsonifiedValue = JSON.stringify(value);
+      if (
+        jsonifiedValue ===
+        (localStorage.getItem(localStorageKeys[prop as keyof Settings]) ??
+          JSON.stringify(defaultSettings[prop as keyof Settings]))
+      )
+        // No change
+        return true;
+      localStorage.setItem(localStorageKeys[prop as keyof Settings], jsonifiedValue);
+      changeListeners.get(prop as keyof Settings)?.forEach((listener) => listener());
+      return true;
+    },
+  });
 })();
