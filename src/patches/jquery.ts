@@ -41,36 +41,8 @@ $(function () {
       return null;
     };
 
-    let lastCaretPosition = getCaretPosition();
-    const onCaretMove = (event: Event) => {
-      const selection = window.getSelection();
-
-      if (selection === null) {
-        if (lastCaretPosition !== null) {
-          lastCaretPosition = null;
-          if (event.target) $(event.target).trigger("caretMove", [null]);
-          return;
-        }
-        return;
-      }
-
-      if (selection.rangeCount) {
-        const range = selection.getRangeAt(0);
-        const caretPosition = {
-          node: range.startContainer,
-          offset: range.startOffset,
-        };
-
-        if (
-          !lastCaretPosition ||
-          caretPosition.node !== lastCaretPosition.node ||
-          caretPosition.offset !== lastCaretPosition.offset
-        ) {
-          lastCaretPosition = caretPosition;
-          if (event.target) $(event.target).trigger("caretMove", [caretPosition]);
-        }
-      }
-    };
+    // Separate caretMove event handlers for each target
+    const onCaretMoveFunctions = new WeakMap<EventTarget, (event: Event) => void>();
 
     const eventsToBind = [
       "keypress",
@@ -112,9 +84,44 @@ $(function () {
 
     $.event.special.caretMove = {
       setup() {
+        let lastCaretPosition = getCaretPosition();
+        const onCaretMove = (event: Event) => {
+          const selection = window.getSelection();
+
+          if (selection === null) {
+            if (lastCaretPosition !== null) {
+              lastCaretPosition = null;
+              if (event.target) $(event.target).trigger("caretMove", [null]);
+              return;
+            }
+            return;
+          }
+
+          if (selection.rangeCount) {
+            const range = selection.getRangeAt(0);
+            const caretPosition = {
+              node: range.startContainer,
+              offset: range.startOffset,
+            };
+
+            if (
+              !lastCaretPosition ||
+              !lastCaretPosition.node.isSameNode(caretPosition.node) ||
+              caretPosition.offset !== lastCaretPosition.offset
+            ) {
+              lastCaretPosition = caretPosition;
+              if (event.target) $(event.target).trigger("caretMove", [caretPosition]);
+            }
+          }
+        };
+
+        onCaretMoveFunctions.set(this, onCaretMove);
+
         for (const event of eventsToBind) this.addEventListener(event, onCaretMove, true);
       },
       teardown() {
+        const onCaretMove = onCaretMoveFunctions.get(this);
+        if (!onCaretMove) return;
         for (const event of eventsToBind) this.removeEventListener(event, onCaretMove, true);
       },
     };
