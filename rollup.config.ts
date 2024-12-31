@@ -33,7 +33,19 @@ export default defineConfig([
       file: "dist/index.js",
       format: "iife",
     },
-    plugins: [...plugins, postcss({ inject: true })],
+    plugins: [
+      ...plugins,
+      postcss({
+        inject: true,
+        // Disable Dart Sass deprecated legacy JS API warning until rollup-plugin-postcss is updated
+        // to support modern Sass API: https://github.com/egoist/rollup-plugin-postcss/issues/463
+        use: {
+          sass: {
+            silenceDeprecations: ["legacy-js-api"],
+          },
+        } as never,
+      }),
+    ],
   },
   {
     input: "src/mac-server.ts",
