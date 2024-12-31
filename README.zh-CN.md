@@ -84,7 +84,7 @@ wget -O - https://raw.githubusercontent.com/Snowflyt/typora-copilot/main/install
 <details>
   <summary><strong>Windows</strong></summary>
 
-对于 Windows 用户，首先从[发布页面](https://github.com/Snowfly-T/typora-copilot/releases)下载最新版本并解压。然后定位到你解压的文件夹并在 PowerShell 中**以管理员身份**运行以下命令：
+对于 Windows 用户，首先从[发布页面](https://github.com/Snowflyt/typora-copilot/releases)下载最新版本并解压。然后定位到你解压的文件夹并在 PowerShell 中**以管理员身份**运行以下命令：
 
 ```powershell
 .\bin\install_windows.ps1
@@ -105,7 +105,7 @@ wget -O - https://raw.githubusercontent.com/Snowflyt/typora-copilot/main/install
 <details>
   <summary><strong>macOS</strong></summary>
 
-对于 macOS 用户，首先从[发布页面](https://github.com/Snowfly-T/typora-copilot/releases)下载最新版本并解压。然后定位到你解压的文件夹并在终端中运行以下命令：
+对于 macOS 用户，首先从[发布页面](https://github.com/Snowflyt/typora-copilot/releases)下载最新版本并解压。然后定位到你解压的文件夹并在终端中运行以下命令：
 
 ```bash
 sudo bash ./bin/install_macos.sh
@@ -126,7 +126,7 @@ sudo bash ./bin/install_macos.sh --path "/Applications/Typora.app/" # 替换为�
 <details>
   <summary><strong>Linux</strong></summary>
 
-对于 Linux 用户，首先从[发布页面](https://github.com/Snowfly-T/typora-copilot/releases)下载最新版本并解压。然后定位到你解压的文件夹并在终端中运行以下命令：
+对于 Linux 用户，首先从[发布页面](https://github.com/Snowflyt/typora-copilot/releases)下载最新版本并解压。然后定位到你解压的文件夹并在终端中运行以下命令：
 
 ```bash
 sudo bash ./bin/install_linux.sh
@@ -149,7 +149,7 @@ sudo bash ./bin/install_linux.sh --path "/usr/share/typora/" # 替换为你的 T
 <details>
   <summary>点击展开</summary>
 
-1. 从[发布页面](https://github.com/Snowfly-T/typora-copilot/releases)下载最新版本并解压。
+1. 从[发布页面](https://github.com/Snowflyt/typora-copilot/releases)下载最新版本并解压。
 2. 找到 Typora 安装目录下的 `window.html` 文件，通常位于 `<typora_root_path>/resources/`；对于 macOS 用户，找到 Typora 安装目录下的 `index.html` 文件，通常位于 `<typora_root_path>/Contents/Resources/TypeMark/`。`<typora_root_path>` 是 Typora 的安装路径，替换为你的实际 Typora 安装路径（注意尖括号 `<` 和 `>` 也要删除）。这个文件夹在下面的步骤中被称为 Typora 资源文件夹。
 3. 在 Typora 资源文件夹中创建一个名为 `copilot` 的文件夹。
 4. 将解压出的文件全局复制到 `copilot` 文件夹中。

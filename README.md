@@ -84,7 +84,7 @@ wget -O - https://raw.githubusercontent.com/Snowflyt/typora-copilot/main/install
 <details>
   <summary><strong>Windows</strong></summary>
 
-For Windows users, first download the latest release from [the releases page](https://github.com/Snowfly-T/typora-copilot/releases) and unzip it. Then locate to the folder where you unzipped the release and run the following command in PowerShell **as administrator**:
+For Windows users, first download the latest release from [the releases page](https://github.com/Snowflyt/typora-copilot/releases) and unzip it. Then locate to the folder where you unzipped the release and run the following command in PowerShell **as administrator**:
 
 ```powershell
 .\bin\install_windows.ps1
@@ -103,7 +103,7 @@ If the script fails to find Typora, you can specify the path to Typora manually:
 <details>
   <summary><strong>macOS</strong></summary>
 
-For macOS users, first download the latest release from [the releases page](https://github.com/Snowfly-T/typora-copilot/releases) and unzip it. Then locate to the folder where you unzipped the release and run the following command in terminal:
+For macOS users, first download the latest release from [the releases page](https://github.com/Snowflyt/typora-copilot/releases) and unzip it. Then locate to the folder where you unzipped the release and run the following command in terminal:
 
 ```bash
 sudo bash ./bin/install_macos.sh
@@ -124,7 +124,7 @@ You’ll see a message logging the installation directory of the plugin. _Keep i
 <details>
   <summary><strong>Linux</strong></summary>
 
-For Linux users, first download the latest release from [the releases page](https://github.com/Snowfly-T/typora-copilot/releases) and unzip it. THen locate to the folder where you unzipped the release and run the following command in terminal:
+For Linux users, first download the latest release from [the releases page](https://github.com/Snowflyt/typora-copilot/releases) and unzip it. THen locate to the folder where you unzipped the release and run the following command in terminal:
 
 ```bash
 sudo bash ./bin/install_linux.sh
@@ -147,7 +147,7 @@ You’ll see a message logging the installation directory of the plugin. _Keep i
 <details>
   <summary>Click to expand</summary>
 
-1. Download the latest release from [the releases page](https://github.com/Snowfly-T/typora-copilot/releases) and unzip it.
+1. Download the latest release from [the releases page](https://github.com/Snowflyt/typora-copilot/releases) and unzip it.
 2. For Windows / Linux users, find `window.html` in your Typora installation folder, usually located at `<typora_root_path>/resources/`; For macOS users, find `index.html` in your Typora installation folder, usually located at `<typora_root_path>/Contents/Resources/TypeMark/`. `<typora_root_path>` is the path where Typora is installed, replace it with your real Typora installation path (note that the angle brackets `<` and `>` should also be removed). This folder is called Typora resource folder in the following steps.
 3. Create a folder named `copilot` in Typora resource folder.
 4. Copy the downloaded release to the `copilot` folder.
