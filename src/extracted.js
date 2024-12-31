@@ -10,7 +10,7 @@
 
 // @ts-nocheck
 
-/// <reference path="./typora-env.ts" />
+/// <reference path="./global.d.ts" />
 
 /* These two aliases are used to make the code a little more type-safe */
 const File = /** @type {ExtendedFileConstructor} */ (window.File);
