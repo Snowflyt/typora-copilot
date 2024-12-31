@@ -9,7 +9,6 @@ const config = {
   "src/**/*.{css,scss}": "stylelint --fix",
   "{src,test}/**/*.json": "prettier --log-level=silent --no-error-on-unmatched-pattern --write",
   "*.{json,md}": "prettier --log-level=silent --no-error-on-unmatched-pattern --write",
-  ".hintrc": "prettier --log-level=silent --no-error-on-unmatched-pattern --write --parser json",
 };
 
 export default config;
