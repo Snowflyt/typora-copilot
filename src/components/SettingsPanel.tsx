@@ -45,7 +45,7 @@ const SettingsPanel: FC<SettingsPanelProps> = ({ onClose }) => {
               paddingLeft: "2rem",
               paddingRight: "1rem",
               paddingTop: "0.25rem",
-              paddingBottom: "0.75rem",
+              paddingBottom: "1rem",
               fontSize: "0.875rem",
               width: "100%",
               display: "flex",
