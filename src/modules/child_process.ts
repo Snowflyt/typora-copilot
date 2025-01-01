@@ -5,7 +5,7 @@ import type { ChildProcessWithoutNullStreams } from "node:child_process";
 import { PLUGIN_DIR } from "@/constants";
 import { t } from "@/i18n";
 import { logger } from "@/logging";
-import { File, findFreePort, runShellCommand, waitUntilEditorInitialized } from "@/typora-utils";
+import { findFreePort, runShellCommand, waitUntilEditorInitialized } from "@/typora-utils";
 import { wrapNodeChildProcess } from "@/utils/server";
 
 export interface NodeServer {
@@ -32,7 +32,7 @@ const parseNodeVersion = (version: string): number[] =>
  * @returns A Node server that can send and receive messages.
  */
 export const forkNode: (modulePath: string) => Promise<NodeServer> = (() => {
-  if (File.isNode) {
+  if (Files.isNode) {
     const { fork, spawn, spawnSync } = window.reqnode!("child_process");
 
     // Check Node version
@@ -56,7 +56,7 @@ export const forkNode: (modulePath: string) => Promise<NodeServer> = (() => {
       logger.error(`${errorMessage}.`, ...(stderr ? ["Error:", stderr?.toString("utf-8")] : []));
 
       void waitUntilEditorInitialized().then(() => {
-        File.editor!.EditHelper.showDialog({
+        Files.editor!.EditHelper.showDialog({
           title: `Typora Copilot: ${t("dialog.warn-nodejs-required-for-typora-under-1-6.title")}`,
           type: "error",
           html: /* html */ `
@@ -81,7 +81,7 @@ export const forkNode: (modulePath: string) => Promise<NodeServer> = (() => {
       logger.error(errorMessage + ".");
 
       void waitUntilEditorInitialized().then(() => {
-        File.editor!.EditHelper.showDialog({
+        Files.editor!.EditHelper.showDialog({
           title: `Typora Copilot: ${t("dialog.warn-nodejs-above-18-required-for-typora-under-1-6.title")}`,
           type: "error",
           html: /* html */ `
@@ -103,7 +103,7 @@ export const forkNode: (modulePath: string) => Promise<NodeServer> = (() => {
     return (modulePath) => Promise.resolve(wrapNodeChildProcess(spawn("node", [modulePath])));
   }
 
-  if (File.isMac) {
+  if (Files.isMac) {
     let initialized = false;
     let initializeFailed = false;
 
@@ -147,7 +147,7 @@ export const forkNode: (modulePath: string) => Promise<NodeServer> = (() => {
           logger.error(`${errorMessage}.`, ...(err ? ["Error:", err] : []));
 
           void waitUntilEditorInitialized().then(() => {
-            File.editor!.EditHelper.showDialog({
+            Files.editor!.EditHelper.showDialog({
               title: `Typora Copilot: ${t("dialog.warn-nodejs-required-on-macOS.title")}`,
               type: "error",
               html: /* html */ `
@@ -170,7 +170,7 @@ export const forkNode: (modulePath: string) => Promise<NodeServer> = (() => {
         logger.error(errorMessage + ".");
 
         void waitUntilEditorInitialized().then(() => {
-          File.editor!.EditHelper.showDialog({
+          Files.editor!.EditHelper.showDialog({
             title: `Typora Copilot: ${t("dialog.warn-nodejs-above-18-required-on-macOS.title")}`,
             type: "error",
             html: /* html */ `

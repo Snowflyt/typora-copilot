@@ -26,10 +26,13 @@ declare var _options: {
   appVersion: string;
 };
 
-/**
- * The actual type of `File` in Typora application.
- */
-type ExtendedFileConstructor = typeof globalThis.File & FileConstructorExtensions;
+// Typora extends `window.File` with some additional properties, e.g., `File.editor`
+// This is an alias of `window.File` to make TS happy
+// See `src/patches/typora.ts` for more details
+declare var Files: typeof globalThis.File & FileConstructorExtensions;
+// The same for `window.Node`
+declare var Nodes: typeof globalThis.Node & Typora.Node;
+
 /**
  * File constructor extensions defined by Typora.
  */

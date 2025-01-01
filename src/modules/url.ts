@@ -37,7 +37,7 @@ export const fileURLToPath = (url: string) => {
 
   let path = decodeURIComponent(parsedUrl.pathname);
 
-  if ((window.File as ExtendedFileConstructor).isWin) {
+  if (Files.isWin) {
     // For Windows: replace forward slashes with backslashes and remove the leading slash for local paths
     path = path.replace(/\//g, "\\");
 

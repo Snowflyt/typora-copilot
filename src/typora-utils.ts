@@ -11,18 +11,6 @@ import { getCaretPlacement } from "./extracted";
 
 import type { Position } from "./types/lsp";
 
-/****************************
- * Proxies to make TS happy *
- ****************************/
-/**
- * Re-export `File` to tell TS that it is extended.
- */
-export const File = window.File as ExtendedFileConstructor;
-/**
- * Re-export `Node` to tell TS that it is overridden by Typora.
- */
-export const Node = window.Node as unknown as typeof Typora.Node;
-
 /*************
  * Constants *
  *************/
@@ -51,7 +39,7 @@ export const TYPORA_RESOURCE_DIR: string = (() => {
     if (result === lastResult) throw new Error("Cannot determine Typora resource directory.");
   }
 
-  return File.isMac ? path.join(result, "TypeMark") : result;
+  return Files.isMac ? path.join(result, "TypeMark") : result;
 })();
 
 /*********************
@@ -78,7 +66,7 @@ const enhanceEditor = () => {
 
   editorEnhanced = true;
 
-  const rawEditor = File.editor!;
+  const rawEditor = Files.editor!;
 
   const editorPrototype: Typora.EnhancedEditor = rawEditor.constructor.prototype;
 
@@ -277,7 +265,7 @@ const enhanceSourceView = () => {
   sourceViewEnhanced = true;
 
   const sourceViewPrototype: Typora.EnhancedSourceView =
-    File.editor!.sourceView.constructor.prototype;
+    Files.editor!.sourceView.constructor.prototype;
 
   const handlersMap: Map<
     string,
@@ -334,7 +322,7 @@ const enhanceSourceView = () => {
 export const waitUntilEditorInitialized = (): Promise<void> =>
   new Promise((resolve) => {
     const interval = setInterval(() => {
-      if (File.editor) {
+      if (Files.editor) {
         clearInterval(interval);
 
         // Apply patches
@@ -349,32 +337,32 @@ export const waitUntilEditorInitialized = (): Promise<void> =>
 /**
  * Get workspace folder path.
  *
- * **⚠️ Warning:** This function assumes {@link File.editor} is initialized, otherwise an error will
- * be thrown. To ensure {@link File.editor} is initialized, use {@link waitUntilEditorInitialized}
+ * **⚠️ Warning:** This function assumes {@link Files.editor} is initialized, otherwise an error will
+ * be thrown. To ensure {@link Files.editor} is initialized, use {@link waitUntilEditorInitialized}
  * before this function.
- * @throws {TypeError} If {@link File.editor} is not initialized.
+ * @throws {TypeError} If {@link Files.editor} is not initialized.
  * @returns
  */
-export const getWorkspaceFolder = (): string | null => File.editor!.library?.watchedFolder ?? null;
+export const getWorkspaceFolder = (): string | null => Files.editor!.library?.watchedFolder ?? null;
 
 /**
  * Get active file pathname.
  * @returns
  */
 export const getActiveFilePathname = (): string | null =>
-  (File.filePath ?? (File.bundle && File.bundle.filePath)) || null;
+  (Files.filePath ?? (Files.bundle && Files.bundle.filePath)) || null;
 
 /**
  * Get current caret position in source markdown text.
  *
- * **⚠️ Warning:** This function assumes {@link File.editor} is initialized, otherwise an error will
- * be thrown. To ensure {@link File.editor} is initialized, use {@link waitUntilEditorInitialized}
+ * **⚠️ Warning:** This function assumes {@link Files.editor} is initialized, otherwise an error will
+ * be thrown. To ensure {@link Files.editor} is initialized, use {@link waitUntilEditorInitialized}
  * before this function.
- * @throws {TypeError} If {@link File.editor} is not initialized.
+ * @throws {TypeError} If {@link Files.editor} is not initialized.
  * @returns
  */
 export const getCaretPosition = (): Position | null => {
-  const editor = File.editor!;
+  const editor = Files.editor!;
   const sourceView = editor.sourceView;
   if (!sourceView.cm) sourceView.prep();
   const cm = sourceView.cm!;
@@ -445,7 +433,7 @@ export const getCaretPosition = (): Position | null => {
 export const runShellCommand = (command: string, options?: { cwd?: string }): Promise<string> => {
   const { cwd } = options ?? {};
 
-  if (File.isMac)
+  if (Files.isMac)
     return new Promise((resolve, reject) => {
       window.bridge!.callHandler(
         "controller.runCommand",
@@ -457,7 +445,7 @@ export const runShellCommand = (command: string, options?: { cwd?: string }): Pr
       );
     });
 
-  if (File.isNode)
+  if (Files.isNode)
     return new Promise((resolve, reject) => {
       window.reqnode!("child_process").exec(command, { cwd }, (error, stdout, stderr) => {
         if (error) reject(error);

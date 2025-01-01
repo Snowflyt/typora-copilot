@@ -15,7 +15,6 @@ import { attachFooter } from "./footer";
 import { logger } from "./logging";
 import { settings } from "./settings";
 import {
-  File,
   TYPORA_VERSION,
   getActiveFilePathname,
   getCaretPosition,
@@ -36,7 +35,7 @@ logger.info("Copilot plugin activated. Version:", VERSION);
  * Fake temporary workspace folder, only used when no folder is opened.
  */
 const FAKE_TEMP_WORKSPACE_FOLDER =
-  File.isWin ?
+  Files.isWin ?
     "C:\\Users\\FakeUser\\FakeTyporaCopilotWorkspace"
   : "/home/fakeuser/faketyporacopilotworkspace";
 const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
@@ -87,12 +86,12 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
 
       const startPos = getCaretPosition()!;
       startPos.line -=
-        cm.getValue(File.useCRLF ? "\r\n" : "\n").split(File.useCRLF ? "\r\n" : "\n").length - 1;
+        cm.getValue(Files.useCRLF ? "\r\n" : "\n").split(Files.useCRLF ? "\r\n" : "\n").length - 1;
       startPos.character -= cm.getCursor().ch;
       if (startPos.character < 0) startPos.character = 0;
 
       // Get starter of CodeMirror to determine whether it is a code block, formula, etc.
-      const cmStarter = state.markdown.split(File.useCRLF ? "\r\n" : "\n")[startPos.line - 1];
+      const cmStarter = state.markdown.split(Files.useCRLF ? "\r\n" : "\n")[startPos.line - 1];
 
       if (cmStarter) {
         const cmElement = cm.getWrapperElement();
@@ -115,9 +114,9 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
             text = text.slice(0, indexOfEnder);
             const textAfterEnder = text.slice(indexOfEnder);
             // Reduce `range` to only include text before ender
-            const rows = textAfterEnder.split(File.useCRLF ? "\r\n" : "\n").length - 1;
+            const rows = textAfterEnder.split(Files.useCRLF ? "\r\n" : "\n").length - 1;
             range.end.line -= rows;
-            range.end.character = textAfterEnder.split(File.useCRLF ? "\r\n" : "\n").pop()!.length;
+            range.end.character = textAfterEnder.split(Files.useCRLF ? "\r\n" : "\n").pop()!.length;
           }
         }
         // * Math block *
@@ -133,9 +132,9 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
             text = text.slice(0, indexOfEnder);
             const textAfterEnder = text.slice(indexOfEnder);
             // Reduce `range` to only include text before ender
-            const rows = textAfterEnder.split(File.useCRLF ? "\r\n" : "\n").length - 1;
+            const rows = textAfterEnder.split(Files.useCRLF ? "\r\n" : "\n").length - 1;
             range.end.line -= rows;
-            range.end.character = textAfterEnder.split(File.useCRLF ? "\r\n" : "\n").pop()!.length;
+            range.end.character = textAfterEnder.split(Files.useCRLF ? "\r\n" : "\n").pop()!.length;
           }
         }
 
@@ -220,7 +219,7 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
         const markdownInRange = sliceTextByRange(
           state.markdown,
           range,
-          File.useCRLF ? "\r\n" : "\n",
+          Files.useCRLF ? "\r\n" : "\n",
         );
         if (text.startsWith(markdownInRange)) {
           safeToJustUseInsertText = true;
@@ -239,11 +238,11 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
           { line: range.start.line, ch: range.start.character },
           { line: range.end.line, ch: range.end.character },
         );
-        const newMarkdown = cm.getValue(File.useCRLF ? "\r\n" : "\n");
+        const newMarkdown = cm.getValue(Files.useCRLF ? "\r\n" : "\n");
         const cursorPos = Object.assign(cm.getCursor(), {
           lineText: cm.getLine(cm.getCursor().line),
         });
-        File.reloadContent(newMarkdown, {
+        Files.reloadContent(newMarkdown, {
           fromDiskChange: false,
           skipChangeCount: true,
           skipStore: false,
@@ -502,7 +501,7 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
           else editor.undo[origin]();
           taskManager.cancelAll();
         } else {
-          cm.replaceRange(text.join(File.useCRLF ? "\r\n" : "\n"), from, to, origin);
+          cm.replaceRange(text.join(Files.useCRLF ? "\r\n" : "\n"), from, to, origin);
         }
       });
     };
@@ -737,7 +736,7 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
   /*********************
    * Initialize states *
    *********************/
-  const editor = File.editor as Typora.EnhancedEditor;
+  const editor = Files.editor as Typora.EnhancedEditor;
   // Initialize state
   const state = {
     markdown: editor.getMarkdown(),
@@ -861,7 +860,7 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
     if (settings.disableCompletions) return;
     if (!editor.sourceView.inSourceMode) return;
 
-    const newMarkdown = cm.getValue(File.useCRLF ? "\r\n" : "\n");
+    const newMarkdown = cm.getValue(Files.useCRLF ? "\r\n" : "\n");
     // If not literally changed, simply return
     if (newMarkdown === state._actualLatestMarkdown) return;
     // If literally changed, update current actual markdown text

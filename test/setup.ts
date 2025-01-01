@@ -1,5 +1,7 @@
 import { Window } from "happy-dom";
 
+import "@/patches/typora";
+
 const window = new Window();
 Object.assign(window, {
   isWin: false,

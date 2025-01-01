@@ -7,7 +7,6 @@ import SettingsPanel from "./components/SettingsPanel";
 import { t } from "./i18n";
 import { logger } from "./logging";
 import { settings } from "./settings";
-import { File } from "./typora-utils";
 import { getCSSClassStyles } from "./utils/dom";
 
 import "./footer.scss";
@@ -93,7 +92,7 @@ export const FooterPanel: FC<FooterPanelOptions> = ({ copilot, open = true }) =>
     try {
       response = await copilot.request.signInInitiate();
     } catch (e) {
-      File.editor?.EditHelper.showDialog({
+      Files.editor?.EditHelper.showDialog({
         title: t("dialog.sign-in-request-failed.title"),
         html: /* html */ `
           <div style="text-align: center; margin-top: 8px;">
@@ -109,7 +108,7 @@ export const FooterPanel: FC<FooterPanelOptions> = ({ copilot, open = true }) =>
     // Copy user code to clipboard
     void navigator.clipboard.writeText(userCode);
     // Open verification URI in browser
-    File.editor?.EditHelper.showDialog({
+    Files.editor?.EditHelper.showDialog({
       title: t("dialog.sign-in.title"),
       html: /* html */ `
         <div style="text-align: center; margin-top: 8px;">
@@ -125,7 +124,7 @@ export const FooterPanel: FC<FooterPanelOptions> = ({ copilot, open = true }) =>
           .then(({ status }) => {
             accountStatus.value = status;
             copilot.status = "Normal";
-            File.editor?.EditHelper.showDialog({
+            Files.editor?.EditHelper.showDialog({
               title: t("dialog.signed-in.title"),
               html: /* html */ `
               <div style="text-align: center; margin-top: 8px;">
@@ -136,7 +135,7 @@ export const FooterPanel: FC<FooterPanelOptions> = ({ copilot, open = true }) =>
             });
           })
           .catch(() => {
-            File.editor?.EditHelper.showDialog({
+            Files.editor?.EditHelper.showDialog({
               title: t("dialog.sign-in-verification-failed.title"),
               html: /* html */ `
               <div style="text-align: center; margin-top: 8px;">

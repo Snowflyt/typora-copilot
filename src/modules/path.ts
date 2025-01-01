@@ -1,16 +1,13 @@
 import type path from "node:path";
 
-// DO NOT import `File` from `@/typora-utils` as circular dependency will occur
-const File = window.File as ExtendedFileConstructor;
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AddSep<F extends (...args: any) => unknown> = (
   sep: string,
   ...args: Parameters<F>
 ) => ReturnType<F>;
 
-export const sep = File.isWin ? "\\" : "/";
-export const delimiter = File.isWin ? ";" : ":";
+export const sep = Files.isWin ? "\\" : "/";
+export const delimiter = Files.isWin ? ";" : ":";
 
 const assertPath = (path: unknown) => {
   if (typeof path !== "string")

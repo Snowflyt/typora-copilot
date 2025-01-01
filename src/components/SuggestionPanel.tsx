@@ -4,7 +4,6 @@ import { useEffect, useRef } from "preact/hooks";
 import CopilotIcon from "./CopilotIcon";
 
 import { t } from "@/i18n";
-import { File } from "@/typora-utils";
 import { getCaretCoordinate } from "@/utils/dom";
 
 import "./SuggestionPanel.scss";
@@ -91,8 +90,8 @@ const SuggestionPanel: FC<SuggestionPanelProps> = ({
   const codeAreaRef = useRef<HTMLTextAreaElement>(null);
 
   const maxAvailableWidth =
-    (cm ? cm.getWrapperElement() : File.editor!.writingArea).getBoundingClientRect().width -
-    (x - (cm ? cm.getWrapperElement() : File.editor!.writingArea).getBoundingClientRect().left) -
+    (cm ? cm.getWrapperElement() : Files.editor!.writingArea).getBoundingClientRect().width -
+    (x - (cm ? cm.getWrapperElement() : Files.editor!.writingArea).getBoundingClientRect().left) -
     30;
 
   // Calculate actual width after mount, and adjust position
