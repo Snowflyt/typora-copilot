@@ -45,6 +45,7 @@
     "@preact/signals": "^2.0.0",
     "preact": "^10.25.4",
     "radash": "^12.1.0",
+    "string-ts": "^2.2.0",
     "ts-pattern": "^5.6.0"
   },
   "devDependencies": {
