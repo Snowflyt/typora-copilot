@@ -22,6 +22,35 @@ export const omit = <O extends ReadonlyRecord<PropertyKey, unknown>, KS extends 
   return result as never;
 };
 
+/**
+ * A stricter version of {@linkcode Object.keys} that makes TS happy.
+ * @param obj The object to get keys from.
+ * @returns
+ */
+export const keysOf = <O extends object>(obj: O): readonly `${keyof O & (string | number)}`[] =>
+  Object.keys(obj) as readonly `${keyof O & (string | number)}`[];
+
+/**
+ * A stricter version of {@linkcode Object.values} that makes TS happy.
+ * @param obj The object to get values from.
+ * @returns
+ */
+export const valuesOf = <O extends object>(obj: O): readonly O[keyof O][] =>
+  Object.values(obj) as readonly O[keyof O][];
+
+/**
+ * A stricter version of {@linkcode Object.entries} that makes TS happy.
+ * @param obj The object to get entries from.
+ * @returns
+ */
+export const entriesOf = <O extends object>(
+  obj: O,
+): readonly (readonly [`${keyof O & (string | number)}`, O[keyof O]])[] =>
+  Object.entries(obj) as unknown as readonly (readonly [
+    `${keyof O & (string | number)}`,
+    O[keyof O],
+  ])[];
+
 export const isKeyOf = <O extends object>(obj: O, key: PropertyKey): key is keyof O => key in obj;
 
 /**
