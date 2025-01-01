@@ -1,6 +1,3 @@
-/* eslint-disable sonarjs/no-identical-functions */
-/* eslint-disable sonarjs/no-duplicate-string */
-
 import { forkNode } from "@modules/child_process";
 import * as path from "@modules/path";
 import { pathToFileURL } from "@modules/url";
@@ -8,7 +5,7 @@ import { pathToFileURL } from "@modules/url";
 import { debounce } from "radash";
 
 import { createCopilotClient } from "./client";
-import { createCompletionTaskManager } from "./completion";
+import CompletionTaskManager from "./completion";
 import { attachSuggestionPanel } from "./components/SuggestionPanel";
 import { PLUGIN_DIR, VERSION } from "./constants";
 import { attachFooter } from "./footer";
@@ -23,6 +20,7 @@ import {
   waitUntilEditorInitialized,
 } from "./typora-utils";
 import { getCaretCoordinate } from "./utils/dom";
+import { Observable } from "./utils/observable";
 import { setGlobalVar, sliceTextByRange } from "./utils/tools";
 
 import "./styles.scss";
@@ -57,12 +55,16 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
    *********************/
   /**
    * Insert completion text to editor.
-   * @param options Completion options.
+   * @param completion Completion options.
    * @returns
    */
-  const insertCompletionTextToEditor = (options: Completion) => {
-    const { position, range } = options;
-    let { displayText, text } = options;
+  const insertCompletionTextToEditor = (
+    completion: Completion,
+  ): Observable<"accepted" | "rejected"> | void => {
+    console.log("completion done", completion);
+
+    const { position, range } = completion;
+    let { displayText, text } = completion;
 
     const activeElement = document.activeElement;
     if (!activeElement) return;
@@ -139,7 +141,7 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
         }
 
         if (handled && settings.useInlineCompletionTextInPreviewCodeBlocks) {
-          const subCmCompletion = { ...options };
+          const subCmCompletion = { ...completion };
 
           // Set `position` and `range` to be relative to `startPos`
           subCmCompletion.position = {
@@ -157,8 +159,7 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
             },
           };
 
-          insertCompletionTextToCodeMirror(cm, subCmCompletion);
-          return;
+          return insertCompletionTextToCodeMirror(cm, subCmCompletion);
         }
       }
     }
@@ -176,36 +177,11 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
       fontSize,
     });
 
-    copilot.notification.notifyShown({ uuid: options.uuid });
+    console.log("suggestion panel attached");
 
-    /**
-     * Reject the completion.
-     */
-    const _reject = () => {
-      if (completion.reject === reject) completion.reject = null;
-      if (completion.accept === accept) completion.accept = null;
-      if (finished) return;
+    copilot.notification.notifyShown({ uuid: completion.uuid });
 
-      finished = true;
-
-      unattachSuggestionPanel();
-
-      copilot.notification.notifyRejected({ uuids: [options.uuid] });
-
-      logger.debug("Rejected completion", options.uuid);
-    };
-    /**
-     * Accept the completion.
-     */
-    const _accept = () => {
-      if (completion.accept === accept) completion.accept = null;
-      if (completion.reject === reject) completion.reject = null;
-      if (finished) return;
-
-      finished = true;
-
-      unattachSuggestionPanel();
-
+    const insertCompletionText = () => {
       // Calculate whether it is safe to just use `insertText` to insert completion text,
       // as using `reloadContent` uses much more resources and causes a flicker
       let safeToJustUseInsertText = false;
@@ -251,24 +227,14 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
         sourceView.gotoLine(cursorPos);
         editor.refocus();
       }
-
-      copilot.notification.notifyAccepted({ uuid: options.uuid });
-
-      logger.debug("Accepted completion");
     };
 
-    /**
-     * Whether completion is already accepted or rejected.
-     */
-    let finished = false;
-    /**
-     * Whether completion listeners attached for this completion are cleared.
-     */
-    let cleared = false;
-    const clearListeners = () => {
-      cleared = true;
-      editor.writingArea.removeEventListener("keydown", keydownHandler);
-    };
+    const cleanup = new Observable<"accepted" | "rejected">();
+    cleanup.subscribeOnce(() => {
+      unattachSuggestionPanel();
+      editor.writingArea.removeEventListener("keydown", keydownHandler, true);
+      $(editor.writingArea).off("caretMove", caretMoveHandler);
+    });
 
     /**
      * Intercept `Tab` key once and change it to accept completion.
@@ -276,37 +242,22 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
      * @returns
      */
     const keydownHandler = (event: KeyboardEvent) => {
-      if (cleared) return;
-
       // Prevent tab key to trigger tab once
       if (event.key === "Tab") {
         event.preventDefault();
         event.stopPropagation();
-        clearListeners();
-        _accept();
+        insertCompletionText();
+        cleanup.next("accepted");
       }
     };
     editor.writingArea.addEventListener("keydown", keydownHandler, true);
 
-    $(editor.writingArea).once("caretMove", () => {
-      if (cleared) return;
-
-      taskManager.cancelAll();
-
-      clearListeners();
-      _reject();
-    });
-
-    const reject = () => {
-      clearListeners();
-      _reject();
+    const caretMoveHandler = () => {
+      cleanup.next("rejected");
     };
-    completion.reject = reject;
-    const accept = () => {
-      clearListeners();
-      _accept();
-    };
-    completion.accept = accept;
+    $(editor.writingArea).on("caretMove", caretMoveHandler);
+
+    return cleanup;
   };
 
   /**
@@ -318,7 +269,7 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
   const insertCompletionTextToCodeMirror = (
     cm: CodeMirror.Editor,
     { displayText, position, range, text, uuid }: Completion,
-  ) => {
+  ): Observable<"accepted" | "rejected"> | void => {
     interface CodeMirrorHistory {
       done: readonly object[];
       undone: readonly object[];
@@ -376,16 +327,10 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
      * **Warning:** It should only be called when no more changes is applied after
      * completion text is inserted, otherwise history will be corrupted.
      */
-    const _reject = () => {
-      if (completion.reject === reject) completion.reject = null;
-      if (completion.accept === accept) completion.accept = null;
-      if (finished) return;
-
-      finished = true;
-
+    const reject = () => {
       const textMarkerRange = textMarker.find();
       if (!textMarkerRange) {
-        clearListeners();
+        cleanup.next("rejected");
         return;
       }
       const { from, to } = textMarkerRange;
@@ -399,24 +344,16 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
         Array.prototype.push.apply(editor.undo.commandStack, commandStackBefore);
       }
 
-      copilot.notification.notifyRejected({ uuids: [uuid] });
-
-      logger.debug("Rejected completion", uuid);
+      cleanup.next("rejected");
     };
     /**
      * Accept the completion.
      */
-    const _accept = () => {
-      if (completion.accept === accept) completion.accept = null;
-      if (completion.accept === accept) completion.accept = null;
-      if (finished) return;
-
-      finished = true;
-
+    const accept = () => {
       // Clear completion hint
       const textMarkerRange = textMarker.find();
       if (!textMarkerRange) {
-        clearListeners();
+        cleanup.next("rejected");
         return;
       }
       const { from, to } = textMarkerRange;
@@ -437,28 +374,15 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
         { line: range.end.line, ch: range.end.character },
       );
 
-      copilot.notification.notifyAccepted({ uuid });
-
-      logger.debug("Accepted completion");
+      cleanup.next("accepted");
     };
 
-    /**
-     * Whether completion is already accepted or rejected.
-     */
-    let finished = false;
-    /**
-     * Whether completion listeners attached for this completion are cleared.
-     */
-    let cleared = false;
-    /**
-     * Clear completion listeners.
-     */
-    const clearListeners = () => {
-      cleared = true;
+    const cleanup = new Observable<"accepted" | "rejected">();
+    cleanup.subscribeOnce(() => {
       cm.off("keydown", cmTabFixer);
       cm.off("beforeChange", cmChangeFixer);
       cm.off("cursorActivity", cursorMoveHandler);
-    };
+    });
 
     /**
      * Intercept `Tab` key once and change it to accept completion.
@@ -466,13 +390,10 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
      * @param event
      */
     const cmTabFixer = (_: CodeMirror.Editor, event: KeyboardEvent) => {
-      if (cleared) return;
-
       // Prevent tab key to trigger tab once
       if (event.key === "Tab") {
         event.preventDefault();
-        clearListeners();
-        _accept();
+        accept();
       }
     };
     cm.on("keydown", cmTabFixer);
@@ -480,26 +401,22 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
     /**
      * Reject completion before any change applied.
      * @param cm
-     * @param param_1
+     * @param change
      */
     const cmChangeFixer = (cm: CodeMirror.Editor, change: CodeMirror.EditorChangeCancellable) => {
-      if (cleared) return;
-
       const { from, origin, text, to } = change;
       const cancel = change.cancel.bind(change);
 
-      clearListeners();
       // Cancel the change temporarily
       cancel();
       // Reject completion and redo the change after 1 tick
       // It is to make sure these changes are applied after the `"beforeChange"` event
       // has finished, in order to avoid corrupting the CodeMirror instance
       void Promise.resolve().then(() => {
-        _reject();
+        reject();
         if (origin === "undo" || origin === "redo") {
           if (sourceView.inSourceMode) cm[origin]();
           else editor.undo[origin]();
-          taskManager.cancelAll();
         } else {
           cm.replaceRange(text.join(Files.useCRLF ? "\r\n" : "\n"), from, to, origin);
         }
@@ -511,25 +428,11 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
      * Reject completion if cursor moved.
      */
     const cursorMoveHandler = () => {
-      if (cleared) return;
-
-      taskManager.cancelAll();
-
-      clearListeners();
-      _reject();
+      reject();
     };
     cm.on("cursorActivity", cursorMoveHandler);
 
-    const reject = () => {
-      clearListeners();
-      _reject();
-    };
-    completion.reject = reject;
-    const accept = () => {
-      clearListeners();
-      _accept();
-    };
-    completion.accept = accept;
+    return cleanup;
   };
 
   /**
@@ -541,85 +444,41 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
   const insertSuggestionPanelToCodeMirror = (
     cm: CodeMirror.Editor,
     { displayText, range, text, uuid }: Completion,
-  ) => {
+  ): Observable<"accepted" | "rejected"> | void => {
     // Insert a suggestion panel below the cursor
     const unattachSuggestionPanel = attachSuggestionPanel(displayText, null, { cm });
 
     copilot.notification.notifyShown({ uuid });
 
-    /**
-     * Reject the completion.
-     *
-     * **Warning:** It should only be called when no more changes is applied after
-     * completion text is inserted, otherwise history will be corrupted.
-     */
-    const _reject = () => {
-      if (completion.reject === reject) completion.reject = null;
-      if (completion.accept === accept) completion.accept = null;
-      if (finished) return;
-
-      finished = true;
-
-      unattachSuggestionPanel();
-
-      copilot.notification.notifyRejected({ uuids: [uuid] });
-
-      logger.debug("Rejected completion", uuid);
-    };
-    /**
-     * Accept the completion.
-     */
-    const _accept = () => {
-      if (completion.accept === accept) completion.accept = null;
-      if (completion.accept === accept) completion.accept = null;
-      if (finished) return;
-
-      finished = true;
-
+    const insertCompletionText = () => {
       // Insert completion text
       cm.replaceRange(
         text,
         { line: range.start.line, ch: range.start.character },
         { line: range.end.line, ch: range.end.character },
       );
-
-      copilot.notification.notifyAccepted({ uuid });
-
-      logger.debug("Accepted completion");
     };
 
-    /**
-     * Whether completion is already accepted or rejected.
-     */
-    let finished = false;
-    /**
-     * Whether completion listeners attached for this completion are cleared.
-     */
-    let cleared = false;
-    /**
-     * Clear completion listeners.
-     */
-    const clearListeners = () => {
-      cleared = true;
+    const cleanup = new Observable<"accepted" | "rejected">();
+    cleanup.subscribeOnce(() => {
+      unattachSuggestionPanel();
       cm.off("keydown", keydownHandler);
       cm.off("cursorActivity", cursorMoveHandler);
-    };
+    });
 
     /**
      * Intercept `Tab` key once and change it to accept completion.
      * @param event
      * @returns
      */
-
+    // eslint-disable-next-line sonarjs/no-identical-functions
     const keydownHandler = (_: CodeMirror.Editor, event: KeyboardEvent) => {
-      if (cleared) return;
-
       // Prevent tab key to trigger tab once
       if (event.key === "Tab") {
         event.preventDefault();
         event.stopPropagation();
-        clearListeners();
-        _accept();
+        insertCompletionText();
+        cleanup.next("accepted");
       }
     };
     cm.on("keydown", keydownHandler);
@@ -628,25 +487,11 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
      * Reject completion if cursor moved.
      */
     const cursorMoveHandler = () => {
-      if (cleared) return;
-
-      taskManager.cancelAll();
-
-      clearListeners();
-      _reject();
+      cleanup.next("rejected");
     };
     cm.on("cursorActivity", cursorMoveHandler);
 
-    const reject = () => {
-      clearListeners();
-      _reject();
-    };
-    completion.reject = reject;
-    const accept = () => {
-      clearListeners();
-      _accept();
-    };
-    completion.accept = accept;
+    return cleanup;
   };
 
   /*******************
@@ -675,13 +520,12 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
    */
   const onChangeActiveFile = (newPathname: string | null, oldPathname: string | null) => {
     if (oldPathname) {
-      // Reject current completion if exists
-      completion.reject?.();
-
+      taskManager.rejectCurrentIfExist();
       copilot.notification.textDocument.didClose({
         textDocument: { uri: pathToFileURL(oldPathname).href },
       });
     }
+
     if (newPathname) {
       copilot.version = 0;
       copilot.notification.textDocument.didOpen({
@@ -717,17 +561,15 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
       const cursorPos = getCaretPosition();
       if (!cursorPos) return;
 
-      taskManager.cancelAll();
       // Fetch completion from Copilot
-      taskManager.startOne({
-        position: cursorPos,
-        onCompletion: (comp) => {
-          completion.reject?.();
+      console.log("task start at", cursorPos);
+      taskManager.start(cursorPos, {
+        onCompletion: (completion) => {
           if (editor.sourceView.inSourceMode)
             if (settings.useInlineCompletionTextInSource)
-              insertCompletionTextToCodeMirror(cm, comp);
-            else insertSuggestionPanelToCodeMirror(cm, comp);
-          else insertCompletionTextToEditor(comp);
+              return insertCompletionTextToCodeMirror(cm, completion);
+            else return insertSuggestionPanelToCodeMirror(cm, completion);
+          else return insertCompletionTextToEditor(completion);
         },
       });
     },
@@ -747,22 +589,11 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
   const sourceView = editor.sourceView as Typora.EnhancedSourceView;
   if (!sourceView.cm) sourceView.prep();
   const cm = sourceView.cm!;
-  // Initialize completion state
-  const completion = {
-    /**
-     * Reject current completion.
-     */
-    reject: null as (() => void) | null,
-    /**
-     * Accept current completion.
-     */
-    accept: null as (() => void) | null,
-  };
 
   /***************************
    * Initialize task manager *
    ***************************/
-  const taskManager = createCompletionTaskManager(copilot, {
+  const taskManager = new CompletionTaskManager(copilot, {
     workspaceFolder: getWorkspaceFolder() ?? FAKE_TEMP_WORKSPACE_FOLDER,
     activeFilePathname:
       getActiveFilePathname() ?? path.join(FAKE_TEMP_WORKSPACE_FOLDER, FAKE_TEMP_FILENAME),
@@ -826,9 +657,9 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
 
   /* Reject completion on toggle source mode */
   sourceView.on("beforeToggle", (_, on) => {
-    if (completion.reject) {
+    if (taskManager.state === "pending") {
       logger.debug(`Refusing completion before toggling source mode ${on ? "on" : "off"}`);
-      completion.reject();
+      taskManager.rejectCurrentIfExist();
     }
   });
 
@@ -850,7 +681,7 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
     state.markdown = newMarkdown;
     logger.debug("Changing markdown", { from: oldMarkdown, to: newMarkdown });
     // Reject last completion if exists
-    completion.reject?.();
+    taskManager.rejectCurrentIfExist();
     // Invoke callback
     void onChangeMarkdown(newMarkdown, oldMarkdown);
   });
@@ -876,7 +707,7 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
     state.markdown = newMarkdown;
     logger.debug("Changing markdown", { from: oldMarkdown, to: newMarkdown, change });
     // Reject last completion if exists
-    completion.reject?.();
+    taskManager.rejectCurrentIfExist();
     // Invoke callback
     void onChangeMarkdown(newMarkdown, oldMarkdown);
   });

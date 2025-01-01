@@ -1,11 +1,11 @@
 import * as path from "@modules/path";
 
+import { logger } from "./logging";
+import { Observable } from "./utils/observable";
+
 import type { Completion, CopilotClient } from "./client";
 import type { Position } from "./types/lsp";
 
-/*************************
- * CompletionTaskManager *
- *************************/
 /**
  * Options for {@link CompletionTaskManager}.
  */
@@ -15,127 +15,106 @@ export interface CompletionTaskManagerOptions {
 }
 
 /**
- * Task ID used in {@link CompletionTaskManager}.
+ * A manager for GitHub Copilot completion tasks that makes sure exactly one completion task is
+ * active at a time.
  */
-export type TaskID = number & {
-  readonly __tag: unique symbol;
-};
+export default class CompletionTaskManager {
+  public workspaceFolder: string;
+  public activeFilePathname: string;
 
-/**
- * A manager for GitHub Copilot completion tasks.
- */
-export type CompletionTaskManager = ReturnType<typeof createCompletionTaskManager>;
+  private _state: "idle" | "requesting" | "pending" = "idle";
 
-/**
- * Create a {@link CompletionTaskManager}.
- * @param copilot A GitHub Copilot client.
- * @param options Options for the manager.
- * @returns
- */
-export const createCompletionTaskManager = (
-  copilot: CopilotClient,
-  options: CompletionTaskManagerOptions,
-) => {
-  let { activeFilePathname: _activeFilePathname, workspaceFolder: _workspaceFolder } = options;
+  private latestTaskId = 0;
+  private lastCleanup: Observable<"accepted" | "rejected"> | null = null;
 
-  let _latestTaskId = 0 as TaskID;
-
-  interface TaskState {
-    readonly timestamp: number;
-    cancelled: boolean;
+  constructor(
+    private copilot: CopilotClient,
+    options: CompletionTaskManagerOptions,
+  ) {
+    this.workspaceFolder = options.workspaceFolder;
+    this.activeFilePathname = options.activeFilePathname;
   }
-  const taskStates = new Map<TaskID, TaskState>();
 
-  const _isAllCancelled = () => [...taskStates.values()].every((state) => state.cancelled);
+  get state(): "idle" | "requesting" | "pending" {
+    return this._state;
+  }
 
-  /***********
-   * Methods *
-   ***********/
-  const _startOne = ({
-    onCompletion,
-    position,
-  }: {
-    onCompletion?: (completion: Completion) => void;
-    position: Position;
-  }): TaskID => {
-    const taskId = ++_latestTaskId as TaskID;
-    const state: TaskState = {
-      timestamp: Date.now(),
-      cancelled: false,
-    };
-    taskStates.set(taskId, state);
+  rejectCurrentIfExist(): void {
+    if (this.lastCleanup) {
+      this.lastCleanup.next("rejected");
+    }
+  }
 
-    copilot.status = "InProgress";
+  start(
+    position: Position,
+    {
+      onCompletion,
+    }: {
+      /**
+       * Callback invoked when a task completion is received.
+       *
+       * This can optionally return an {@linkcode Observable} representing a cleanup action.
+       * The observable will be:
+       * - Subscribed to initially for internal cleanup.
+       * - Triggered later by the class itself when a new task starts, or by external triggers
+       *   (e.g., the user manually invoking `.next()` for cleanup).
+       */
+      onCompletion?: (completion: Completion) => Observable<"accepted" | "rejected"> | void;
+    },
+  ): void {
+    this.lastCleanup?.next("rejected");
 
-    void copilot.request
+    const taskId = ++this.latestTaskId;
+    this._state = "requesting";
+
+    this.copilot.request
       .getCompletions({
         position,
-        path: _activeFilePathname,
+        path: this.activeFilePathname,
         relativePath:
-          _workspaceFolder ?
-            path.relative(_workspaceFolder, _activeFilePathname)
-          : _activeFilePathname,
+          this.workspaceFolder ?
+            path.relative(this.workspaceFolder, this.activeFilePathname)
+          : this.activeFilePathname,
       })
       .then(({ cancellationReason, completions }): void => {
-        taskStates.delete(taskId);
-
-        if (_isAllCancelled()) copilot.status = "Normal";
-
-        if (state.cancelled) {
-          copilot.notification.notifyRejected({ uuids: completions.map((c) => c.uuid) });
+        if (taskId !== this.latestTaskId) {
+          // A new task has started since this task was started,
+          // so we should ignore this task's completion
           return;
         }
 
-        if (cancellationReason || completions.length === 0) return;
+        if (cancellationReason || completions.length === 0) {
+          this._state = "idle";
+          return;
+        }
 
-        // Reject other completions if exists
-        if (completions.length > 1)
-          copilot.notification.notifyRejected({ uuids: completions.slice(1).map((c) => c.uuid) });
+        this._state = "pending";
 
-        onCompletion?.(completions[0]!);
+        const completion = completions[0]!;
+
+        console.log("checkpoint d");
+        const cleanup = onCompletion?.(completion) ?? new Observable<"accepted" | "rejected">();
+        cleanup.subscribeOnce((acceptedOrRejected) => {
+          if (acceptedOrRejected === "accepted") {
+            this.copilot.notification.notifyAccepted({ uuid: completion.uuid });
+            logger.debug("Accepted completion");
+          } else {
+            this.copilot.notification.notifyRejected({ uuids: [completion.uuid] });
+            logger.debug("Rejected completion", completion.uuid);
+          }
+          this._state = "idle";
+          if (this.lastCleanup === cleanup) this.lastCleanup = null;
+        });
+        this.lastCleanup = cleanup;
       })
       .catch(() => {
-        taskStates.delete(taskId);
-        if (_isAllCancelled()) copilot.status = "Normal";
+        if (taskId !== this.latestTaskId) {
+          // A new task has started since this task was started,
+          // so we should ignore this task's completion
+          return;
+        }
+
+        this._state = "idle";
       });
-
-    return taskId;
-  };
-
-  const _cancelOne = (taskId: TaskID) => {
-    const state = taskStates.get(taskId);
-    if (!state) return;
-
-    state.cancelled = true;
-
-    if (_isAllCancelled()) copilot.status = "Normal";
-  };
-  const _cancelAll = () => {
-    for (const state of taskStates.values()) state.cancelled = true;
-    copilot.status = "Normal";
-  };
-
-  return {
-    get activeFilePathname() {
-      return _activeFilePathname;
-    },
-    set activeFilePathname(value: string) {
-      _activeFilePathname = value;
-    },
-    get workspaceFolder() {
-      return _workspaceFolder;
-    },
-    set workspaceFolder(value: string) {
-      _workspaceFolder = value;
-    },
-
-    get isAllCancelled() {
-      return _isAllCancelled();
-    },
-
-    startOne: _startOne,
-
-    cancelOne: _cancelOne,
-    cancelAll: _cancelAll,
-  };
-};
+  }
+}
