@@ -1,6 +1,6 @@
 {
   "name": "typora-copilot",
-  "version": "0.3.2~dev",
+  "version": "0.3.2",
   "private": true,
   "description": "GitHub Copilot plugin for Typora",
   "keywords": [
