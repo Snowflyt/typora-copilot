@@ -233,6 +233,7 @@ export const Footer: FC<FooterOptions> = ({ copilot }) => {
       status.value = value ? "Disabled" : copilot.status;
     });
     const handler: CopilotClientEventHandler<"changeStatus"> = ({ newStatus }) => {
+      if (status.value === "Disabled") return;
       status.value = newStatus;
     };
     copilot.on("changeStatus", handler);
