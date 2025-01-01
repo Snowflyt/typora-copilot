@@ -52,7 +52,47 @@ class TranslationError extends Error {
  * t("a.b"); // => "a.b". Warning: Cannot find translation for "a.b": "a.b" is not a string.
  * ```
  */
-export const t = (path: PathOf<typeof en>): string => {
+export const t = Object.assign(
+  (path: PathOf<typeof en>): string => {
+    try {
+      return _t(path);
+    } catch (e) {
+      if (e instanceof TranslationError) console.warn(e.message);
+      else console.error(e);
+      return path;
+    }
+  },
+  {
+    /**
+     * Test if the path exists.
+     * @param path The path of the locale string.
+     * @returns
+     */
+    test: (path: string): boolean => {
+      try {
+        _t(path);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    /**
+     * The unsafe version of {@linkcode t} without type checking.
+     * @param path The path of the locale string.
+     * @returns
+     */
+    tran: (path: string): string => {
+      try {
+        return _t(path);
+      } catch (e) {
+        if (e instanceof TranslationError) console.warn(e.message);
+        else console.error(e);
+        return path;
+      }
+    },
+  },
+);
+const _t = (path: string): string => {
   const locale =
     window._options.userLocale ||
     window._options.appLocale ||
@@ -68,40 +108,33 @@ export const t = (path: PathOf<typeof en>): string => {
     .with(P.union("zh-CN", "zh-Hans"), () => zhCN)
     .otherwise(() => en);
   let tmp = localeMap;
-  try {
-    const visitedKeys: string[] = [];
-    for (const key of keys.slice(0, -1)) {
-      const x = tmp[key];
-      if (x === undefined)
-        throw new TranslationError(
-          `Cannot find translation for "${path}": "${key}" not found` +
-            (visitedKeys.length > 0 ? ` in "${visitedKeys.join(".")}".` : "."),
-        );
-      if (typeof x === "string" || isStringArray(x))
-        throw new TranslationError(
-          `Cannot find translation for "${path}": "${[...visitedKeys, key].join(".")}" is not an object.`,
-        );
-      tmp = x;
-      visitedKeys.push(key);
-    }
-    const lastKey = keys.at(-1);
-    if (lastKey === undefined) throw new TranslationError("Empty path is not allowed.");
-    const res = tmp[lastKey];
-    if (res === undefined)
+
+  const visitedKeys: string[] = [];
+  for (const key of keys.slice(0, -1)) {
+    const x = tmp[key];
+    if (x === undefined)
       throw new TranslationError(
-        `Cannot find translation for "${path}": "${lastKey}" not found` +
+        `Cannot find translation for "${path}": "${key}" not found` +
           (visitedKeys.length > 0 ? ` in "${visitedKeys.join(".")}".` : "."),
       );
-    if (typeof res !== "string" && !isStringArray(res))
+    if (typeof x === "string" || isStringArray(x))
       throw new TranslationError(
-        `Cannot find translation for "${path}": "${path}" is not a string.`,
+        `Cannot find translation for "${path}": "${[...visitedKeys, key].join(".")}" is not an object.`,
       );
-    return typeof res === "string" ? res : res.join("\n");
-  } catch (e) {
-    if (e instanceof TranslationError) console.warn(e.message);
-    else console.error(e);
-    return path;
+    tmp = x;
+    visitedKeys.push(key);
   }
+  const lastKey = keys.at(-1);
+  if (lastKey === undefined) throw new TranslationError("Empty path is not allowed.");
+  const res = tmp[lastKey];
+  if (res === undefined)
+    throw new TranslationError(
+      `Cannot find translation for "${path}": "${lastKey}" not found` +
+        (visitedKeys.length > 0 ? ` in "${visitedKeys.join(".")}".` : "."),
+    );
+  if (typeof res !== "string" && !isStringArray(res))
+    throw new TranslationError(`Cannot find translation for "${path}": "${path}" is not a string.`);
+  return typeof res === "string" ? res : res.join("\n");
 };
 
 /**
