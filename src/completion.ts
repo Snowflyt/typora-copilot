@@ -92,7 +92,6 @@ export default class CompletionTaskManager {
 
         const completion = completions[0]!;
 
-        console.log("checkpoint d");
         const cleanup = onCompletion?.(completion) ?? new Observable<"accepted" | "rejected">();
         cleanup.subscribeOnce((acceptedOrRejected) => {
           if (acceptedOrRejected === "accepted") {

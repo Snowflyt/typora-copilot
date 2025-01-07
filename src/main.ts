@@ -61,8 +61,6 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
   const insertCompletionTextToEditor = (
     completion: Completion,
   ): Observable<"accepted" | "rejected"> | void => {
-    console.log("completion done", completion);
-
     const { position, range } = completion;
     let { displayText, text } = completion;
 
@@ -176,8 +174,6 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
       backgroundColor,
       fontSize,
     });
-
-    console.log("suggestion panel attached");
 
     copilot.notification.notifyShown({ uuid: completion.uuid });
 
@@ -562,7 +558,6 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
       if (!cursorPos) return;
 
       // Fetch completion from Copilot
-      console.log("task start at", cursorPos);
       taskManager.start(cursorPos, {
         onCompletion: (completion) => {
           if (editor.sourceView.inSourceMode)
