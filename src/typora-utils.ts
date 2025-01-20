@@ -5,8 +5,7 @@
 import * as path from "@modules/path";
 import { fileURLToPath } from "@modules/url";
 
-import { NoFreePortError, PlatformError } from "./errors";
-import { CommandError } from "./errors/CommandError";
+import { CommandError, NoFreePortError, PlatformError } from "./errors";
 import { getCaretPlacement } from "./extracted";
 
 import type { Position } from "./types/lsp";
