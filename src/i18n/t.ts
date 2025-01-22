@@ -1,5 +1,3 @@
-import { P, match } from "ts-pattern";
-
 import en from "./en.json";
 import zhCN from "./zh-CN.json";
 
@@ -103,10 +101,11 @@ const _t = (path: string): string => {
       navigator.userLanguage) ||
     "en";
   const keys = path.split(".").filter(Boolean);
-  const localeMap: LocaleMap = match(locale)
-    .with(P.union("en", P.string.startsWith("en-")), () => en)
-    .with(P.union("zh-CN", "zh-Hans"), () => zhCN)
-    .otherwise(() => en);
+  const localeMap: LocaleMap = (() => {
+    if (locale === "en" || locale.startsWith("en-")) return en;
+    if (locale === "zh-CN" || locale === "zh-Hans") return zhCN;
+    return en;
+  })();
   let tmp = localeMap;
 
   const visitedKeys: string[] = [];

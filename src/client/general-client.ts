@@ -1,5 +1,3 @@
-import { P, match } from "ts-pattern";
-
 import type {
   CancelParams,
   DidChangeTextDocumentParams,
@@ -32,7 +30,7 @@ import type { NodeServer } from "@modules/child_process";
 import { ErrorCodes, JSONRPC_VERSION, MessageType } from "@/types/lsp";
 import { createLogger, formatErrorCode, formatId, formatMethod } from "@/utils/logging";
 import { isNotificationMessage, isRequestMessage, isResponseMessage, toJSError } from "@/utils/lsp";
-import { isKeyOf } from "@/utils/tools";
+import { assertNever, isKeyOf } from "@/utils/tools";
 
 /**
  * A promise specially designed for LSP client representing a future response from LSP server that
@@ -331,13 +329,21 @@ const _prepareProtocolNotificationHandlers = () =>
      */
     "window/logMessage": ({ message, type }: LogMessageParams, { logger, suppressLogging }) => {
       suppressLogging();
-      match(type)
-        .with(MessageType.Error, () => logger.error(message))
-        .with(MessageType.Warning, () => logger.warn(message))
-        .with(P.union(MessageType.Info, MessageType.Log, MessageType.Debug), () =>
-          logger.debug(message),
-        )
-        .exhaustive();
+      switch (type) {
+        case MessageType.Error:
+          logger.error(message);
+          break;
+        case MessageType.Warning:
+          logger.warn(message);
+          break;
+        case MessageType.Info:
+        case MessageType.Log:
+        case MessageType.Debug:
+          logger.debug(message);
+          break;
+        default:
+          assertNever(type);
+      }
     },
   });
 

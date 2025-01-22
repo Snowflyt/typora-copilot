@@ -2,6 +2,15 @@ import type { EOL, Range } from "@/types/lsp";
 import type { ReadonlyRecord } from "@/types/tools";
 
 /**
+ * Assert that the value is never (i.e., this statement should never be reached).
+ * @param value The value to assert.
+ * @returns
+ */
+export const assertNever = (value: never): never => {
+  throw new Error(`Unexpected value: ${JSON.stringify(value)}`);
+};
+
+/**
  * Omit keys from an object
  * @param obj The object to omit keys from.
  * @param keys The keys to omit.
