@@ -186,7 +186,9 @@ export const _normalize: AddSep<typeof path.posix.normalize> = (sep, path) => {
 export const isAbsolute: typeof path.posix.isAbsolute = (...args) => _isAbsolute(sep, ...args);
 export const _isAbsolute: AddSep<typeof path.posix.isAbsolute> = (sep, path) => {
   assertPath(path);
-  return path.length > 0 && path.charCodeAt(0) === sep.charCodeAt(0) /*/*/;
+  if (path.length === 0) return false;
+  if (Files.isWin) return /[a-zA-Z]+:/.test(path);
+  return path.charCodeAt(0) === sep.charCodeAt(0) /*/*/;
 };
 
 /**
