@@ -5,7 +5,6 @@
 import * as path from "@modules/path";
 import { fileURLToPath } from "@modules/url";
 
-import { CommandError, NoFreePortError, PlatformError } from "./errors";
 import { getCaretPlacement } from "./extracted";
 
 import type { Position } from "./types/lsp";
@@ -422,56 +421,6 @@ export const getCaretPosition = (): Position | null => {
   }
 
   return { line: placement.line, character: ch !== undefined && ch > 0 ? ch : 0 };
-};
-
-/**
- * Run a shell command and return its output.
- * @param command Shell command to run.
- * @returns
- */
-export const runShellCommand = (command: string, options?: { cwd?: string }): Promise<string> => {
-  const { cwd } = options ?? {};
-
-  if (Files.isMac)
-    return new Promise((resolve, reject) => {
-      window.bridge!.callHandler(
-        "controller.runCommand",
-        { args: command, ...(cwd ? { cwd } : {}) },
-        ([success, stdout, stderr]) => {
-          if (success) resolve(stdout);
-          else reject(new CommandError(stderr));
-        },
-      );
-    });
-
-  if (Files.isNode)
-    return new Promise((resolve, reject) => {
-      window.reqnode!("child_process").exec(command, { cwd }, (error, stdout, stderr) => {
-        if (error) reject(error);
-        else if (stderr) reject(new CommandError(stderr));
-        else resolve(stdout);
-      });
-    });
-
-  throw new PlatformError("Unsupported platform for `runShellCommand`");
-};
-
-/**
- * Find a free localhost port.
- *
- * **⚠️ Warning:** This function only works on macOS and Linux.
- * @throws {NoFreePortError} If no free port is found.
- */
-export const findFreePort = async (startAt = 6190): Promise<number> => {
-  const command = /* bash */ `
-    for port in {${startAt}..${startAt + 100 > 65535 ? 65535 : startAt + 100}}; do
-      nc -z localhost $port &>/dev/null || { echo $port; break; }
-    done
-  `;
-  const output = await runShellCommand(command);
-  const port = Number.parseInt(output.trim());
-  if (Number.isNaN(port)) throw new NoFreePortError("Cannot find free port.");
-  return port;
 };
 
 /**

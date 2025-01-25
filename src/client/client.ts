@@ -18,7 +18,7 @@ import type {
   integer,
 } from "@/types/lsp";
 import type { ReadonlyRecord } from "@/types/tools";
-import type { NodeServer } from "@modules/child_process";
+import type { NodeServer } from "@/utils/node-bridge";
 
 /**
  * Copilot account status.

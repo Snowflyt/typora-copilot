@@ -3,9 +3,7 @@ import net from "net";
 
 import { WebSocketServer } from "ws";
 
-import { wrapNodeChildProcess } from "./utils/server";
-
-import type { ChildProcessWithoutNullStreams } from "child_process";
+import type { ChildProcessWithoutNullStreams } from "node:child_process";
 
 if (!process.argv[2] || !process.argv[3]) {
   console.log("Usage: node mac-server.cjs <port> <lsp-node-module-path>");
@@ -20,9 +18,7 @@ if (Number.isNaN(port)) {
 
 console.log("Process PID:", process.pid);
 
-const server = wrapNodeChildProcess(
-  fork(process.argv[3], [], { silent: true }) as ChildProcessWithoutNullStreams,
-);
+const server = fork(process.argv[3], [], { silent: true }) as ChildProcessWithoutNullStreams;
 console.log("Copilot LSP server started. PID:", server.pid);
 
 const startWebSocketServer = () => {
@@ -41,10 +37,12 @@ const startWebSocketServer = () => {
       // eslint-disable-next-line @typescript-eslint/no-base-to-string
       const payload = data.toString("utf-8");
       console.debug("📥", payload);
-      server.send(payload);
+      server.stdin.write(payload);
     });
 
-    server.onMessage((message) => {
+    server.stdout.on("data", (data) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const message: string = data.toString("utf-8");
       console.debug("📤", message);
       ws.send(message);
     });

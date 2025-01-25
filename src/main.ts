@@ -1,4 +1,3 @@
-import { forkNode } from "@modules/child_process";
 import * as path from "@modules/path";
 import { pathToFileURL } from "@modules/url";
 
@@ -20,12 +19,14 @@ import {
   waitUntilEditorInitialized,
 } from "./typora-utils";
 import { getCaretCoordinate } from "./utils/dom";
+import { NodeServer, detectAvailableNodeRuntimes } from "./utils/node-bridge";
 import { Observable } from "./utils/observable";
 import { setGlobalVar, sliceTextByRange } from "./utils/tools";
 
 import "./styles.scss";
 
 import type { Completion } from "./client";
+import type { NodeRuntime } from "./utils/node-bridge";
 
 logger.info("Copilot plugin activated. Version:", VERSION);
 
@@ -38,8 +39,31 @@ const FAKE_TEMP_WORKSPACE_FOLDER =
   : "/home/fakeuser/faketyporacopilotworkspace";
 const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
 
-(async () => {
-  const server = await forkNode(path.join(PLUGIN_DIR, "language-server", "language-server.cjs"));
+Promise.defer(async () => {
+  const runtime = await new Promise<NodeRuntime>((resolve, reject) => {
+    const start = Date.now();
+    void detectAvailableNodeRuntimes({
+      onFirstResolved: (runtime) => {
+        resolve(runtime);
+        logger.debug(`Resolved first Node.js runtime in ${Date.now() - start}ms:`, runtime);
+      },
+    }).then((runtimes) => {
+      if (runtimes.length === 0) reject(new Error("No available Node.js runtime"));
+      logger.debug(`Resolved all Node.js runtimes in ${Date.now() - start}ms:`, runtimes);
+    });
+  });
+  logger.info(
+    "Detected " +
+      (runtime.path === "bundled" ? "bundled" : "available") +
+      ` Node.js (v${runtime.version.replace(/^v/, "")})` +
+      (runtime.path === "bundled" ? "" : ` at "${runtime.path}"`) +
+      ", using it to start language server.",
+  );
+
+  const server = await NodeServer.start(
+    runtime.path,
+    path.join(PLUGIN_DIR, "language-server", "language-server.cjs"),
+  );
   logger.debug("Copilot LSP server started. PID:", server.pid);
 
   /**
@@ -706,6 +730,6 @@ const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
     // Invoke callback
     void onChangeMarkdown(newMarkdown, oldMarkdown);
   });
-})().catch((err) => {
+}).catch((err) => {
   throw err;
 });

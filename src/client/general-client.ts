@@ -25,7 +25,7 @@ import type {
 } from "../types/lsp";
 import type { Equals, ReadonlyRecord } from "@/types/tools";
 import type { Logger } from "@/utils/logging";
-import type { NodeServer } from "@modules/child_process";
+import type { NodeServer } from "@/utils/node-bridge";
 
 import { ErrorCodes, JSONRPC_VERSION, MessageType } from "@/types/lsp";
 import { createLogger, formatErrorCode, formatId, formatMethod } from "@/utils/logging";

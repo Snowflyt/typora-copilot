@@ -93,6 +93,18 @@ export const __format = (sep: string, pathObject: path.FormatInputPathObject) =>
 };
 
 /**
+ * Expand the home directory (`~`) in a path.
+ * @param path Path to expand.
+ * @returns Expanded path.
+ * @throws {TypeError} if `path` is not a string.
+ */
+export const expandHomeDir = (path: string): string => {
+  assertPath(path);
+  if (path.startsWith("~")) return window._options.userPath + path.slice(1);
+  return path;
+};
+
+/**
  * The right-most parameter is considered {to}. Other parameters are considered an array of {from}.
  *
  * Starting from leftmost {from} parameter, resolves {to} to an absolute path.

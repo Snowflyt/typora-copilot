@@ -21,9 +21,10 @@
  * declared here.
  */
 declare var _options: {
-  userLocale?: string;
   appLocale?: string;
   appVersion: string;
+  userLocale?: string;
+  userPath: string;
 };
 
 // Typora extends `window.File` with some additional properties, e.g., `File.editor`
@@ -135,6 +136,7 @@ interface Window {
    */
   reqnode?: {
     (moduleName: "child_process"): typeof import("node:child_process");
+    (moduleName: "fs"): typeof import("node:fs");
     (moduleName: "util"): typeof import("node:util");
     (moduleName: string): unknown;
   };
