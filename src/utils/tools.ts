@@ -45,11 +45,10 @@ export const valuesOf = <O extends object>(obj: O): readonly O[keyof O][] =>
  */
 export const entriesOf = <O extends object>(
   obj: O,
-): readonly (readonly [`${keyof O & (string | number)}`, O[keyof O]])[] =>
-  Object.entries(obj) as unknown as readonly (readonly [
-    `${keyof O & (string | number)}`,
-    O[keyof O],
-  ])[];
+): O extends O ? readonly (readonly [`${keyof O & (string | number)}`, O[keyof O]])[] : never =>
+  Object.entries(obj) as unknown as O extends O ?
+    readonly (readonly [`${keyof O & (string | number)}`, O[keyof O]])[]
+  : never;
 
 export const isKeyOf = <O extends object>(obj: O, key: PropertyKey): key is keyof O => key in obj;
 
