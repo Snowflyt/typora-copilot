@@ -71,49 +71,35 @@
         "</div>"
       ]
     },
-    "warn-nodejs-required-for-typora-under-1-6": {
-      "title": "需要安装 Node.js 才能在 Typora 1.6 以下版本中运行此插件",
+    "warn-nodejs-above-18-required-for-typora-above-1-10": {
+      "title": "需要安装 Node.js ≥ 18 才能在 Typora 1.10 及以上版本中运行此插件",
       "html": [
-        "<p>需要 Node.js >= 18 或 Typora >= 1.6 才能运行此插件。</p>",
+        "<p>需要安装 Node.js ≥ 18 才能在 Typora 1.10 及以上版本中运行此插件，但是未找到有效的 Node.js 路径。</p>",
         "<p>当前 Typora 版本为 <code>{{TYPORA_VERSION}}</code>。</p>",
         "<p>",
         "  请安装 <a href=\"https://nodejs.org/en/download/\" target=\"_blank\">Node.js</a>",
-        "  >= 18 或升级 <a href=\"https://typora.io/#download\" target=\"_blank\">Typora</a>",
-        "  >= 1.6.",
+        "  ≥ 18 或在“设置 → Node.js → Node.js 路径”中指定 Node.js 路径，并重新启动 Typora 以生效。",
         "</p>"
       ]
     },
     "warn-nodejs-above-18-required-for-typora-under-1-6": {
-      "title": "需要安装 Node.js >= 18 才能在 Typora 1.6 以下版本中运行此插件",
+      "title": "需要安装 Node.js ≥ 18 才能在 Typora 1.6 以下版本中运行此插件",
       "html": [
-        "<p>需要 Node.js >= 18 或 Typora >= 1.6 才能运行此插件。</p>",
+        "<p>需要安装 Node.js ≥ 18 才能在 Typora 1.6 以下版本中运行此插件，但是未找到有效的 Node.js 路径。</p>",
         "<p>当前 Typora 版本为 <code>{{TYPORA_VERSION}}</code>。</p>",
-        "<p>当前 Node 版本为 <code>{{NODE_VERSION}}</code>。</p>",
         "<p>",
         "  请安装 <a href=\"https://nodejs.org/en/download/\" target=\"_blank\">Node.js</a>",
-        "  >= 18 或升级 <a href=\"https://typora.io/#download\" target=\"_blank\">Typora</a>",
-        "  >= 1.6.",
-        "</p>"
-      ]
-    },
-    "warn-nodejs-required-on-macOS": {
-      "title": "需要安装 Node.js 才能运行此插件",
-      "html": [
-        "<p>需要 Node.js >= 18 才能在 macOS 上运行此插件。</p>",
-        "<p>",
-        "  请安装 <a href=\"https://nodejs.org/en/download/\" target=\"_blank\">Node.js</a>",
-        "  >= 18 并重新启动 Typora 以使用此插件。",
+        "  ≥ 18 或在“设置 → Node.js → Node.js 路径”中指定 Node.js 路径，并重新启动 Typora 以生效。",
         "</p>"
       ]
     },
     "warn-nodejs-above-18-required-on-macOS": {
-      "title": "需要安装 Node.js >= 18 才能运行此插件",
+      "title": "需要安装 Node.js ≥ 18 才能运行此插件",
       "html": [
-        "<p>需要 Node.js >= 18 才能在 macOS 上运行此插件。</p>",
-        "<p>当前 Node 版本为 <code>{{NODE_VERSION}}</code>。</p>",
+        "<p>需要 Node.js ≥ 18 才能在 macOS 上运行此插件，但是未找到有效的 Node.js 路径。</p>",
         "<p>",
         "  请安装 <a href=\"https://nodejs.org/en/download/\" target=\"_blank\">Node.js</a>",
-        "  >= 18 并重新启动 Typora 以使用此插件。",
+        "  ≥ 18 或在“设置 → Node.js → Node.js 路径”中指定 Node.js 路径，并重新启动 Typora 以生效。",
         "</p>"
       ]
     }
@@ -147,6 +133,27 @@
         "label": "在预览模式代码块中使用内联补全文本（Early alpha）",
         "description": "在预览模式的代码块中使用内联补全文本，而不是建议面板",
         "warning": "此功能仍处于早期阶段，很可能会损坏你的文档。请谨慎使用。"
+      }
+    },
+    "nodejs": {
+      "title": "Node.js",
+      "note": "自 Typora v1.10 起，所有平台都需要 Node.js ≥ 18 才能运行此插件。",
+      "constant": {
+        "PATH_AUTO_DETECT": "自动检测",
+        "PATH_BUNDLED": "内置"
+      },
+      "node-path": {
+        "label": "Node.js 路径（重启 Typora 生效）",
+        "description": "选择或输入 Copilot LSP 使用的 Node.js 路径",
+        "message": {
+          "retrieving-version": "正在获取位于 \"{{PATH}}\" 的 Node.js 版本...",
+          "updated": "已更新 Node.js 路径为 \"{{PATH}}\" ({{VERSION}})",
+          "updated-auto": "已更新 Node.js 路径为自动检测",
+          "warn-invalid": "无法获取位于 \"{{PATH}}\" 的 Node.js 版本",
+          "warn-invalid-version": "期望 Node.js 版本 ≥ 18，但是在 \"{{PATH}}\" 中找到的版本为 {{VERSION}}",
+          "warn-empty-select-or-input": "请选择或输入有效的 Node.js 路径",
+          "warn-empty-input": "请输入有效的 Node.js 路径"
+        }
       }
     }
   }

@@ -2,12 +2,16 @@ import * as path from "@modules/path";
 import { pathToFileURL } from "@modules/url";
 
 import { debounce } from "radash";
+import semverGte from "semver/functions/gte";
+import semverLt from "semver/functions/lt";
+import semverValid from "semver/functions/valid";
 
 import { createCopilotClient } from "./client";
 import CompletionTaskManager from "./completion";
 import { attachSuggestionPanel } from "./components/SuggestionPanel";
 import { PLUGIN_DIR, VERSION } from "./constants";
 import { attachFooter } from "./footer";
+import { t } from "./i18n";
 import { logger } from "./logging";
 import { settings } from "./settings";
 import {
@@ -18,8 +22,14 @@ import {
   getWorkspaceFolder,
   waitUntilEditorInitialized,
 } from "./typora-utils";
+import { runCommand } from "./utils/cli-tools";
 import { getCaretCoordinate } from "./utils/dom";
-import { NodeServer, detectAvailableNodeRuntimes } from "./utils/node-bridge";
+import {
+  NodeServer,
+  detectAvailableNodeRuntimes,
+  setAllAvailableNodeRuntimes,
+  setCurrentNodeRuntime,
+} from "./utils/node-bridge";
 import { Observable } from "./utils/observable";
 import { setGlobalVar, sliceTextByRange } from "./utils/tools";
 
@@ -40,31 +50,116 @@ const FAKE_TEMP_WORKSPACE_FOLDER =
 const FAKE_TEMP_FILENAME = "typora-copilot-fake-markdown.md";
 
 Promise.defer(async () => {
-  const runtime = await new Promise<NodeRuntime>((resolve, reject) => {
+  const runtime = await new Promise<NodeRuntime>((resolve) => {
     const start = Date.now();
+
+    const customNodePath = settings.nodePath;
+    const checkCustomRuntimePromise =
+      customNodePath ?
+        runCommand(`"${customNodePath}" -v`).then((output) => {
+          const version = output.trim();
+          if (!semverValid(version)) {
+            logger.warn(
+              `Failed to check version of custom Node.js path "${customNodePath}", fallback to auto detection`,
+            );
+            throw new Error("Custom runtime invalid");
+          }
+          const runtime = { path: customNodePath, version };
+          setCurrentNodeRuntime(runtime);
+          logger.info(
+            `Using custom Node.js runtime (v${version.replace(/^v/, "")}) at path` +
+              `"${customNodePath}" to start language server.`,
+          );
+          resolve(runtime);
+        })
+      : Promise.reject(new Error("No custom runtime"));
+
     void detectAvailableNodeRuntimes({
       onFirstResolved: (runtime) => {
-        resolve(runtime);
-        logger.debug(`Resolved first Node.js runtime in ${Date.now() - start}ms:`, runtime);
+        const timeSpent = Date.now() - start;
+
+        checkCustomRuntimePromise.catch(() => {
+          setCurrentNodeRuntime(runtime);
+          logger.debug(`Resolved first Node.js runtime in ${timeSpent}ms:`, runtime);
+          logger.info(
+            "Detected " +
+              (runtime.path === "bundled" ? "bundled" : "available") +
+              ` Node.js (v${runtime.version.replace(/^v/, "")})` +
+              (runtime.path === "bundled" ? "" : ` at path "${runtime.path}"`) +
+              ", using it to start language server.",
+          );
+          resolve(runtime);
+        });
       },
     }).then((runtimes) => {
-      if (runtimes.length === 0) reject(new Error("No available Node.js runtime"));
-      logger.debug(`Resolved all Node.js runtimes in ${Date.now() - start}ms:`, runtimes);
+      const timeSpent = Date.now() - start;
+      setAllAvailableNodeRuntimes(runtimes);
+
+      checkCustomRuntimePromise.catch(() => {
+        if (runtimes.length === 0) {
+          logger.error("No available Node.js runtime found");
+          if (Files.isMac)
+            void waitUntilEditorInitialized().then(() => {
+              Files.editor!.EditHelper.showDialog({
+                title: `Typora Copilot: ${t("dialog.warn-nodejs-above-18-required-on-macOS.title")}`,
+                type: "error",
+                html: /* html */ `
+                  <div style="text-align: center; margin-top: 8px;">
+                    ${t("dialog.warn-nodejs-above-18-required-on-macOS.html")}
+                  </div>
+                `,
+                buttons: [t("button.understand")],
+              });
+            });
+          else if (Files.isNode && semverLt(process.version, "18.0.0"))
+            void waitUntilEditorInitialized().then(() => {
+              Files.editor!.EditHelper.showDialog({
+                title: `Typora Copilot: ${t("dialog.warn-nodejs-above-18-required-for-typora-under-1-6.title")}`,
+                type: "error",
+                html: /* html */ `
+                  <div style="text-align: center; margin-top: 8px;">
+                    ${t("dialog.warn-nodejs-above-18-required-for-typora-under-1-6.html").replace(
+                      "{{TYPORA_VERSION}}",
+                      TYPORA_VERSION,
+                    )}
+                  </div>
+                `,
+                buttons: [t("button.understand")],
+              });
+            });
+          else if (Files.isNode && semverGte(TYPORA_VERSION, "1.10.0"))
+            void waitUntilEditorInitialized().then(() => {
+              Files.editor!.EditHelper.showDialog({
+                title: `Typora Copilot: ${t("dialog.warn-nodejs-above-18-required-for-typora-above-1-10.title")}`,
+                type: "error",
+                html: /* html */ `
+                  <div style="text-align: center; margin-top: 8px;">
+                    ${t("dialog.warn-nodejs-above-18-required-for-typora-above-1-10.html").replace(
+                      "{{TYPORA_VERSION}}",
+                      TYPORA_VERSION,
+                    )}
+                  </div>
+                `,
+                buttons: [t("button.understand")],
+              });
+            });
+
+          resolve({ path: "not found", version: "unknown" });
+        } else {
+          logger.debug(`Resolved all available Node.js runtimes in ${timeSpent}ms:`, runtimes);
+        }
+      });
     });
   });
-  logger.info(
-    "Detected " +
-      (runtime.path === "bundled" ? "bundled" : "available") +
-      ` Node.js (v${runtime.version.replace(/^v/, "")})` +
-      (runtime.path === "bundled" ? "" : ` at "${runtime.path}"`) +
-      ", using it to start language server.",
-  );
 
-  const server = await NodeServer.start(
-    runtime.path,
-    path.join(PLUGIN_DIR, "language-server", "language-server.cjs"),
-  );
-  logger.debug("Copilot LSP server started. PID:", server.pid);
+  const server =
+    runtime.path === "not found" ?
+      NodeServer.getMock()
+    : await NodeServer.start(
+        runtime.path,
+        path.join(PLUGIN_DIR, "language-server", "language-server.cjs"),
+      );
+  if (server.pid !== -1) logger.debug("Copilot LSP server started. PID:", server.pid);
 
   /**
    * Copilot LSP client.

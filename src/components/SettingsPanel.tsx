@@ -1,7 +1,13 @@
+/* eslint-disable sonarjs/no-duplicate-string */
+
 import { useSignal } from "@preact/signals";
-import { mapValues } from "radash";
+import { useMemo } from "preact/hooks";
+import { debounce, mapValues } from "radash";
+import semverGte from "semver/functions/gte";
+import semverValid from "semver/functions/valid";
 import { kebabCase } from "string-ts";
 
+import DropdownWithInput from "./DropdownWithInput";
 import ModalBody from "./ModalBody";
 import ModalCloseButton from "./ModalCloseButton";
 import ModalContent from "./ModalContent";
@@ -9,41 +15,261 @@ import ModalOverlay from "./ModalOverlay";
 import ModalTitle from "./ModalTitle";
 import ModalHeader from "./ModelHeader";
 import Switch from "./Switch";
+import { NodejsIcon, SettingsIcon } from "./icons";
 
 import type { Settings } from "@/settings";
 import type { _Id } from "@/types/tools";
+import type { NodeRuntime } from "@/utils/node-bridge";
 import type { Signal } from "@preact/signals";
 
 import { t } from "@/i18n";
 import { settings } from "@/settings";
-import { entriesOf, keysOf } from "@/utils/tools";
+import { runCommand } from "@/utils/cli-tools";
+import {
+  getAllAvailableNodeRuntimes,
+  getCurrentNodeRuntime,
+  setCurrentNodeRuntime,
+} from "@/utils/node-bridge";
+import { assertNever, entriesOf, keysOf } from "@/utils/tools";
 
-type SettingControl<K extends keyof Settings> = (
-  key: K,
-  signal: Signal<Settings[K]>,
-) => preact.JSX.Element;
+interface SettingControl<K extends keyof Settings> {
+  position: "right" | "bottom";
+  component: (key: K, signal: Signal<Settings[K]>) => preact.JSX.Element;
+}
 type TypedSettingControl<T> = SettingControl<
   keyof { [K in keyof Settings as Settings[K] extends T ? K : never]: void }
 >;
 
-const BooleanSettingControl: TypedSettingControl<boolean> = (key, signal) => (
-  <Switch
-    value={signal.value}
-    onChange={(value) => {
-      signal.value = value;
-      settings[key] = value;
-    }}
-  />
-);
+const BooleanSettingControl: TypedSettingControl<boolean> = {
+  position: "right",
+  component: (key, signal) => (
+    <Switch
+      value={signal.value}
+      onChange={(value) => {
+        signal.value = value;
+        settings[key] = value;
+      }}
+    />
+  ),
+};
 
-type Categories = Record<string, { [K in keyof Settings]: SettingControl<K> }>;
+type Categories = Record<string, { [K in keyof Settings]?: SettingControl<K> }>;
 const categories = {
   general: {
     disableCompletions: BooleanSettingControl,
     useInlineCompletionTextInSource: BooleanSettingControl,
     useInlineCompletionTextInPreviewCodeBlocks: BooleanSettingControl,
   },
+  nodejs: {
+    nodePath: {
+      position: "bottom",
+      component: (key, signal) => {
+        const optionAuto = (() => {
+          if (getAllAvailableNodeRuntimes().length === 0) return null;
+          const { path, version } =
+            getAllAvailableNodeRuntimes().find(({ path }) => path === "bundled") ??
+            getAllAvailableNodeRuntimes()[0]!;
+          return (
+            `${t("settings-panel.nodejs.constant.PATH_AUTO_DETECT")} ` +
+            `(${path === "bundled" ? t("settings-panel.nodejs.constant.PATH_BUNDLED") : path}, ` +
+            `${version.startsWith("v") ? version : "v" + version})`
+          );
+        })();
+        const options = [
+          ...(optionAuto ? [optionAuto] : []),
+          ...getAllAvailableNodeRuntimes()
+            .filter(({ path }) => path !== "bundled")
+            .map(
+              ({ path, version }) =>
+                `${path} (${version.startsWith("v") ? version : "v" + version})`,
+            ),
+        ];
+
+        const currentVersion = useSignal(getCurrentNodeRuntime().version);
+
+        const inputType = useSignal<"default" | "passed" | "failed">(
+          getCurrentNodeRuntime().path === "not found" ? "failed" : "default",
+        );
+        const forceFocusInput = useSignal(false);
+        const info = useSignal(
+          getCurrentNodeRuntime().path === "not found" ?
+            options.length > 0 ?
+              t("settings-panel.nodejs.node-path.message.warn-empty-select-or-input")
+            : t("settings-panel.nodejs.node-path.message.warn-empty-input")
+          : "",
+        );
+        const infoColor = useSignal(
+          getCurrentNodeRuntime().path === "not found" ?
+            /* text-red-500 */ "#f56565"
+          : /* text-blue-500 */ "#4299e1",
+        );
+        const dropdownMarginTop = useSignal(
+          getCurrentNodeRuntime().path === "not found" ? "1.75rem" : "default",
+        );
+
+        const parseOption = (option: string): NodeRuntime => {
+          const parts = option.split(" ");
+
+          if (option === optionAuto) {
+            let path = parts
+              .slice(0, -1)
+              .join(" ")
+              .slice(t("settings-panel.nodejs.constant.PATH_AUTO_DETECT").length + 2, -1);
+            if (path === t("settings-panel.nodejs.constant.PATH_BUNDLED")) path = "bundled";
+            const version = parts[parts.length - 1]!.slice(0, -1);
+            return { path, version };
+          }
+
+          if (parts.length < 2) return { path: option, version: "unknown" };
+          const lastPart = parts[parts.length - 1];
+          if (!lastPart || !lastPart.startsWith("(") || !lastPart.endsWith(")"))
+            return { path: option, version: "unknown" };
+          const version = lastPart.slice(1, -1);
+          if (!semverValid(version)) return { path: option, version: "unknown" };
+          return {
+            path: parts.slice(0, -1).join(" "),
+            version: version.startsWith("v") ? version : `v${version}`,
+          };
+        };
+
+        const retrieveRuntimeVersion = useMemo(
+          () =>
+            debounce(
+              { delay: 500 },
+              (() => {
+                let latestTimestamp = 0;
+
+                return (path: string) => {
+                  const timestamp = Date.now();
+                  latestTimestamp = timestamp;
+
+                  runCommand(`"${path}" -v`)
+                    .then((output) => {
+                      if (latestTimestamp !== timestamp) return;
+                      const version = output.trim();
+                      if (!version) throw new Error("No version found");
+                      if (!semverValid(version)) throw new Error(`Invalid version: ${version}`);
+                      if (semverGte(version, "18.0.0")) {
+                        setCurrentNodeRuntime({ path, version });
+                        settings[key] = path;
+                        signal.value = path;
+                        currentVersion.value = version;
+                        inputType.value = "passed";
+                        forceFocusInput.value = false;
+                        info.value = t("settings-panel.nodejs.node-path.message.updated")
+                          .replace("{{PATH}}", path)
+                          .replace("{{VERSION}}", version);
+                        infoColor.value = "#48bb78"; // text-green-500
+                      } else {
+                        inputType.value = "failed";
+                        forceFocusInput.value = false;
+                        info.value = t(
+                          "settings-panel.nodejs.node-path.message.warn-invalid-version",
+                        )
+                          .replace("{{PATH}}", path)
+                          .replace("{{VERSION}}", version);
+                        infoColor.value = "#f56565"; // text-red-500
+                      }
+                    })
+                    .catch(() => {
+                      if (latestTimestamp !== timestamp) return;
+                      inputType.value = "failed";
+                      forceFocusInput.value = false;
+                      info.value = t(
+                        "settings-panel.nodejs.node-path.message.warn-invalid",
+                      ).replace("{{PATH}}", path);
+                      infoColor.value = "#f56565"; // text-red-500
+                    });
+                };
+              })(),
+            ),
+          [inputType, forceFocusInput, info, infoColor],
+        );
+
+        return (
+          <div style={{ width: "100%", marginTop: "0.75rem" }}>
+            <DropdownWithInput
+              type={inputType.value}
+              forceFocus={forceFocusInput.value}
+              dropdownMarginTop={dropdownMarginTop.value}
+              options={options}
+              value={
+                signal.value === null ?
+                  (optionAuto ?? "")
+                : signal.value +
+                  (currentVersion.value === "unknown" ? "" : ` (${currentVersion.value})`)
+              }
+              onChange={(option) => {
+                const runtime = parseOption(option);
+                signal.value = option === optionAuto ? null : runtime.path;
+                currentVersion.value = runtime.version;
+
+                if (!runtime.path) {
+                  inputType.value = "failed";
+                  info.value =
+                    options.length > 0 ?
+                      t("settings-panel.nodejs.node-path.message.warn-empty-select-or-input")
+                    : t("settings-panel.nodejs.node-path.message.warn-empty-input");
+                  infoColor.value = "#f56565"; // text-red-500
+                  dropdownMarginTop.value = "1.75rem";
+                  return;
+                }
+
+                if (options.includes(option)) {
+                  setCurrentNodeRuntime(runtime);
+                  if (option === optionAuto) settings.clear(key);
+                  else settings[key] = runtime.path;
+                  inputType.value = "passed";
+                  forceFocusInput.value = false;
+                  info.value =
+                    option === optionAuto ?
+                      t("settings-panel.nodejs.node-path.message.updated-auto")
+                    : t("settings-panel.nodejs.node-path.message.updated")
+                        .replace("{{PATH}}", runtime.path)
+                        .replace("{{VERSION}}", runtime.version);
+                  infoColor.value = "#48bb78"; // text-green-500
+                } else {
+                  inputType.value = "default";
+                  forceFocusInput.value = true;
+                  info.value = t(
+                    "settings-panel.nodejs.node-path.message.retrieving-version",
+                  ).replace("{{PATH}}", runtime.path);
+                  infoColor.value = "#4299e1"; // text-blue-500
+                  dropdownMarginTop.value = "1.75rem";
+                  retrieveRuntimeVersion(runtime.path);
+                }
+              }}
+              onOpenDropdown={() => {
+                if (inputType.value === "passed") inputType.value = "default";
+              }}
+              onCloseDropdown={() => {
+                if (inputType.value === "default" && !forceFocusInput.value) info.value = "";
+                dropdownMarginTop.value = "default";
+              }}
+            />
+
+            {info && (
+              <div
+                style={{
+                  marginTop: "0.5rem",
+                  fontSize: "0.75rem",
+                  lineHeight: 1,
+                  color: infoColor.value,
+                }}>
+                {info}
+              </div>
+            )}
+          </div>
+        );
+      },
+    },
+  },
 } as const satisfies Categories;
+
+const categoryIcons = {
+  general: <SettingsIcon size={18} />,
+  nodejs: <NodejsIcon size={18} />,
+} as const satisfies Record<keyof typeof categories, preact.JSX.Element>;
 
 type CategoriesSignals<C extends Categories> = _Id<{
   [K in keyof C]: {
@@ -58,9 +284,9 @@ export interface SettingsPanelProps {
 
 const SettingsPanel: FC<SettingsPanelProps> = ({ onClose }) => {
   const selectedCategory = useSignal(Object.keys(categories)[0] as keyof typeof categories);
-  const signals: CategoriesSignals<typeof categories> = mapValues(categories, (category) =>
-    mapValues(category, (_, key) => useSignal(settings[key])),
-  );
+  const signals = mapValues(categories, (category) =>
+    mapValues(category as never, (_, key) => useSignal(settings[key])),
+  ) as CategoriesSignals<typeof categories>;
 
   return (
     <ModalOverlay onClose={onClose}>
@@ -79,7 +305,7 @@ const SettingsPanel: FC<SettingsPanelProps> = ({ onClose }) => {
                   selectedCategory.value = category;
                 }}
                 style={{ marginBottom: i === arr.length - 1 ? "0" : "0.5rem" }}>
-                <SettingsIcon size={18} />
+                {categoryIcons[category]}
                 <span style={{ marginLeft: "0.375rem" }}>
                   {t(`settings-panel.${category}.title`)}
                 </span>
@@ -98,31 +324,82 @@ const SettingsPanel: FC<SettingsPanelProps> = ({ onClose }) => {
               display: "flex",
               flexDirection: "column",
             }}>
+            {t.test(`settings-panel.${selectedCategory.value}.note`) && (
+              <div style={{ fontSize: "0.75rem", lineHeight: 1, opacity: 0.75 }}>
+                <span>* {t.tran(`settings-panel.${selectedCategory.value}.note`)}</span>
+                <hr
+                  style={{ height: 0, margin: "1rem 0", border: "none", borderTop: "1px dashed" }}
+                />
+              </div>
+            )}
             {entriesOf(categories[selectedCategory.value]).map(([key, control], i, arr) => (
               <>
                 <div key={key} style={{ width: "100%" }}>
-                  <div
-                    style={{
-                      width: "100%",
-                      display: "flex",
-                      flexDirection: "row",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    }}>
-                    <span>
-                      {t(`settings-panel.${selectedCategory.value}.${kebabCase(key)}.label`)}
-                    </span>
-                    {control(key, signals[selectedCategory.value][key])}
-                  </div>
-                  <div
-                    style={{
-                      marginTop: "0.5rem",
-                      fontSize: "0.75rem",
-                      lineHeight: 1,
-                      opacity: 0.75,
-                    }}>
-                    {t(`settings-panel.${selectedCategory.value}.${kebabCase(key)}.description`)}
-                  </div>
+                  {(() => {
+                    if (control.position === "right")
+                      return (
+                        <>
+                          <div
+                            style={{
+                              width: "100%",
+                              display: "flex",
+                              flexDirection: "row",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                            }}>
+                            <span>
+                              {t.tran(
+                                `settings-panel.${selectedCategory.value}.${kebabCase(key)}.label`,
+                              )}
+                            </span>
+                            {control.component(
+                              key as never,
+                              (signals[selectedCategory.value] as never)[key],
+                            )}
+                          </div>
+                          <div
+                            style={{
+                              marginTop: "0.5rem",
+                              fontSize: "0.75rem",
+                              lineHeight: 1,
+                              opacity: 0.75,
+                            }}>
+                            {t.tran(
+                              `settings-panel.${selectedCategory.value}.${kebabCase(key)}.description`,
+                            )}
+                          </div>
+                        </>
+                      );
+                    if (control.position === "bottom")
+                      return (
+                        <>
+                          <div>
+                            {t.tran(
+                              `settings-panel.${selectedCategory.value}.${kebabCase(key)}.label`,
+                            )}
+                          </div>
+                          <div
+                            style={{
+                              marginTop: "0.5rem",
+                              fontSize: "0.75rem",
+                              lineHeight: 1,
+                              opacity: 0.75,
+                            }}>
+                            {t.tran(
+                              `settings-panel.${selectedCategory.value}.${kebabCase(key)}.description`,
+                            )}
+                          </div>
+                          <div style={{ marginTop: "0.5rem" }}>
+                            {control.component(
+                              key as never,
+                              (signals[selectedCategory.value] as never)[key],
+                            )}
+                          </div>
+                        </>
+                      );
+                    assertNever(control.position);
+                  })()}
+
                   {t.test(`settings-panel.${selectedCategory.value}.${kebabCase(key)}.warning`) && (
                     <div
                       style={{
@@ -178,17 +455,6 @@ const MenuButton: FC<{
     : <button type="button" className="unset-button" style={style} onClick={onClick}>
         {children}
       </button>;
-};
-
-const SettingsIcon: FC<{ size?: number }> = ({ size = 24 }) => {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24">
-      <path
-        fill="currentColor"
-        d="M3.34 17a10.017 10.017 0 0 1-.979-2.326a3 3 0 0 0 .003-5.347a9.99 9.99 0 0 1 2.5-4.337a3 3 0 0 0 4.632-2.674a9.99 9.99 0 0 1 5.007.003a3 3 0 0 0 4.632 2.671a10.056 10.056 0 0 1 2.503 4.336a3 3 0 0 0-.002 5.347a9.99 9.99 0 0 1-2.501 4.337a3 3 0 0 0-4.632 2.674a9.99 9.99 0 0 1-5.007-.002a3 3 0 0 0-4.631-2.672A10.018 10.018 0 0 1 3.339 17m5.66.196a4.992 4.992 0 0 1 2.25 2.77c.499.047 1 .048 1.499.002a4.993 4.993 0 0 1 2.25-2.772a4.993 4.993 0 0 1 3.526-.564c.29-.408.54-.843.748-1.298A4.993 4.993 0 0 1 18 12c0-1.26.47-2.437 1.273-3.334a8.152 8.152 0 0 0-.75-1.298A4.993 4.993 0 0 1 15 6.804a4.993 4.993 0 0 1-2.25-2.77c-.5-.047-1-.048-1.5-.001A4.993 4.993 0 0 1 9 6.804a4.993 4.993 0 0 1-3.526.564c-.29.408-.54.843-.747 1.298A4.993 4.993 0 0 1 6 12c0 1.26-.471 2.437-1.273 3.334a8.16 8.16 0 0 0 .75 1.298A4.993 4.993 0 0 1 9 17.196M12 15a3 3 0 1 1 0-6a3 3 0 0 1 0 6m0-2a1 1 0 1 0 0-2a1 1 0 0 0 0 2"
-      />
-    </svg>
-  );
 };
 
 export default SettingsPanel;

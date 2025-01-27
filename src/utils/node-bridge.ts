@@ -35,6 +35,14 @@ export abstract class NodeServer {
     if (Files.isNode) return ElectronNodeServer.start(nodePath, modulePath);
     return await MacOSNodeServer.start(nodePath, modulePath);
   }
+
+  static getMock(): NodeServer {
+    return {
+      pid: -1,
+      send() {},
+      onMessage() {},
+    };
+  }
 }
 
 class ElectronNodeServer implements NodeServer {
@@ -123,6 +131,20 @@ class MacOSNodeServer implements NodeServer {
     });
   }
 }
+
+// The following 2 variables are used as global state in the application and are not persisted.
+// They should be set manually by other parts of the codebase.
+let currentNodeRuntime: NodeRuntime = { path: "not found", version: "unknown" };
+export const getCurrentNodeRuntime = () => currentNodeRuntime;
+export const setCurrentNodeRuntime = (runtime: NodeRuntime) => {
+  currentNodeRuntime = runtime;
+};
+
+let allAvailableNodeRuntimes: readonly NodeRuntime[] = [];
+export const getAllAvailableNodeRuntimes = () => allAvailableNodeRuntimes;
+export const setAllAvailableNodeRuntimes = (runtimes: readonly NodeRuntime[]) => {
+  allAvailableNodeRuntimes = runtimes;
+};
 
 export interface NodeRuntime {
   readonly path: string;
@@ -588,13 +610,13 @@ export const detectAvailableNodeRuntimes = async ({
       .then((r) =>
         // Resolve true case path
         Promise.all(
-          r
-            .filter(Boolean)
-            .map((runtime) =>
-              runtime.path === "bundled" ?
-                runtime
-              : trueCasePath(runtime.path).then((path) => ({ path, version: runtime.version })),
-            ),
+          r.filter(Boolean).map((runtime) =>
+            runtime.path === "bundled" ?
+              runtime
+            : trueCasePath(runtime.path)
+                .then((path) => ({ path, version: runtime.version }))
+                .catch(() => null),
+          ),
         ).then((r) => r.filter(Boolean)),
       ),
   );
