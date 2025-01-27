@@ -12,28 +12,32 @@ This plugin uses the LSP server extracted from Copilot.vim to provide suggestion
 
 > [!NOTE]
 >
-> For Windows / Linux users using Typora < 1.6 or macOS users using any version of Typora, you need to install [Node.js](https://nodejs.org/en/download) ≥ 18.
+> Since Typora v1.10, all platforms require [Node.js](https://nodejs.org/en/download) ≥ 18 to use this plugin.
+>
+> (For those special users on Windows / Linux using 1.6 ≤ Typora < 1.10, no need for Node.js to be installed. :wink:)
 
 _\*Note: `/` means not tested._
 
 | Typora Version | Windows 11 | Ubuntu 22.04 | macOS 14.x/15.x |
 | -------------- | ---------- | ------------ | --------------- |
-| 1.9.5          | ✔         | /            | /               |
-| 1.9.4          | /          | /            | ✔              |
-| 1.8.10         | ✔         | ✔           | ✔              |
-| 1.8.8          | /          | ✔           | /               |
-| 1.8.6          | ✔         | /            | /               |
-| 1.8.5          | ✔         | /            | ✔              |
-| 1.7.6          | ✔         | /            | /               |
-| 1.6.7          | ✔         | /            | /               |
-| 1.6.4-dev      | ✔         | /            | /               |
-| 1.5.12         | ✔         | /            | /               |
-| 1.4.8          | ✔         | /            | /               |
-| 1.3.8          | ✔         | /            | /               |
-| 1.2.5          | ✔         | /            | /               |
-| 1.2.3          | ✔         | /            | /               |
-| 1.0.3          | ✔         | /            | /               |
-| 0.11.18-beta   | ✔         | /            | /               |
+| 1.10.5-dev     | ✓         | /            | ✓              |
+| 1.9.5          | ✓         | /            | /               |
+| 1.9.4          | /          | /            | ✓              |
+| 1.9.3          | /          | ✓           | /               |
+| 1.8.10         | ✓         | ✓           | ✓              |
+| 1.8.8          | /          | ✓           | /               |
+| 1.8.6          | ✓         | /            | /               |
+| 1.8.5          | ✓         | /            | ✓              |
+| 1.7.6          | ✓         | /            | /               |
+| 1.6.7          | ✓         | /            | /               |
+| 1.6.4-dev      | ✓         | /            | /               |
+| 1.5.12         | ✓         | /            | /               |
+| 1.4.8          | ✓         | /            | /               |
+| 1.3.8          | ✓         | /            | /               |
+| 1.2.5          | ✓         | /            | /               |
+| 1.2.3          | ✓         | /            | /               |
+| 1.0.3          | ✓         | /            | /               |
+| 0.11.18-beta   | ✓         | /            | /               |
 
 ## Prerequisites
 
