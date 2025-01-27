@@ -84,6 +84,7 @@ export default class CompletionTaskManager {
         }
 
         if (cancellationReason || completions.length === 0) {
+          if (this.copilot.status === "InProgress") this.copilot.status = "Normal";
           this._state = "idle";
           return;
         }
