@@ -1,6 +1,6 @@
 {
   "name": "typora-copilot",
-  "version": "0.3.3~dev",
+  "version": "0.3.3",
   "private": true,
   "description": "GitHub Copilot plugin for Typora",
   "keywords": [
@@ -25,6 +25,7 @@
   "type": "module",
   "main": "./index.js",
   "scripts": {
+    "prebuild": "npm run clean",
     "build:dev": "npm run prebuild && rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript && cpy {package.json,README.md,README.zh-CN.md,bin,docs,language-server} dist",
     "build:release": "npm run prebuild && rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript && prettier --log-level=silent --print-width 80 --write dist/**/* --ignore-path !dist/ && cpy {package.json,README.md,README.zh-CN.md,bin,docs,language-server} dist",
     "build:watch": "npm run prebuild && cpy {package.json,README.md,README.zh-CN.md,bin,docs,language-server} dist && rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript --watch",
@@ -32,14 +33,13 @@
     "format": "prettier --no-error-on-unmatched-pattern --write {src,test}/**/*.{json,js,jsx,ts,tsx} *.{js,cjs,mjs,ts,cts,mts,json,md}",
     "lint": "eslint {src,test}/**/*.{js,jsx,ts,tsx} *.{js,cjs,mjs,ts,cts,mts} --no-error-on-unmatched-pattern --report-unused-disable-directives-severity error --max-warnings 0 && stylelint \"src/**/*.{css,scss}\"",
     "lint:fix": "eslint --fix {src,test}/**/*.{js,jsx,ts,tsx} *.{js,cjs,mjs,ts,cts,mts} --no-error-on-unmatched-pattern --report-unused-disable-directives-severity error --max-warnings 0 && stylelint --fix \"src/**/*.{css,scss}\"",
-    "prebuild": "npm run clean",
     "prepare": "husky",
     "test": "vitest run",
-    "test-types": "typroof",
     "test:cov": "vitest run --coverage",
     "test:ui": "vitest --ui --coverage.enabled=true",
     "test:watch": "vitest",
-    "test:watch-cov": "vitest --coverage"
+    "test:watch-cov": "vitest --coverage",
+    "test-types": "typroof"
   },
   "dependencies": {
     "@preact/signals": "^2.0.1",
