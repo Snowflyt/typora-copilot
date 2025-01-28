@@ -1,15 +1,10 @@
 .switch {
-  width: 32px;
+  width: 36px;
   height: 20px;
-  background-color: #ccc;
   border-radius: 20px;
   position: relative;
   cursor: pointer;
   transition: background-color 0.2s;
-}
-
-.switch.on {
-  background-color: #4caf50;
 }
 
 .switch .toggle {
@@ -24,5 +19,5 @@
 }
 
 .switch.on .toggle {
-  left: 14px;
+  left: 18px;
 }

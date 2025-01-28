@@ -328,7 +328,13 @@ const SettingsPanel: FC<SettingsPanelProps> = ({ onClose }) => {
               <div style={{ fontSize: "0.75rem", lineHeight: 1, opacity: 0.75 }}>
                 <span>* {t.tran(`settings-panel.${selectedCategory.value}.note`)}</span>
                 <hr
-                  style={{ height: 0, margin: "1rem 0", border: "none", borderTop: "1px dashed" }}
+                  style={{
+                    height: 0,
+                    margin: "1rem 0",
+                    border: "none",
+                    background: "transparent",
+                    borderTop: "1px dashed",
+                  }}
                 />
               </div>
             )}

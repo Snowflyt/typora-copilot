@@ -4,7 +4,7 @@ export const NodejsIcon: FC<{ size?: number }> = ({ size = 24 }) => {
       xmlns="http://www.w3.org/2000/svg"
       width={(28.35 / 32) * 24}
       height={size}
-      style={{ marginLeft: -(size * 0.08), marginRight: -(size * 0.08) }}
+      style={{ marginLeft: -(size * 0.075), marginRight: -(size * 0.075) }}
       viewBox="0 0 256 289">
       <path
         fill="#539e43"

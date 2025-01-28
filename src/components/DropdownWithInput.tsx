@@ -1,3 +1,4 @@
+import { darken, getLuminance, lighten } from "color2k";
 import { useRef, useState } from "preact/hooks";
 
 import "./DropdownWithInput.scss";
@@ -28,6 +29,8 @@ const DropdownWithInput: FC<DropdownWithInputProps> = ({
   type = "default",
   value,
 }) => {
+  const backgroundColor = window.getComputedStyle(document.body).backgroundColor;
+
   const [isOpen, setIsOpen] = useState(false);
   const [filteredOptions, setFilteredOptions] = useState<string[]>(options);
 
@@ -91,12 +94,21 @@ const DropdownWithInput: FC<DropdownWithInputProps> = ({
 
       {/* Dropdown Menu */}
       {isOpen && filteredOptions.length > 0 && (
-        <ul style={{ marginTop: dropdownMarginTop === "default" ? "0.375rem" : dropdownMarginTop }}>
+        <ul
+          style={{
+            marginTop: dropdownMarginTop === "default" ? "0.375rem" : dropdownMarginTop,
+            backgroundColor,
+          }}>
           {filteredOptions.map((option, index) => (
             <li
               key={index}
               onClick={() => handleOptionClick(option)}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "#f0f0f0")}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background =
+                  getLuminance(backgroundColor) > 0.5 ?
+                    darken(backgroundColor, 0.05)
+                  : lighten(backgroundColor, 0.05);
+              }}
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
               {option}
             </li>
