@@ -43,6 +43,7 @@
   },
   "dependencies": {
     "@preact/signals": "^2.0.1",
+    "color2k": "^2.0.3",
     "preact": "^10.25.4",
     "radash": "^12.1.0",
     "semver": "^7.6.3",
