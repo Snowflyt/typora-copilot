@@ -23,7 +23,7 @@ import {
   waitUntilEditorInitialized,
 } from "./typora-utils";
 import { runCommand } from "./utils/cli-tools";
-import { computeTextChange } from "./utils/diff";
+import { computeTextChanges } from "./utils/diff";
 import { getCaretCoordinate } from "./utils/dom";
 import {
   NodeServer,
@@ -659,61 +659,28 @@ Promise.defer(async () => {
   };
 
   /**
-   * Callback to be invoked when markdown text changed.
+   * Trigger completion.
    */
-
-  const onChangeMarkdown = debounce({ delay: 500 }, (newMarkdown: string, _oldMarkdown: string) => {
-    const changes = computeTextChange(state.lastCommittedMarkdown, newMarkdown);
-
-    // If only one change is made and caret exists, we assume this change is triggered by typing,
-    // and compute the current caret position based on the change
-    let caretPosition: Position | null = null;
-    if (changes.length === 1)
-      if (sourceView.inSourceMode) {
-        // In source view mode, we can directly get the caret position from CodeMirror
-        if (!cm.getSelection())
-          // If not selecting text
-          caretPosition = {
-            line: cm.getCursor().line,
-            character: cm.getCursor().ch,
-          };
-      } else {
-        // In live preview mode, compute the current caret position based on the change
-        if (
-          editor.selection.getRangy()?.collapse && // If not selecting text
-          window.getSelection()?.rangeCount // If has cursor
-        ) {
-          const change = changes[0]!;
-          const changeLines = change.text.split("\n").length - 1;
-          caretPosition = {
-            line: change.range.start.line + changeLines,
-            character:
-              changeLines === 0 ?
-                change.range.start.character + change.text.length
-              : change.text.lastIndexOf("\n") - 1,
-          };
-        }
-      }
-
+  const triggerCompletion = debounce({ delay: 500 }, () => {
     logger.debug("Changing markdown", {
-      ...(caretPosition && { caret: caretPosition }),
-      changes,
-      from: state.lastCommittedMarkdown,
-      to: newMarkdown,
+      from: state.markdownUsedInLastCompletion,
+      to: state.markdown,
     });
 
     // Update state
-    state.lastCommittedMarkdown = newMarkdown;
+    state.markdownUsedInLastCompletion = state.markdown;
 
     /* Tell Copilot that file has changed */
     const version = ++copilot.version;
     copilot.notification.textDocument.didChange({
       textDocument: { version, uri: pathToFileURL(taskManager.activeFilePathname).href },
-      contentChanges: changes,
+      contentChanges: [{ text: state.markdown }],
     });
 
     /* If caret position is available, fetch completion from Copilot */
-    if (caretPosition)
+    if (state.caretPosition) {
+      const caretPosition = state.caretPosition;
+      logger.debug("Triggering completion at", caretPosition);
       taskManager.start(caretPosition, {
         onCompletion: (completion) => {
           if (editor.sourceView.inSourceMode)
@@ -723,6 +690,7 @@ Promise.defer(async () => {
           else return insertCompletionTextToEditor(caretPosition, completion);
         },
       });
+    }
   });
 
   /*********************
@@ -732,8 +700,9 @@ Promise.defer(async () => {
   // Initialize state
   const initialMarkdown = editor.getMarkdown();
   const state = {
-    lastCommittedMarkdown: initialMarkdown,
+    markdownUsedInLastCompletion: initialMarkdown,
     markdown: initialMarkdown,
+    caretPosition: { line: 0, character: 0 } as Position | null,
     _actualLatestMarkdown: initialMarkdown,
     suppressMarkdownChange: 0,
   };
@@ -816,7 +785,7 @@ Promise.defer(async () => {
   });
 
   /* Watch for markdown change in live preview mode */
-  editor.on("change", (_, { newMarkdown, oldMarkdown }) => {
+  editor.on("change", (_, { newMarkdown }) => {
     if (settings.disableCompletions) return;
     if (sourceView.inSourceMode) return;
 
@@ -829,12 +798,102 @@ Promise.defer(async () => {
       state.suppressMarkdownChange--;
       return;
     }
+
+    /* When update not suppressed */
+    // Update caret position
+    if (
+      editor.selection.getRangy()?.collapse && // If not selecting text
+      window.getSelection()?.rangeCount // If has cursor
+    ) {
+      const changes = computeTextChanges(state.markdown, newMarkdown, state.caretPosition);
+      if (changes.length === 1) {
+        const change = changes[0]!;
+        const changeLines = change.text.split(Files.useCRLF ? "\r\n" : "\n").length - 1;
+        state.caretPosition = {
+          line: change.range.start.line + changeLines,
+          character:
+            changeLines === 0 ?
+              change.range.start.character + change.text.length
+            : change.text.lastIndexOf(Files.useCRLF ? "\r\n" : "\n") - 1,
+        };
+
+        // Fix code blocks, math blocks and HTML blocks caret position
+        // When creating these blocks, Typora place the caret in the middle of the block,
+        // instead of at the end of the block
+        if (
+          // If it is an insert operation
+          change.range.start.line === change.range.end.line &&
+          change.range.start.character === change.range.end.character &&
+          // If not in input
+          !document.activeElement?.classList?.contains("ty-input")
+          // If in a CodeMirror instance
+        ) {
+          // The line of the starter (```, ~~~, $$, <div>, etc.)
+          let starterLine =
+            change.range.start.character === 0 ?
+              change.range.start.line - 1
+            : change.range.start.line;
+
+          const lines = newMarkdown.split(Files.useCRLF ? "\r\n" : "\n");
+          if (lines[starterLine] === "") starterLine--;
+          const lineText = lines[starterLine];
+
+          let starter: string | undefined = undefined;
+          let ender: string | undefined = undefined;
+
+          if (lineText) {
+            const unindentedLineText = lineText.replace(/^(\s|>)*/, "");
+
+            // * Code block *
+            if (
+              // Check if the caret is inside a CodeMirror instance
+              document.activeElement?.tagName === "TEXTAREA" &&
+              (starter = unindentedLineText.match(/^(```([^`]|$)|~~~([^~]|$))/)?.[0]?.slice(0, 3))
+            ) {
+              ender = starter;
+            }
+            // * Math block *
+            // NOTE: Typora renders the CodeMirror instance of a math/HTML block in an async way,
+            // so we cannot check if the caret is inside a CodeMirror instance like what we did
+            // in code blocks checking
+            else if (unindentedLineText === "$$" && change.text.trimEnd().endsWith("$$")) {
+              starter = ender = "$$";
+            }
+            // * HTML block *
+            else if (
+              (starter = unindentedLineText.match(/^<[^>]*>/)?.[0]) &&
+              change.text.trimEnd().endsWith(`</${starter.slice(1, -1)}>`)
+            ) {
+              ender = `</${starter.slice(1, -1)}>`;
+            }
+
+            if (starter && ender) {
+              const caretLine = starterLine + 1;
+              const caretLineText = lines[caretLine];
+              if (caretLineText !== undefined)
+                state.caretPosition = {
+                  line: caretLine,
+                  character:
+                    caretLineText.replace(/^(\s|>)*/, "") === ender ? 0 : caretLineText.length,
+                };
+            }
+          }
+        }
+
+        // Set `character` to 0 if it is negative
+        if (state.caretPosition.character < 0) state.caretPosition.character = 0;
+      } else {
+        state.caretPosition = null;
+      }
+    } else {
+      state.caretPosition = null;
+    }
     // Update current markdown text
     state.markdown = newMarkdown;
     // Reject last completion if exists
     taskManager.rejectCurrentIfExist();
-    // Invoke callback
-    void onChangeMarkdown(newMarkdown, oldMarkdown);
+    // Trigger completion
+    void triggerCompletion();
   });
 
   /* Watch for markdown change in source mode */
@@ -852,14 +911,23 @@ Promise.defer(async () => {
       state.suppressMarkdownChange--;
       return;
     }
+
     /* When update not suppressed */
-    const oldMarkdown = state.markdown;
+    // Update caret position if not selecting text
+    if (!cm.getSelection()) {
+      state.caretPosition = {
+        line: cm.getCursor().line,
+        character: cm.getCursor().ch,
+      };
+    } else {
+      state.caretPosition = null;
+    }
     // Update current markdown text
     state.markdown = newMarkdown;
     // Reject last completion if exists
     taskManager.rejectCurrentIfExist();
-    // Invoke callback
-    void onChangeMarkdown(newMarkdown, oldMarkdown);
+    // Trigger completion
+    void triggerCompletion();
   });
 }).catch((err) => {
   throw err;

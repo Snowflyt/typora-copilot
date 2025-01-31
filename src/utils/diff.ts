@@ -2,13 +2,25 @@ import diff from "fast-diff";
 
 import type { Range } from "@/types/lsp";
 
-export const computeTextChange = (
+export const computeTextChanges = (
   oldStr: string,
   newStr: string,
+  lastCaretPosition?: { line: number; character: number } | null,
 ): Array<{ range: Range; text: string }> => {
   const result: Array<{ range: Range; text: string }> = [];
 
-  const diffs = diff(oldStr, newStr).reverse();
+  const diffs = diff(
+    oldStr,
+    newStr,
+    lastCaretPosition ?
+      oldStr
+        .split(Files.useCRLF ? "\r\n" : "\n")
+        .slice(0, lastCaretPosition.line)
+        .reduce((acc, line) => acc + line.length + (Files.useCRLF ? 2 : 1), 0) +
+        lastCaretPosition.character
+    : 0,
+    true,
+  ).reverse();
 
   let line = 0;
   let character = 0;
@@ -19,7 +31,7 @@ export const computeTextChange = (
   while ((part = diffs.pop())) {
     const [operation, text] = part;
 
-    const linesToAdd = text.split("\n").length - 1;
+    const linesToAdd = text.split(Files.useCRLF ? "\r\n" : "\n").length - 1;
 
     switch (operation) {
       case diff.EQUAL:
@@ -29,7 +41,9 @@ export const computeTextChange = (
         }
         line += linesToAdd;
         character =
-          linesToAdd === 0 ? character + text.length : text.length - text.lastIndexOf("\n") - 1;
+          linesToAdd === 0 ?
+            character + text.length
+          : text.length - text.lastIndexOf(Files.useCRLF ? "\r\n" : "\n") - 1;
         break;
 
       case diff.DELETE:
@@ -42,7 +56,7 @@ export const computeTextChange = (
                 character:
                   linesToAdd === 0 ?
                     character + text.length
-                  : text.length - text.lastIndexOf("\n") - 1,
+                  : text.length - text.lastIndexOf(Files.useCRLF ? "\r\n" : "\n") - 1,
               },
             },
             text: "",
@@ -50,11 +64,15 @@ export const computeTextChange = (
         } else {
           change.range.end.line += linesToAdd;
           change.range.end.character =
-            linesToAdd === 0 ? character + text.length : text.length - text.lastIndexOf("\n") - 1;
+            linesToAdd === 0 ?
+              character + text.length
+            : text.length - text.lastIndexOf(Files.useCRLF ? "\r\n" : "\n") - 1;
         }
         line += linesToAdd;
         character =
-          linesToAdd === 0 ? character + text.length : text.length - text.lastIndexOf("\n") - 1;
+          linesToAdd === 0 ?
+            character + text.length
+          : text.length - text.lastIndexOf(Files.useCRLF ? "\r\n" : "\n") - 1;
         break;
 
       case diff.INSERT:
