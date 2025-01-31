@@ -1,6 +1,7 @@
 import * as path from "@modules/path";
 import { pathToFileURL } from "@modules/url";
 
+import diff from "fast-diff";
 import { debounce } from "radash";
 import semverGte from "semver/functions/gte";
 import semverLt from "semver/functions/lt";
@@ -17,12 +18,12 @@ import { settings } from "./settings";
 import {
   TYPORA_VERSION,
   getActiveFilePathname,
-  getCaretPosition,
   getCodeMirror,
   getWorkspaceFolder,
   waitUntilEditorInitialized,
 } from "./typora-utils";
 import { runCommand } from "./utils/cli-tools";
+import { computeTextChange } from "./utils/diff";
 import { getCaretCoordinate } from "./utils/dom";
 import {
   NodeServer,
@@ -31,11 +32,12 @@ import {
   setCurrentNodeRuntime,
 } from "./utils/node-bridge";
 import { Observable } from "./utils/observable";
-import { setGlobalVar, sliceTextByRange } from "./utils/tools";
+import { replaceTextByRange, setGlobalVar } from "./utils/tools";
 
 import "./styles.scss";
 
 import type { Completion } from "./client";
+import type { Position } from "./types/lsp";
 import type { NodeRuntime } from "./utils/node-bridge";
 
 logger.info("Copilot plugin activated. Version:", VERSION);
@@ -178,6 +180,7 @@ Promise.defer(async () => {
    * @returns
    */
   const insertCompletionTextToEditor = (
+    caretPosition: Position,
     completion: Completion,
   ): Observable<"accepted" | "rejected"> | void => {
     const { position, range } = completion;
@@ -203,7 +206,7 @@ Promise.defer(async () => {
     if ("TEXTAREA" === activeElement.tagName && getCodeMirror(activeElement)) {
       const cm = getCodeMirror(activeElement)!;
 
-      const startPos = getCaretPosition()!;
+      const startPos = { ...caretPosition };
       startPos.line -=
         cm.getValue(Files.useCRLF ? "\r\n" : "\n").split(Files.useCRLF ? "\r\n" : "\n").length - 1;
       startPos.character -= cm.getCursor().ch;
@@ -297,29 +300,18 @@ Promise.defer(async () => {
     copilot.notification.notifyShown({ uuid: completion.uuid });
 
     const insertCompletionText = () => {
-      // Calculate whether it is safe to just use `insertText` to insert completion text,
+      // Check whether it is safe to just use `insertText` to insert completion text,
       // as using `reloadContent` uses much more resources and causes a flicker
-      let safeToJustUseInsertText = false;
-      let textToInsert = text;
-      const cursorPos = getCaretPosition();
-      if (
-        cursorPos &&
-        cursorPos.line === range.end.line &&
-        cursorPos.character === range.end.character
-      ) {
-        const markdownInRange = sliceTextByRange(
-          state.markdown,
-          range,
-          Files.useCRLF ? "\r\n" : "\n",
-        );
-        if (text.startsWith(markdownInRange)) {
-          safeToJustUseInsertText = true;
-          textToInsert = text.slice(markdownInRange.length);
-        }
-      }
+      const newMarkdown = replaceTextByRange(
+        state.markdown,
+        range,
+        completion.text,
+        Files.useCRLF ? "\r\n" : "\n",
+      );
+      const diffs = diff(state.markdown, newMarkdown).filter((part) => part[0] !== diff.EQUAL);
 
-      if (safeToJustUseInsertText) {
-        editor.insertText(textToInsert);
+      if (diffs.length === 1 && diffs[0]![0] === diff.INSERT) {
+        editor.insertText(diffs[0]![1]);
       } else {
         // @ts-expect-error - CodeMirror supports 2nd parameter, but not declared in types
         cm.setValue(editor.getMarkdown(), "begin");
@@ -658,45 +650,68 @@ Promise.defer(async () => {
    * Callback to be invoked when markdown text changed.
    */
 
-  const onChangeMarkdown = debounce(
-    { delay: 500 },
-    (
-      newMarkdown: string,
-      // @ts-expect-error - Unused parameter `oldMarkdown`
-      oldMarkdown: string,
-    ) => {
-      /* Tell Copilot that file has changed */
-      const version = ++copilot.version;
-      copilot.notification.textDocument.didChange({
-        textDocument: { version, uri: pathToFileURL(taskManager.activeFilePathname).href },
-        contentChanges: [{ text: newMarkdown }],
-      });
+  const onChangeMarkdown = debounce({ delay: 500 }, (newMarkdown: string, _oldMarkdown: string) => {
+    const changes = computeTextChange(state.lastCommittedMarkdown, newMarkdown);
 
-      /* Fetch completion from Copilot if cursor position exists */
-      const cursorPos = getCaretPosition();
-      if (!cursorPos) return;
+    // If only one change is made and cursor exists, we assume this change is triggered by typing,
+    // and we can compute the current caret position based on the change
+    let caretPosition: Position | null = null;
+    if (
+      changes.length === 1 &&
+      editor.selection.getRangy()?.collapse && // If not selecting text
+      window.getSelection()?.rangeCount // If has cursor
+    ) {
+      const change = changes[0]!;
+      const changeLines = change.text.split("\n").length - 1;
+      caretPosition = {
+        line: change.range.start.line + changeLines,
+        character:
+          changeLines === 0 ?
+            change.range.start.character + change.text.length
+          : change.text.lastIndexOf("\n") - 1,
+      };
+    }
 
-      // Fetch completion from Copilot
-      taskManager.start(cursorPos, {
+    logger.debug("Changing markdown", {
+      ...(caretPosition && { caret: caretPosition }),
+      changes,
+      from: state.lastCommittedMarkdown,
+      to: newMarkdown,
+    });
+
+    // Update state
+    state.lastCommittedMarkdown = newMarkdown;
+
+    /* Tell Copilot that file has changed */
+    const version = ++copilot.version;
+    copilot.notification.textDocument.didChange({
+      textDocument: { version, uri: pathToFileURL(taskManager.activeFilePathname).href },
+      contentChanges: changes,
+    });
+
+    /* If caret position is available, fetch completion from Copilot */
+    if (caretPosition)
+      taskManager.start(caretPosition, {
         onCompletion: (completion) => {
           if (editor.sourceView.inSourceMode)
             if (settings.useInlineCompletionTextInSource)
               return insertCompletionTextToCodeMirror(cm, completion);
             else return insertSuggestionPanelToCodeMirror(cm, completion);
-          else return insertCompletionTextToEditor(completion);
+          else return insertCompletionTextToEditor(caretPosition, completion);
         },
       });
-    },
-  );
+  });
 
   /*********************
    * Initialize states *
    *********************/
   const editor = Files.editor as Typora.EnhancedEditor;
   // Initialize state
+  const initialMarkdown = editor.getMarkdown();
   const state = {
-    markdown: editor.getMarkdown(),
-    _actualLatestMarkdown: editor.getMarkdown(),
+    lastCommittedMarkdown: initialMarkdown,
+    markdown: initialMarkdown,
+    _actualLatestMarkdown: initialMarkdown,
     suppressMarkdownChange: 0,
   };
   // Initialize CodeMirror
@@ -793,7 +808,6 @@ Promise.defer(async () => {
     }
     // Update current markdown text
     state.markdown = newMarkdown;
-    logger.debug("Changing markdown", { from: oldMarkdown, to: newMarkdown });
     // Reject last completion if exists
     taskManager.rejectCurrentIfExist();
     // Invoke callback
@@ -801,7 +815,7 @@ Promise.defer(async () => {
   });
 
   /* Watch for markdown change in source mode */
-  cm.on("change", (cm, change): void => {
+  cm.on("change", (cm): void => {
     if (settings.disableCompletions) return;
     if (!editor.sourceView.inSourceMode) return;
 
@@ -819,7 +833,6 @@ Promise.defer(async () => {
     const oldMarkdown = state.markdown;
     // Update current markdown text
     state.markdown = newMarkdown;
-    logger.debug("Changing markdown", { from: oldMarkdown, to: newMarkdown, change });
     // Reject last completion if exists
     taskManager.rejectCurrentIfExist();
     // Invoke callback

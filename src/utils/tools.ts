@@ -92,40 +92,6 @@ export const setGlobalVar = <K extends keyof typeof globalThis | (string & NonNu
 };
 
 /**
- * Slice text by range.
- * @param text The text to slice.
- * @param range The range to slice.
- * @param eol The end of line character. Defaults to `"\n"`.
- * @param returnRows Whether to return rows instead of a string. Defaults to `false`.
- * @returns The sliced text or rows determined by `returnRows`.
- */
-export const sliceTextByRange = <ReturnRows extends boolean = false>(
-  text: string,
-  range: Range,
-  eol: EOL = "\n",
-  returnRows?: ReturnRows,
-): ReturnRows extends true ? string[] : string => {
-  const { end, start } = range;
-  returnRows = (returnRows ?? false) as ReturnRows;
-  const lines = text.split(eol);
-  const startLine = lines[start.line]!.slice(start.character);
-  if (start.line === end.line)
-    return (returnRows ? [startLine] : startLine) as ReturnRows extends true ? string[] : string;
-
-  const endLine = lines[end.line]!.slice(0, end.character);
-
-  if (returnRows)
-    return [startLine, ...lines.slice(start.line + 1, end.line), endLine] as ReturnRows extends (
-      true
-    ) ?
-      string[]
-    : string;
-  else
-    return [startLine, ...lines.slice(start.line + 1, end.line), endLine].join(
-      eol,
-    ) as ReturnRows extends true ? string[] : string;
-};
-/**
  * Replace `text` in `range` with `newText`.
  * @param text The text to replace.
  * @param range The range to replace.

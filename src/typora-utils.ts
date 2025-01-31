@@ -5,10 +5,6 @@
 import * as path from "@modules/path";
 import { fileURLToPath } from "@modules/url";
 
-import { getCaretPlacement } from "./extracted";
-
-import type { Position } from "./types/lsp";
-
 /*************
  * Constants *
  *************/
@@ -351,79 +347,6 @@ export const getActiveFilePathname = (): string | null =>
   (Files.filePath ?? (Files.bundle && Files.bundle.filePath)) || null;
 
 /**
- * Get current caret position in source markdown text.
- *
- * **⚠️ Warning:** This function assumes {@link Files.editor} is initialized, otherwise an error will
- * be thrown. To ensure {@link Files.editor} is initialized, use {@link waitUntilEditorInitialized}
- * before this function.
- * @throws {TypeError} If {@link Files.editor} is not initialized.
- * @returns
- */
-export const getCaretPosition = (): Position | null => {
-  const editor = Files.editor!;
-  const sourceView = editor.sourceView;
-  if (!sourceView.cm) sourceView.prep();
-  const cm = sourceView.cm!;
-
-  // When selection, return null
-  if (sourceView.inSourceMode) {
-    if (cm.getSelection()) return null;
-  } else {
-    const rangy = editor.selection.getRangy();
-    if (!rangy) return null;
-    if (!rangy.collapsed) return null;
-  }
-
-  /* If in source mode, simply return cursor position get from `cm` */
-  if (sourceView.inSourceMode) {
-    const { ch, line } = cm.getCursor();
-    return { line, character: ch };
-  }
-
-  /* When in live preview mode, calculate cursor position */
-  // First sync `cm` with live preview mode markdown text
-  // @ts-expect-error - CodeMirror supports 2nd parameter, but not declared in types
-  cm.setValue(editor.getMarkdown(), "begin");
-
-  let placement: Typora.CaretPlacement | null;
-  try {
-    placement = getCaretPlacement();
-  } catch (e) {
-    if (e instanceof Error && e.stack) console.warn(e.stack);
-    return null;
-  }
-  if (!placement) return null;
-
-  let lineContent: string | null;
-  let ch = placement.ch;
-
-  // If line number is negative, set it to the last line
-  if (placement.line < 0) placement.line = cm.lineCount() - 1;
-
-  // Handle indentation after list items, blockquotes, etc.
-  if (placement.afterIndent) {
-    lineContent = cm.getLine(placement.line);
-    ch = (/^((\s+)|([-+*]\s)|(\[( |x)\])|>|(\d+(\.|\))\s))+/i.exec(lineContent) || [""])[0].length;
-  }
-
-  // If character position is not defined
-  if (ch === undefined) {
-    lineContent = cm.getLine(placement.line) ?? "";
-    if (placement.before) {
-      // Find the position of the 'before' text
-      ch = lineContent.indexOf(placement.before) + placement.before.length;
-    } else if (placement.beforeRegExp) {
-      // Find the position based on regular expression
-      const pattern = new RegExp(placement.beforeRegExp, "g");
-      pattern.exec(lineContent);
-      ch = pattern.lastIndex;
-    }
-  }
-
-  return { line: placement.line, character: ch !== undefined && ch > 0 ? ch : 0 };
-};
-
-/**
  * Get closest CodeMirror instance from an element, if any.
  * @param element Element to search.
  * @returns CodeMirror instance if found, otherwise `null`.
@@ -433,8 +356,3 @@ export const getCodeMirror = (element: Element): CodeMirror.Editor | null => {
   if (!cms || !cms.length) return null;
   return (cms[0] as unknown as { CodeMirror: CodeMirror.Editor }).CodeMirror;
 };
-
-/*******************************************************************************************
- * Extracted functions (Extracted from Typora's bundled code, I don't understand them all) *
- *******************************************************************************************/
-export { getCaretPlacement };
