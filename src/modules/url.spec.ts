@@ -4,16 +4,16 @@ import { fileURLToPath, pathToFileURL } from "./url";
 
 describe("fileURLToPath", () => {
   it("should return a platform-specific path", () => {
-    const isWinBefore = (window.File as ExtendedFileConstructor).isWin;
+    const isWinBefore = Files.isWin;
 
-    (window.File as ExtendedFileConstructor).isWin = true;
+    Files.isWin = true;
     expect(fileURLToPath("file:///C:/path/")).toBe("C:\\path\\");
     expect(fileURLToPath("file://nas/foo.txt")).toBe("\\\\nas\\foo.txt");
-    (window.File as ExtendedFileConstructor).isWin = false;
+    Files.isWin = false;
     expect(fileURLToPath("file:///你好.txt")).toBe("/你好.txt");
     expect(fileURLToPath("file:///hello world")).toBe("/hello world");
 
-    (window.File as ExtendedFileConstructor).isWin = isWinBefore;
+    Files.isWin = isWinBefore;
   });
 });
 
