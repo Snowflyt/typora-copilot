@@ -434,6 +434,10 @@ Promise.defer(async () => {
      * **Warning:** It should only be called when no more changes is applied after
      * completion text is inserted, otherwise history will be corrupted.
      */
+    // NOTE: The check for `rejectedOrAccepted` is intentionally placed inside each callers instead
+    // of in `reject` and `accept` functions, because some callers may not call `reject` or `accept`
+    // immediately, but the `rejectedOrAccepted` flag itself should be set immediately.
+    let rejectedOrAccepted = false;
     const reject = () => {
       const textMarkerRange = textMarker.find();
       if (!textMarkerRange) {
@@ -497,9 +501,12 @@ Promise.defer(async () => {
      * @param event
      */
     const cmTabFixer = (_: CodeMirror.Editor, event: KeyboardEvent) => {
-      // Prevent tab key to trigger tab once
+      if (rejectedOrAccepted) return;
+
+      // Prevent tab key to accept completion
       if (event.key === "Tab") {
         event.preventDefault();
+        rejectedOrAccepted = true;
         accept();
       }
     };
@@ -511,11 +518,13 @@ Promise.defer(async () => {
      * @param change
      */
     const cmChangeFixer = (cm: CodeMirror.Editor, change: CodeMirror.EditorChangeCancellable) => {
+      if (rejectedOrAccepted) return;
+      rejectedOrAccepted = true;
+
       const { from, origin, text, to } = change;
-      const cancel = change.cancel.bind(change);
 
       // Cancel the change temporarily
-      cancel();
+      change.cancel();
       // Reject completion and redo the change after 1 tick
       // It is to make sure these changes are applied after the `"beforeChange"` event
       // has finished, in order to avoid corrupting the CodeMirror instance
@@ -535,6 +544,9 @@ Promise.defer(async () => {
      * Reject completion if cursor moved.
      */
     const cursorMoveHandler = () => {
+      if (rejectedOrAccepted) return;
+      rejectedOrAccepted = true;
+
       reject();
     };
     cm.on("cursorActivity", cursorMoveHandler);
