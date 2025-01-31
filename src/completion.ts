@@ -70,6 +70,7 @@ export default class CompletionTaskManager {
     this.copilot.request
       .getCompletions({
         position,
+        languageId: "markdown",
         path: this.activeFilePathname,
         relativePath:
           this.workspaceFolder ?
