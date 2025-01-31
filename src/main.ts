@@ -665,24 +665,35 @@ Promise.defer(async () => {
   const onChangeMarkdown = debounce({ delay: 500 }, (newMarkdown: string, _oldMarkdown: string) => {
     const changes = computeTextChange(state.lastCommittedMarkdown, newMarkdown);
 
-    // If only one change is made and cursor exists, we assume this change is triggered by typing,
-    // and we can compute the current caret position based on the change
+    // If only one change is made and caret exists, we assume this change is triggered by typing,
+    // and compute the current caret position based on the change
     let caretPosition: Position | null = null;
-    if (
-      changes.length === 1 &&
-      editor.selection.getRangy()?.collapse && // If not selecting text
-      window.getSelection()?.rangeCount // If has cursor
-    ) {
-      const change = changes[0]!;
-      const changeLines = change.text.split("\n").length - 1;
-      caretPosition = {
-        line: change.range.start.line + changeLines,
-        character:
-          changeLines === 0 ?
-            change.range.start.character + change.text.length
-          : change.text.lastIndexOf("\n") - 1,
-      };
-    }
+    if (changes.length === 1)
+      if (sourceView.inSourceMode) {
+        // In source view mode, we can directly get the caret position from CodeMirror
+        if (!cm.getSelection())
+          // If not selecting text
+          caretPosition = {
+            line: cm.getCursor().line,
+            character: cm.getCursor().ch,
+          };
+      } else {
+        // In live preview mode, compute the current caret position based on the change
+        if (
+          editor.selection.getRangy()?.collapse && // If not selecting text
+          window.getSelection()?.rangeCount // If has cursor
+        ) {
+          const change = changes[0]!;
+          const changeLines = change.text.split("\n").length - 1;
+          caretPosition = {
+            line: change.range.start.line + changeLines,
+            character:
+              changeLines === 0 ?
+                change.range.start.character + change.text.length
+              : change.text.lastIndexOf("\n") - 1,
+          };
+        }
+      }
 
     logger.debug("Changing markdown", {
       ...(caretPosition && { caret: caretPosition }),
