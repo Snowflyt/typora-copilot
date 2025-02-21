@@ -3,7 +3,8 @@ import * as path from "@modules/path";
 import { logger } from "./logging";
 import { Observable } from "./utils/observable";
 
-import type { Completion, CopilotClient } from "./client";
+import type { Completion, CompletionResult, CopilotClient } from "./client";
+import type { ResponsePromise } from "./client/general-client";
 import type { Position } from "./types/lsp";
 
 /**
@@ -24,8 +25,9 @@ export default class CompletionTaskManager {
 
   private _state: "idle" | "requesting" | "pending" = "idle";
 
-  private latestTaskId = 0;
-  private lastCleanup: Observable<"accepted" | "rejected"> | null = null;
+  private activeRequest:
+    | (ResponsePromise<CompletionResult> & { cleanup?: Observable<"accepted" | "rejected"> })
+    | null = null;
 
   constructor(
     private copilot: CopilotClient,
@@ -40,9 +42,13 @@ export default class CompletionTaskManager {
   }
 
   rejectCurrentIfExist(): void {
-    if (this.lastCleanup) {
-      this.lastCleanup.next("rejected");
+    if (this.activeRequest) {
+      if (this.activeRequest.status === "pending") this.activeRequest.cancel();
+      this.activeRequest.cleanup?.next("rejected");
+      this.activeRequest = null;
     }
+    this._state = "idle";
+    if (this.copilot.status === "InProgress") this.copilot.status = "Normal";
   }
 
   start(
@@ -62,24 +68,28 @@ export default class CompletionTaskManager {
       onCompletion?: (completion: Completion) => Observable<"accepted" | "rejected"> | void;
     },
   ): void {
-    this.lastCleanup?.next("rejected");
+    if (this.activeRequest) {
+      if (this.activeRequest.status === "pending") this.activeRequest.cancel();
+      this.activeRequest.cleanup?.next("rejected");
+    }
 
-    const taskId = ++this.latestTaskId;
     this._state = "requesting";
 
-    this.copilot.request
-      .getCompletions({
-        position,
-        languageId: "markdown",
-        path: this.activeFilePathname,
-        relativePath:
-          this.workspaceFolder ?
-            path.relative(this.workspaceFolder, this.activeFilePathname)
-          : this.activeFilePathname,
-      })
+    const request = this.copilot.request.getCompletions({
+      position,
+      languageId: "markdown",
+      path: this.activeFilePathname,
+      relativePath:
+        this.workspaceFolder ?
+          path.relative(this.workspaceFolder, this.activeFilePathname)
+        : this.activeFilePathname,
+    });
+    this.activeRequest = request;
+
+    request
       .then(({ cancellationReason, completions }): void => {
-        if (taskId !== this.latestTaskId) {
-          // A new task has started since this task was started,
+        if (this.activeRequest !== request) {
+          // The request has been cancelled or a new task has started since this task was started,
           // so we should ignore this task's completion
           return;
         }
@@ -104,13 +114,13 @@ export default class CompletionTaskManager {
             logger.debug("Rejected completion", completion.uuid);
           }
           this._state = "idle";
-          if (this.lastCleanup === cleanup) this.lastCleanup = null;
+          if (this.activeRequest === request) this.activeRequest = null;
         });
-        this.lastCleanup = cleanup;
+        this.activeRequest.cleanup = cleanup;
       })
       .catch(() => {
-        if (taskId !== this.latestTaskId) {
-          // A new task has started since this task was started,
+        if (this.activeRequest !== request) {
+          // The request has been cancelled or a new task has started since this task was started,
           // so we should ignore this task's completion
           return;
         }
