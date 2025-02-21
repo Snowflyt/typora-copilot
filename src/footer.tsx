@@ -127,10 +127,10 @@ export const FooterPanel: FC<FooterPanelOptions> = ({ copilot, open = true }) =>
             Files.editor?.EditHelper.showDialog({
               title: t("dialog.signed-in.title"),
               html: /* html */ `
-              <div style="text-align: center; margin-top: 8px;">
-                ${t("dialog.signed-in.html")}
-              </div>
-            `,
+                <div style="text-align: center; margin-top: 8px;">
+                  ${t("dialog.signed-in.html")}
+                </div>
+              `,
               buttons: [t("button.ok")],
             });
           })
@@ -138,10 +138,10 @@ export const FooterPanel: FC<FooterPanelOptions> = ({ copilot, open = true }) =>
             Files.editor?.EditHelper.showDialog({
               title: t("dialog.sign-in-verification-failed.title"),
               html: /* html */ `
-              <div style="text-align: center; margin-top: 8px;">
-                ${t("dialog.sign-in-verification-failed.html")}
-              </div>
-            `,
+                <div style="text-align: center; margin-top: 8px;">
+                  ${t("dialog.sign-in-verification-failed.html")}
+                </div>
+              `,
               buttons: [t("button.understand")],
             });
           });
