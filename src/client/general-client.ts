@@ -41,7 +41,7 @@ interface _BaseResponsePromise {
   /**
    * Status of the promise.
    */
-  readonly status: "fulfilled" | "rejected" | "pending";
+  readonly status: "fulfilled" | "rejected" | "cancelled" | "pending";
 
   /**
    * ID of the request.
@@ -833,7 +833,7 @@ export const createClient = <
             ]);
           }),
           {
-            status: "pending" as "pending" | "fulfilled" | "rejected",
+            status: "pending" as "pending" | "fulfilled" | "cancelled" | "rejected",
             id: requestId,
             cancel: () => {
               if (result.status !== "pending") {
@@ -848,8 +848,9 @@ export const createClient = <
               }
 
               _notify("$/cancelRequest", { id: requestId } satisfies CancelParams);
-              resolveMap.delete(requestId);
-              rejectMap.delete(requestId);
+              result.status = "cancelled";
+              resolveMap.set(requestId, [type, method, () => {}]);
+              rejectMap.set(requestId, [type, method, () => {}]);
             },
           } satisfies _BaseResponsePromise,
         );
