@@ -928,6 +928,20 @@ Promise.defer(async () => {
     // Trigger completion
     void triggerCompletion();
   });
+
+  /* Cancel current request on caret move */
+  $(editor.writingArea).on("caretMove", () => {
+    if (settings.disableCompletions) return;
+    if (sourceView.inSourceMode) return;
+
+    taskManager.rejectCurrentIfExist();
+  });
+  cm.on("cursorActivity", () => {
+    if (settings.disableCompletions) return;
+    if (!editor.sourceView.inSourceMode) return;
+
+    taskManager.rejectCurrentIfExist();
+  });
 }).catch((err) => {
   throw err;
 });
