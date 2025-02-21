@@ -742,14 +742,13 @@ Promise.defer(async () => {
         },
       ],
     }),
+    // Register editor info
+    initializationOptions: {
+      editorInfo: { name: "Typora", version: TYPORA_VERSION },
+      editorPluginInfo: { name: "typora-copilot", version: VERSION },
+    },
   });
   copilot.notification.initialized();
-
-  /* Register editor info */
-  await copilot.request.setEditorInfo({
-    editorInfo: { name: "Typora", version: TYPORA_VERSION },
-    editorPluginInfo: { name: "typora-copilot", version: VERSION },
-  });
 
   await copilot.request.getVersion();
 
