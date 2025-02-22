@@ -50,10 +50,15 @@ class ElectronNodeServer implements NodeServer {
 
   private constructor(nodePath: string, modulePath: string) {
     if (nodePath === "bundled")
-      this.childProcess = window.reqnode!("child_process").fork(modulePath, [], {
+      this.childProcess = window.reqnode!("child_process").fork(modulePath, ["--stdio", "true"], {
         silent: true,
       }) as ChildProcessWithoutNullStreams;
-    else this.childProcess = window.reqnode!("child_process").spawn(nodePath, [modulePath]);
+    else
+      this.childProcess = window.reqnode!("child_process").spawn(nodePath, [
+        modulePath,
+        "--stdio",
+        "true",
+      ]);
   }
 
   get pid(): number {

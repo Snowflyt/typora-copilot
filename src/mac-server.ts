@@ -18,7 +18,9 @@ if (Number.isNaN(port)) {
 
 console.log("Process PID:", process.pid);
 
-const server = fork(process.argv[3], [], { silent: true }) as ChildProcessWithoutNullStreams;
+const server = fork(process.argv[3], ["--stdio", "true"], {
+  silent: true,
+}) as ChildProcessWithoutNullStreams;
 console.log("Copilot LSP server started. PID:", server.pid);
 
 const startWebSocketServer = () => {
