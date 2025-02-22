@@ -2,6 +2,12 @@ import { useSignal } from "@preact/signals";
 import { render } from "preact";
 import { useEffect, useMemo } from "preact/hooks";
 
+import type {
+  CopilotAccountStatus,
+  CopilotClient,
+  CopilotClientEventHandler,
+  CopilotStatus,
+} from "./client";
 import CopilotIcon from "./components/CopilotIcon";
 import SettingsPanel from "./components/SettingsPanel";
 import { t } from "./i18n";
@@ -10,13 +16,6 @@ import { settings } from "./settings";
 import { getCSSClassStyles } from "./utils/dom";
 
 import "./footer.scss";
-
-import type {
-  CopilotAccountStatus,
-  CopilotClient,
-  CopilotClientEventHandler,
-  CopilotStatus,
-} from "./client";
 
 /**
  * Get DOM element of Typora footer bar.
@@ -60,6 +59,7 @@ export const FooterPanel: FC<FooterPanelOptions> = ({ copilot, open = true }) =>
         // Delay `checkStatus` call to next tick to avoid a maybe BUG of GitHub Copilot LSP server
         void Promise.resolve(null).then(onCopilotInitialized);
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Sync settings
@@ -70,6 +70,7 @@ export const FooterPanel: FC<FooterPanelOptions> = ({ copilot, open = true }) =>
     return () => {
       unlistenSettingsChange();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /**
@@ -85,6 +86,7 @@ export const FooterPanel: FC<FooterPanelOptions> = ({ copilot, open = true }) =>
       const entry = entries[0];
       if (entry) bottom.value = entry.target.clientHeight + 2;
     }).observe(footerBar);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSignIn = async () => {
@@ -221,6 +223,7 @@ export interface FooterOptions {
 
 /**
  * Footer of the plugin with an icon.
+ * @returns
  */
 export const Footer: FC<FooterOptions> = ({ copilot }) => {
   const status = useSignal<CopilotStatus | "Disabled">(
@@ -241,6 +244,7 @@ export const Footer: FC<FooterOptions> = ({ copilot }) => {
       unlistenSettingsChange();
       copilot.off("changeStatus", handler);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const height = useSignal(useMemo(() => getFooterBarDOM()?.clientHeight ?? 30, []));
@@ -253,6 +257,7 @@ export const Footer: FC<FooterOptions> = ({ copilot }) => {
       const entry = entries[0];
       if (entry) height.value = entry.target.clientHeight;
     }).observe(footerBar);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const isPanelOpen = useSignal(false);

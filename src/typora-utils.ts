@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
 import * as path from "@modules/path";
 import { fileURLToPath } from "@modules/url";
@@ -64,10 +62,10 @@ const enhanceEditor = () => {
 
   const editorPrototype: Typora.EnhancedEditor = rawEditor.constructor.prototype;
 
-  const handlersMap: Map<
+  const handlersMap = new Map<
     string,
-    Array<(editor: Typora.EnhancedEditor, ...args: any[]) => unknown>
-  > = new Map();
+    ((editor: Typora.EnhancedEditor, ...args: any[]) => unknown)[]
+  >();
 
   editorPrototype.on = (event, handler) => {
     if (!handlersMap.has(event)) handlersMap.set(event, []);
@@ -190,8 +188,8 @@ const enhanceEditor = () => {
   /**
    * Watch an object and trigger `scheduleTriggerChange` when any of its methods
    * except those starting with `get`, `copy`, `is`, `has` is called.
-   * @param o
-   * @param key
+   * @param o The object to watch.
+   * @param key The key of the object to watch.
    */
   const watchObj = <O>(o: O, key: keyof O) => {
     if (
@@ -261,10 +259,7 @@ const enhanceSourceView = () => {
   const sourceViewPrototype: Typora.EnhancedSourceView =
     Files.editor!.sourceView.constructor.prototype;
 
-  const handlersMap: Map<
-    string,
-    Array<(sv: Typora.SourceView, ...args: any[]) => unknown>
-  > = new Map();
+  const handlersMap = new Map<string, ((sv: Typora.SourceView, ...args: any[]) => unknown)[]>();
 
   sourceViewPrototype.on = (event, handler) => {
     if (!handlersMap.has(event)) handlersMap.set(event, []);
@@ -344,7 +339,7 @@ export const getWorkspaceFolder = (): string | null => Files.editor!.library?.wa
  * @returns
  */
 export const getActiveFilePathname = (): string | null =>
-  (Files.filePath ?? (Files.bundle && Files.bundle.filePath)) || null;
+  (Files.filePath ?? Files.bundle?.filePath) || null;
 
 /**
  * Get closest CodeMirror instance from an element, if any.
@@ -353,6 +348,6 @@ export const getActiveFilePathname = (): string | null =>
  */
 export const getCodeMirror = (element: Element): CodeMirror.Editor | null => {
   const cms = $(element).closest(".CodeMirror");
-  if (!cms || !cms.length) return null;
+  if (!cms.length) return null;
   return (cms[0] as unknown as { CodeMirror: CodeMirror.Editor }).CodeMirror;
 };

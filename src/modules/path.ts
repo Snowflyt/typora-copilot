@@ -1,6 +1,5 @@
 import type path from "node:path";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AddSep<F extends (...args: any) => unknown> = (
   sep: string,
   ...args: Parameters<F>
@@ -16,6 +15,7 @@ const assertPath = (path: unknown) => {
 
 /**
  * Resolves `.` and `..` elements in a path with directory names
+ * @returns
  */
 const normalizeStringPosix = (sep: string, path: string, allowAboveRoot: boolean) => {
   let res = "";
@@ -116,6 +116,7 @@ export const expandHomeDir = (path: string): string => {
  *
  * @param paths A sequence of paths or path segments.
  * @throws {TypeError} if any of the arguments is not a string.
+ * @returns
  */
 export const resolve: typeof path.posix.resolve = (...args) => _resolve(sep, ...args);
 
@@ -166,6 +167,7 @@ export const _resolve: AddSep<typeof path.posix.resolve> = (sep, ...paths) => {
  *
  * @param path string path to normalize.
  * @throws {TypeError} if `path` is not a string.
+ * @returns
  */
 export const normalize: typeof path.posix.normalize = (...args) => _normalize(sep, ...args);
 export const _normalize: AddSep<typeof path.posix.normalize> = (sep, path) => {
@@ -194,6 +196,7 @@ export const _normalize: AddSep<typeof path.posix.normalize> = (sep, path) => {
  *
  * @param path path to test.
  * @throws {TypeError} if `path` is not a string.
+ * @returns
  */
 export const isAbsolute: typeof path.posix.isAbsolute = (...args) => _isAbsolute(sep, ...args);
 export const _isAbsolute: AddSep<typeof path.posix.isAbsolute> = (sep, path) => {
@@ -208,13 +211,13 @@ export const _isAbsolute: AddSep<typeof path.posix.isAbsolute> = (sep, path) => 
  *
  * @param paths paths to join.
  * @throws {TypeError} if any of the path segments is not a string.
+ * @returns
  */
 export const join: typeof path.posix.join = (...args) => _join(sep, ...args);
 export const _join: AddSep<typeof path.join> = (sep, ...paths) => {
   if (paths.length === 0) return ".";
   let joined;
-  for (let i = 0; i < paths.length; ++i) {
-    const arg = paths[i]!;
+  for (const arg of paths) {
     assertPath(arg);
     if (arg.length > 0) {
       if (joined === undefined) joined = arg;
@@ -231,6 +234,7 @@ export const _join: AddSep<typeof path.join> = (sep, ...paths) => {
  * other. This is actually the reverse transform of path.resolve.
  *
  * @throws {TypeError} if either `from` or `to` is not a string.
+ * @returns
  */
 export const relative: typeof path.posix.relative = (...args) => _relative(sep, ...args);
 export const _relative: AddSep<typeof path.posix.relative> = (sep, from, to) => {
@@ -320,6 +324,7 @@ export const _relative: AddSep<typeof path.posix.relative> = (sep, from, to) => 
  *
  * @param path the path to evaluate.
  * @throws {TypeError} if `path` is not a string.
+ * @returns
  */
 export const dirname: typeof path.dirname = (...args) => _dirname(sep, ...args);
 export const _dirname: AddSep<typeof path.dirname> = (sep, path) => {
@@ -354,6 +359,7 @@ export const _dirname: AddSep<typeof path.dirname> = (sep, path) => {
  * @param path the path to evaluate.
  * @param suffix optionally, an extension to remove from the result.
  * @throws {TypeError} if `path` is not a string or if `ext` is given and is not a string.
+ * @returns
  */
 export const basename: typeof path.basename = (...args) => _basename(sep, ...args);
 export const _basename: AddSep<typeof path.basename> = (sep, path, ext) => {
@@ -436,6 +442,7 @@ export const _basename: AddSep<typeof path.basename> = (sep, path, ext) => {
  *
  * @param path the path to evaluate.
  * @throws {TypeError} if `path` is not a string.
+ * @returns
  */
 export const extname: typeof path.extname = (...args) => _extname(sep, ...args);
 export const _extname: AddSep<typeof path.extname> = (sep, path) => {
@@ -492,10 +499,11 @@ export const _extname: AddSep<typeof path.extname> = (sep, path) => {
  * Returns a path string from an object - the opposite of `parse()`.
  *
  * @param pathObject path to evaluate.
+ * @returns
  */
 export const format: typeof path.format = (...args) => _format(sep, ...args);
 export const _format: AddSep<typeof path.format> = (sep, pathObject) => {
-  if (pathObject === null || typeof pathObject !== "object") {
+  if (typeof pathObject !== "object") {
     throw new TypeError(
       'The "pathObject" argument must be of type Object. Received type ' + typeof pathObject,
     );
@@ -508,6 +516,7 @@ export const _format: AddSep<typeof path.format> = (sep, pathObject) => {
  *
  * @param path path to evaluate.
  * @throws {TypeError} if `path` is not a string.
+ * @returns
  */
 export const parse: typeof path.parse = (...args) => _parse(sep, ...args);
 export const _parse: AddSep<typeof path.parse> = (sep, path) => {

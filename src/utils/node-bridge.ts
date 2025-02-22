@@ -1,3 +1,5 @@
+import type { ChildProcessWithoutNullStreams } from "node:child_process";
+
 import {
   accessDir,
   accessFile,
@@ -17,13 +19,11 @@ import semverLt from "semver/functions/lt";
 import semverRCompare from "semver/functions/rcompare";
 import semverValid from "semver/functions/valid";
 
-import { findFreePort, getEnv, runCommand } from "./cli-tools";
-import { cache } from "./function";
-
-import type { ChildProcessWithoutNullStreams } from "node:child_process";
-
 import { PLUGIN_DIR } from "@/constants";
 import { TYPORA_VERSION } from "@/typora-utils";
+
+import { findFreePort, getEnv, runCommand } from "./cli-tools";
+import { cache } from "./function";
 
 export abstract class NodeServer {
   abstract readonly pid: number;
@@ -71,7 +71,6 @@ class ElectronNodeServer implements NodeServer {
 
   onMessage(listener: (message: string) => void): void {
     this.childProcess.stdout.on("data", (data) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const message: string = data.toString("utf-8");
       listener(message);
     });
@@ -84,7 +83,7 @@ class ElectronNodeServer implements NodeServer {
 
 class MacOSNodeServer implements NodeServer {
   private readonly wsClient: WebSocket;
-  private readonly listeners: Array<(message: string) => void> = [];
+  private readonly listeners: ((message: string) => void)[] = [];
 
   private constructor(
     public readonly pid: number,
@@ -162,19 +161,12 @@ export interface NodeRuntime {
  */
 export const detectAvailableNodeRuntimes = async ({
   onFirstResolved = () => {},
-}: { onFirstResolved?: (runtime: NodeRuntime) => void } = {}): Promise<
-  ReadonlyArray<NodeRuntime>
-> => {
+}: { onFirstResolved?: (runtime: NodeRuntime) => void } = {}): Promise<readonly NodeRuntime[]> => {
   // The language server of GitHub Copilot requires at least Node.js >= 18 to run, so we need to
   // find a Node.js runtime that meets this requirement.
-  const promises: Array<
-    Promise<
-      | Array<Array<NodeRuntime | string | null> | NodeRuntime | string | null>
-      | NodeRuntime
-      | string
-      | null
-    >
-  > = [];
+  const promises: Promise<
+    ((NodeRuntime | string | null)[] | NodeRuntime | string | null)[] | NodeRuntime | string | null
+  >[] = [];
 
   // On Windows and Linux, Typora is built as an Electron app, and since Typora 1.6, the bundled
   // Node.js version is >= 18.0.0. However, since Typora 1.10, the Electron `runAsNode` fuse is
@@ -441,6 +433,7 @@ export const detectAvailableNodeRuntimes = async ({
       Promise.defer(async () => {
         // If found `NVM_DIR` in env, use it
         // https://stackoverflow.com/a/45139064/21418758
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         let nvmRoot = (window.process ? process.env : await getEnv())["NVM_DIR"];
 
         if (!nvmRoot) {
@@ -468,7 +461,7 @@ export const detectAvailableNodeRuntimes = async ({
           ].map((p) =>
             p.then(({ basePath, dirs }) => {
               for (const dir of dirs) {
-                const match = dir.match(/v\d+\.\d+\.\d+/);
+                const match = /v\d+\.\d+\.\d+/.exec(dir);
                 if (match) {
                   const version = match[0];
                   runtimes.push({ path: path.join(basePath, dir, "bin", "node"), version });
@@ -535,7 +528,7 @@ export const detectAvailableNodeRuntimes = async ({
           })()));
       if (!fnmPath) return [];
 
-      const fnmDirEnvRegEx = /^(?:export\s+)?FNM_DIR=(?:'|")?(.+?)(?:'|")?$/;
+      const fnmDirEnvRegEx = /^(?:export\s+)?FNM_DIR=(?:['"])?(.+?)(?:['"])?$/;
       const fnmDir = (await runCommand(`"${fnmPath}" env --shell bash`))
         .trim()
         .split("\n")
@@ -553,7 +546,7 @@ export const detectAvailableNodeRuntimes = async ({
 
       const runtimes: NodeRuntime[] = [];
       for (const dir of versionDirs) {
-        const match = dir.match(/v\d+\.\d+\.\d+/);
+        const match = /v\d+\.\d+\.\d+/.exec(dir);
         if (match) {
           const version = match[0];
           runtimes.push({

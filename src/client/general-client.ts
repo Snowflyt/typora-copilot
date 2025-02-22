@@ -1,3 +1,12 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+import { ErrorCodes, JSONRPC_VERSION, MessageType } from "@/types/lsp";
+import type { Equals, ReadonlyRecord } from "@/types/tools";
+import type { Logger } from "@/utils/logging";
+import { createLogger, formatErrorCode, formatId, formatMethod } from "@/utils/logging";
+import { isNotificationMessage, isRequestMessage, isResponseMessage, toJSError } from "@/utils/lsp";
+import type { NodeServer } from "@/utils/node-bridge";
+import { assertNever, isKeyOf } from "@/utils/tools";
+
 import type {
   CancelParams,
   DidChangeTextDocumentParams,
@@ -23,14 +32,6 @@ import type {
   UnregistrationParams,
   integer,
 } from "../types/lsp";
-import type { Equals, ReadonlyRecord } from "@/types/tools";
-import type { Logger } from "@/utils/logging";
-import type { NodeServer } from "@/utils/node-bridge";
-
-import { ErrorCodes, JSONRPC_VERSION, MessageType } from "@/types/lsp";
-import { createLogger, formatErrorCode, formatId, formatMethod } from "@/utils/logging";
-import { isNotificationMessage, isRequestMessage, isResponseMessage, toJSError } from "@/utils/lsp";
-import { assertNever, isKeyOf } from "@/utils/tools";
 
 /**
  * A promise specially designed for LSP client representing a future response from LSP server that
@@ -136,7 +137,7 @@ export type ValidateRequestHandlers<
 
 /**
  * Validate request handlers. Check if the request handler params extend `LSPArray | LSPObject`.
- * @param requestHandlers
+ * @param requestHandlers The request handlers to validate.
  * @returns
  */
 export const validateRequestHandlers = <
@@ -180,7 +181,7 @@ export type ValidateNotificationHandlers<
 
 /**
  * Validate notification handlers. Check if the notification handler params extend `LSPArray | LSPObject`.
- * @param notificationHandlers
+ * @param notificationHandlers The notification handlers to validate.
  * @returns
  */
 export const validateNotificationHandlers = <
@@ -235,15 +236,7 @@ const _prepareProtocolRequestHandlers = () =>
        * and only register the capability statically if the client doesn’t support dynamic
        * registration for that capability.
        */
-      handler: (
-        // @ts-expect-error - Unused parameters
-        params: RegistrationParams,
-        success,
-        // @ts-expect-error - Unused parameters
-        error,
-        // @ts-expect-error - Unused parameters
-        context,
-      ) => {
+      handler: (params: RegistrationParams, success, error, context) => {
         // To be implemented by an actual implementation
         success(null);
       },
@@ -255,15 +248,7 @@ const _prepareProtocolRequestHandlers = () =>
        * The `client/unregisterCapability` request is sent from the server to the client to unregister
        * a previously registered capability.
        */
-      handler: (
-        // @ts-expect-error - Unused parameters
-        params: UnregistrationParams,
-        success,
-        // @ts-expect-error - Unused parameters
-        error,
-        // @ts-expect-error - Unused parameters
-        context,
-      ) => {
+      handler: (params: UnregistrationParams, success, error, context) => {
         // To be implemented by an actual implementation
         success(null);
       },
@@ -284,24 +269,14 @@ const _prepareProtocolNotificationHandlers = () =>
     /**
      * Invoked when received a `$/cancelRequest` notification from the server.
      */
-    "$/cancelRequest": (
-      // @ts-expect-error - Unused parameters
-      params: CancelParams,
-      // @ts-expect-error - Unused parameters
-      context,
-    ) => {
+    "$/cancelRequest": (params: CancelParams, context) => {
       // TODO: Implement it
     },
 
     /**
      * Invoked when received a `$/progress` notification from the server.
      */
-    "$/progress": (
-      // @ts-expect-error - Unused parameters
-      params: ProgressParams,
-      // @ts-expect-error - Unused parameters
-      context,
-    ) => {
+    "$/progress": (params: ProgressParams, context) => {
       // To be implemented by an actual implementation
     },
 
@@ -314,12 +289,7 @@ const _prepareProtocolNotificationHandlers = () =>
      * `$/logTrace` should only be used for systematic trace reporting. For single debugging
      * messages, the server should send `window/logMessage` notifications.
      */
-    "$/logTrace": (
-      // @ts-expect-error - Unused parameters
-      params: LogTraceParams,
-      // @ts-expect-error - Unused parameters
-      context,
-    ) => {
+    "$/logTrace": (params: LogTraceParams, context) => {
       // To be implemented by an actual implementation
     },
 
@@ -389,7 +359,6 @@ export interface ClientEventMap {
   initialized: void;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ValidateClientOptions<Options extends ClientOptions<any, any>> = {
   [P in keyof Options]: P extends "requestHandlers" ?
     Options[P] extends ReadonlyRecord<string, RequestHandler> ?
@@ -404,8 +373,8 @@ export type ValidateClientOptions<Options extends ClientOptions<any, any>> = {
 
 /**
  * Create a LSP client.
- * @param server
- * @param options
+ * @param server The LSP server.
+ * @param options The client options.
  * @returns
  */
 export const createClient = <
@@ -430,7 +399,7 @@ export const createClient = <
 
   /**
    * Send a JSON-RPC Message to the LSP server.
-   * @param data
+   * @param data The message to send.
    */
   const _send = (data: Message) => {
     const dataString = JSON.stringify(data);
@@ -449,14 +418,14 @@ export const createClient = <
 
   const context = { server, logger, send: _send } satisfies ClientContext;
 
-  const resolveMap: Map<
+  const resolveMap = new Map<
     integer | string,
     readonly ["query" | "mutation", string, (value: LSPAny) => void]
-  > = new Map();
-  const rejectMap: Map<
+  >();
+  const rejectMap = new Map<
     integer | string,
     readonly ["query" | "mutation", string, (reason: ResponseError) => void]
-  > = new Map();
+  >();
 
   const _protocolRequestHandlers = _prepareProtocolRequestHandlers();
   const _protocolNotificationHandlers = _prepareProtocolNotificationHandlers();
@@ -487,11 +456,11 @@ export const createClient = <
 
   /**
    * Send a success response to LSP server.
-   * @param type
-   * @param isProtocol
-   * @param id
-   * @param method
-   * @param value
+   * @param type The type of the request.
+   * @param isProtocol Whether the request is a protocol request.
+   * @param id The ID of the request.
+   * @param method The method of the request.
+   * @param value The value to send.
    */
   const _success = (
     type: "query" | "mutation",
@@ -512,16 +481,15 @@ export const createClient = <
       const color = type === "query" ? "#49cc90" : "purple";
       logger.block
         .overwrite({ color })
-        // eslint-disable-next-line sonarjs/no-duplicate-string
         .debug(`>> [${id}] ${isProtocol ? "[Protocol] " : ""}Response ${method}`, value);
     }
   };
   /**
    * Send an error response to LSP server.
-   * @param isProtocol
-   * @param id
-   * @param method
-   * @param reason
+   * @param isProtocol Whether the request is a protocol request.
+   * @param id The ID of the request.
+   * @param method The method of the request.
+   * @param reason The reason of the error.
    */
   const _error = (
     isProtocol: boolean,
@@ -656,8 +624,12 @@ export const createClient = <
             const { handler, type } = typeAndHandler;
             void handler(
               request.params as never,
-              (value) => _success(type, true, request.id, request.method, value),
-              (reason) => _error(true, request.id, request.method, reason),
+              (value) => {
+                _success(type, true, request.id, request.method, value);
+              },
+              (reason) => {
+                _error(true, request.id, request.method, reason);
+              },
               {
                 ...context,
                 suppressLogging: () => {
@@ -674,21 +646,23 @@ export const createClient = <
             const { handler, type } = typeAndHandler;
             void handler(
               request.params as never,
-              (value) =>
+              (value) => {
                 _success(
                   type,
                   request.method in _protocolRequestHandlers,
                   request.id,
                   request.method,
                   value,
-                ),
-              (reason) =>
+                );
+              },
+              (reason) => {
                 _error(
                   request.method in _protocolRequestHandlers,
                   request.id,
                   request.method,
                   reason,
-                ),
+                );
+              },
               {
                 ...context,
                 suppressLogging: () => {
@@ -702,7 +676,7 @@ export const createClient = <
         if (logging === "debug" && !loggingSuppressed) {
           const typeAndHandler =
             requestHandlers[request.method] ?? _protocolRequestHandlers[request.method as never];
-          const type = typeAndHandler?.type ?? "unknown";
+          const type = typeAndHandler.type ?? "unknown";
           const color =
             type === "query" ? "#49cc90"
             : type === "mutation" ? "purple"
@@ -747,8 +721,8 @@ export const createClient = <
 
   let requestId = 0;
   let _initialized = false;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const _eventHandlers: Map<string, Array<(ev?: any) => void | Promise<void>>> = new Map();
+
+  const _eventHandlers = new Map<string, ((ev?: any) => void | Promise<void>)[]>();
 
   const result = {
     /**
@@ -784,9 +758,9 @@ export const createClient = <
     request: Object.assign(
       /**
        * Send a request to LSP server.
-       * @param type
-       * @param method
-       * @param params
+       * @param type The type of the request.
+       * @param method The method of the request.
+       * @param params The parameters of the request.
        * @returns
        */
       <R extends LSPAny = LSPAny>(
@@ -884,6 +858,7 @@ export const createClient = <
          * server to the client.
          *
          * The `initialize` request may only be sent once.
+         * @returns
          */
         initialize: (params: InitializeParams): ResponsePromise<InitializeResult> => {
           const promise = _mutate(
@@ -906,15 +881,15 @@ export const createClient = <
          *
          * If a server receives requests after a shutdown request those requests should error with
          * `InvalidRequest`.
+         * @returns
          */
         shutdown: (): ResponsePromise<null> => _mutate("shutdown"),
       } as const,
     ),
     /**
      * Send a query request to LSP server.
-     * @readonly
-     * @param method
-     * @param params
+     * @param method The method of the request.
+     * @param params The parameters of the request.
      * @returns
      */
     query: <R extends LSPAny = LSPAny>(
@@ -923,9 +898,8 @@ export const createClient = <
     ): ResponsePromise<R> => _request("query", method, params),
     /**
      * Send a mutation request to LSP server.
-     * @readonly
-     * @param method
-     * @param payload
+     * @param method The method of the request.
+     * @param payload The payload of the request.
      * @returns
      */
     mutate: <R extends LSPAny = LSPAny>(
@@ -935,9 +909,8 @@ export const createClient = <
 
     /**
      * Send a notification to LSP server.
-     * @readonly
-     * @param method
-     * @param params
+     * @param method The method of the notification.
+     * @param params The parameters of the notification.
      */
     notify: (method: string, params?: LSPArray | LSPObject) => {
       const notification = {
@@ -967,16 +940,22 @@ export const createClient = <
        *
        * The `initialized` notification may only be sent once.
        */
-      initialized: () => _notify("initialized", {}),
+      initialized: () => {
+        _notify("initialized", {});
+      },
       /**
        * A notification that should be used by the client to modify the trace setting of the server.
        */
-      setTrace: (params: SetTraceParams) => _notify("$/setTrace", params as unknown as LSPObject),
+      setTrace: (params: SetTraceParams) => {
+        _notify("$/setTrace", params as unknown as LSPObject);
+      },
       /**
        * A notification to ask the server to exit its process. The server should exit with `success`
        * code 0 if the shutdown request has been received before; otherwise with `error` code 1.
        */
-      exit: () => _notify("exit"),
+      exit: () => {
+        _notify("exit");
+      },
 
       /**
        * Text document notifications.
@@ -997,16 +976,18 @@ export const createClient = <
          * to the server followed by a `textDocument/didOpen` with the new language id if the server
          * handles the new language id as well.
          */
-        didOpen: (params: DidOpenTextDocumentParams) =>
-          _notify("textDocument/didOpen", params as unknown as LSPObject),
+        didOpen: (params: DidOpenTextDocumentParams) => {
+          _notify("textDocument/didOpen", params as unknown as LSPObject);
+        },
         /**
          * The document change notification is sent from the client to the server to signal changes to
          * a text document. Before a client can change a text document it must claim ownership of its
          * content using the `textDocument/didOpen` notification. In 2.0 the shape of the params has
          * changed to include proper version numbers.
          */
-        didChange: (params: DidChangeTextDocumentParams) =>
-          _notify("textDocument/didChange", params as unknown as LSPObject),
+        didChange: (params: DidChangeTextDocumentParams) => {
+          _notify("textDocument/didChange", params as unknown as LSPObject);
+        },
         /**
          * The document close notification is sent from the client to the server when the document
          * got closed in the client. The document’s master now exists where the document’s Uri
@@ -1017,8 +998,9 @@ export const createClient = <
          * Note that a server’s ability to fulfill requests is independent of whether a text
          * document is open or closed.
          */
-        didClose: (params: DidCloseTextDocumentParams) =>
-          _notify("textDocument/didClose", params as unknown as LSPObject),
+        didClose: (params: DidCloseTextDocumentParams) => {
+          _notify("textDocument/didClose", params as unknown as LSPObject);
+        },
       } as const,
 
       /**
@@ -1037,8 +1019,9 @@ export const createClient = <
          * the following form, where id is a unique `id` used to unregister the capability (the
          * example uses a UUID).
          */
-        didChangeWorkspaceFolders: (params: DidChangeWorkspaceFoldersParams) =>
-          _notify("workspace/didChangeWorkspaceFolders", params as unknown as LSPObject),
+        didChangeWorkspaceFolders: (params: DidChangeWorkspaceFoldersParams) => {
+          _notify("workspace/didChangeWorkspaceFolders", params as unknown as LSPObject);
+        },
       } as const,
     } as const,
 

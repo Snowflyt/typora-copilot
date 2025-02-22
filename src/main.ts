@@ -7,6 +7,7 @@ import semverGte from "semver/functions/gte";
 import semverLt from "semver/functions/lt";
 import semverValid from "semver/functions/valid";
 
+import type { Completion } from "./client";
 import { createCopilotClient } from "./client";
 import CompletionTaskManager from "./completion";
 import { attachSuggestionPanel } from "./components/SuggestionPanel";
@@ -15,6 +16,7 @@ import { attachFooter } from "./footer";
 import { t } from "./i18n";
 import { logger } from "./logging";
 import { settings } from "./settings";
+import type { Position } from "./types/lsp";
 import {
   TYPORA_VERSION,
   getActiveFilePathname,
@@ -25,6 +27,7 @@ import {
 import { runCommand } from "./utils/cli-tools";
 import { computeTextChanges } from "./utils/diff";
 import { getCaretCoordinate } from "./utils/dom";
+import type { NodeRuntime } from "./utils/node-bridge";
 import {
   NodeServer,
   detectAvailableNodeRuntimes,
@@ -35,10 +38,6 @@ import { Observable } from "./utils/observable";
 import { replaceTextByRange, setGlobalVar } from "./utils/tools";
 
 import "./styles.scss";
-
-import type { Completion } from "./client";
-import type { Position } from "./types/lsp";
-import type { NodeRuntime } from "./utils/node-bridge";
 
 logger.info("Copilot plugin activated. Version:", VERSION);
 
@@ -190,11 +189,7 @@ Promise.defer(async () => {
     if (!activeElement) return;
 
     // When in input, do not insert completion text
-    if (
-      "INPUT" === activeElement.tagName ||
-      (activeElement.classList && activeElement.classList.contains("ty-input"))
-    )
-      return;
+    if ("INPUT" === activeElement.tagName || activeElement.classList.contains("ty-input")) return;
 
     // When not in writer, do not insert completion text
     if ("BODY" === activeElement.tagName) return;
@@ -229,7 +224,7 @@ Promise.defer(async () => {
 
           // Keep only completion text before code block ender, as in Typora code block it is not possible
           // to insert a new code block or end one using "```" or "~~~"
-          const ender = cmStarter.match(/^(.)\1*/)![0];
+          const ender = /^(.)\1*/.exec(cmStarter)![0];
           const indexOfEnder = text.indexOf(ender);
           if (indexOfEnder !== -1) {
             displayText = displayText.slice(0, displayText.indexOf(ender));
@@ -246,10 +241,10 @@ Promise.defer(async () => {
           handled = true;
           mode = "stex";
 
-          const match = text.match(/(?<!\\)\$\$/);
+          const match = /(?<!\\)\$\$/.exec(text);
           const indexOfEnder = match ? match.index : -1;
           if (indexOfEnder !== -1) {
-            const match = displayText.match(/(?<!\\)\$\$/);
+            const match = /(?<!\\)\$\$/.exec(displayText);
             if (match) displayText = displayText.slice(0, match.index);
             text = text.slice(0, indexOfEnder);
             const textAfterEnder = text.slice(indexOfEnder);
@@ -345,8 +340,7 @@ Promise.defer(async () => {
 
     /**
      * Intercept `Tab` key once and change it to accept completion.
-     * @param event
-     * @returns
+     * @param event The keyboard event.
      */
     const keydownHandler = (event: KeyboardEvent) => {
       // Prevent tab key to trigger tab once
@@ -369,8 +363,7 @@ Promise.defer(async () => {
 
   /**
    * Insert completion text to CodeMirror.
-   * @param cm
-   * @param param_1
+   * @param cm The CodeMirror instance.
    * @returns
    */
   const insertCompletionTextToCodeMirror = (
@@ -385,16 +378,12 @@ Promise.defer(async () => {
     const cloneHistory = (history: CodeMirrorHistory): CodeMirrorHistory => ({
       done: history.done.map((item) =>
         "primIndex" in item ?
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
           new (item.constructor as any)([...(item as any).ranges], item.primIndex)
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
         : { ...item, changes: [...(item as any).changes] },
       ),
       undone: history.undone.map((item) =>
         "primIndex" in item ?
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
           new (item.constructor as any)([...(item as any).ranges], item.primIndex)
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
         : { ...item, changes: [...(item as any).changes] },
       ),
     });
@@ -497,10 +486,10 @@ Promise.defer(async () => {
 
     /**
      * Intercept `Tab` key once and change it to accept completion.
-     * @param _
-     * @param event
+     * @param _cm The CodeMirror instance.
+     * @param event The keyboard event.
      */
-    const cmTabFixer = (_: CodeMirror.Editor, event: KeyboardEvent) => {
+    const cmTabFixer = (_cm: CodeMirror.Editor, event: KeyboardEvent) => {
       if (rejectedOrAccepted) return;
 
       // Prevent tab key to accept completion
@@ -514,8 +503,8 @@ Promise.defer(async () => {
 
     /**
      * Reject completion before any change applied.
-     * @param cm
-     * @param change
+     * @param cm The CodeMirror instance.
+     * @param change The change.
      */
     const cmChangeFixer = (cm: CodeMirror.Editor, change: CodeMirror.EditorChangeCancellable) => {
       if (rejectedOrAccepted) return;
@@ -556,8 +545,7 @@ Promise.defer(async () => {
 
   /**
    * Insert suggestion panel to CodeMirror.
-   * @param cm
-   * @param param_1
+   * @param cm The CodeMirror instance.
    * @returns
    */
   const insertSuggestionPanelToCodeMirror = (
@@ -587,8 +575,7 @@ Promise.defer(async () => {
 
     /**
      * Intercept `Tab` key once and change it to accept completion.
-     * @param event
-     * @returns
+     * @param event The keyboard event.
      */
     // eslint-disable-next-line sonarjs/no-identical-functions
     const keydownHandler = (_: CodeMirror.Editor, event: KeyboardEvent) => {
@@ -618,8 +605,8 @@ Promise.defer(async () => {
    *******************/
   /**
    * Callback to be invoked when workspace folder changed.
-   * @param newFolder
-   * @param oldFolder
+   * @param newFolder The new workspace folder.
+   * @param oldFolder The old workspace folder.
    */
   const onChangeWorkspaceFolder = (newFolder: string | null, oldFolder: string | null) => {
     copilot.notification.workspace.didChangeWorkspaceFolders({
@@ -634,8 +621,8 @@ Promise.defer(async () => {
 
   /**
    * Callback to be invoked when active file changed.
-   * @param newPathname
-   * @param oldPathname
+   * @param newPathname The new active file pathname.
+   * @param oldPathname The old active file pathname.
    */
   const onChangeActiveFile = (newPathname: string | null, oldPathname: string | null) => {
     if (oldPathname) {
@@ -730,6 +717,7 @@ Promise.defer(async () => {
    **************************/
   /* Send `initialize` request */
   await copilot.request.initialize({
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     processId: window.process?.pid ?? null,
     capabilities: { workspace: { workspaceFolders: true } },
     trace: "verbose",
@@ -824,7 +812,7 @@ Promise.defer(async () => {
           change.range.start.line === change.range.end.line &&
           change.range.start.character === change.range.end.character &&
           // If not in input
-          !document.activeElement?.classList?.contains("ty-input")
+          !document.activeElement?.classList.contains("ty-input")
           // If in a CodeMirror instance
         ) {
           // The line of the starter (```, ~~~, $$, <div>, etc.)
@@ -847,7 +835,7 @@ Promise.defer(async () => {
             if (
               // Check if the caret is inside a CodeMirror instance
               document.activeElement?.tagName === "TEXTAREA" &&
-              (starter = unindentedLineText.match(/^(```([^`]|$)|~~~([^~]|$))/)?.[0]?.slice(0, 3))
+              (starter = /^(```([^`]|$)|~~~([^~]|$))/.exec(unindentedLineText)?.[0]?.slice(0, 3))
             ) {
               ender = starter;
             }
@@ -860,7 +848,7 @@ Promise.defer(async () => {
             }
             // * HTML block *
             else if (
-              (starter = unindentedLineText.match(/^<[^>]*>/)?.[0]) &&
+              (starter = /^<[^>]*>/.exec(unindentedLineText)?.[0]) &&
               change.text.trimEnd().endsWith(`</${starter.slice(1, -1)}>`)
             ) {
               ender = `</${starter.slice(1, -1)}>`;
@@ -892,7 +880,7 @@ Promise.defer(async () => {
     // Reject last completion if exists
     taskManager.rejectCurrentIfExist();
     // Trigger completion
-    void triggerCompletion();
+    triggerCompletion();
   });
 
   /* Watch for markdown change in source mode */
@@ -926,7 +914,7 @@ Promise.defer(async () => {
     // Reject last completion if exists
     taskManager.rejectCurrentIfExist();
     // Trigger completion
-    void triggerCompletion();
+    triggerCompletion();
   });
 
   /* Cancel current request on caret move */

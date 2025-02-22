@@ -4,7 +4,7 @@
  */
 export const getCaretCoordinate = (): { x: number; y: number } | null => {
   const sel = window.getSelection();
-  if (sel && sel.rangeCount) {
+  if (sel?.rangeCount) {
     const range = sel.getRangeAt(0).cloneRange();
     const caret = document.createElement("span");
     range.insertNode(caret);

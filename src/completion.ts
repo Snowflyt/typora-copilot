@@ -1,11 +1,10 @@
 import * as path from "@modules/path";
 
-import { logger } from "./logging";
-import { Observable } from "./utils/observable";
-
 import type { Completion, CompletionResult, CopilotClient } from "./client";
 import type { ResponsePromise } from "./client/general-client";
+import { logger } from "./logging";
 import type { Position } from "./types/lsp";
+import { Observable } from "./utils/observable";
 
 /**
  * Options for {@link CompletionTaskManager}.

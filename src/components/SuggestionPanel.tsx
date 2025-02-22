@@ -1,10 +1,10 @@
 import { render } from "preact";
 import { useEffect, useRef } from "preact/hooks";
 
-import CopilotIcon from "./CopilotIcon";
-
 import { t } from "@/i18n";
 import { getCaretCoordinate } from "@/utils/dom";
+
+import CopilotIcon from "./CopilotIcon";
 
 import "./SuggestionPanel.scss";
 
@@ -133,6 +133,7 @@ const SuggestionPanel: FC<SuggestionPanelProps> = ({
 
     // Set visibility to visible
     containerRef.current!.style.removeProperty("visibility");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

@@ -23,11 +23,7 @@ interface LocaleMap {
 const isStringArray = (x: unknown): x is readonly string[] =>
   Array.isArray(x) && x.every((v) => typeof v === "string");
 
-class TranslationError extends Error {
-  constructor(message: string) {
-    super(message);
-  }
-}
+class TranslationError extends Error {}
 
 /**
  * Get locale string by path.
@@ -94,7 +90,7 @@ const _t = (path: string): string => {
   const locale =
     window._options.userLocale ||
     window._options.appLocale ||
-    (navigator.languages && navigator.languages[0]) ||
+    navigator.languages[0] ||
     navigator.language ||
     ("userLanguage" in navigator &&
       typeof navigator.userLanguage === "string" &&

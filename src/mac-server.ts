@@ -1,9 +1,8 @@
 import { fork } from "child_process";
 import net from "net";
+import type { ChildProcessWithoutNullStreams } from "node:child_process";
 
 import { WebSocketServer } from "ws";
-
-import type { ChildProcessWithoutNullStreams } from "node:child_process";
 
 if (!process.argv[2] || !process.argv[3]) {
   console.log("Usage: node mac-server.cjs <port> <lsp-node-module-path>");
@@ -43,7 +42,6 @@ const startWebSocketServer = () => {
     });
 
     server.stdout.on("data", (data) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const message: string = data.toString("utf-8");
       console.debug("📤", message);
       ws.send(message);

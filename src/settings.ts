@@ -13,7 +13,7 @@ const defaultSettings = {
 };
 
 export const settings = (() => {
-  const changeListeners = new Map<keyof Settings, Array<() => void>>();
+  const changeListeners = new Map<keyof Settings, (() => void)[]>();
   const onChange = <K extends keyof Settings>(key: K, callback: (value: Settings[K]) => void) => {
     const listener = () => callback(settings[key]);
     if (!changeListeners.has(key)) changeListeners.set(key, []);

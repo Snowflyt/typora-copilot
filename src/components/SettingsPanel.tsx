@@ -1,11 +1,24 @@
-/* eslint-disable sonarjs/no-duplicate-string */
-
+/* eslint-disable react-hooks/rules-of-hooks */
+import type { Signal } from "@preact/signals";
 import { useSignal } from "@preact/signals";
 import { useMemo } from "preact/hooks";
 import { debounce, mapValues } from "radash";
 import semverGte from "semver/functions/gte";
 import semverValid from "semver/functions/valid";
 import { kebabCase } from "string-ts";
+
+import { t } from "@/i18n";
+import type { Settings } from "@/settings";
+import { settings } from "@/settings";
+import type { _Id } from "@/types/tools";
+import { runCommand } from "@/utils/cli-tools";
+import type { NodeRuntime } from "@/utils/node-bridge";
+import {
+  getAllAvailableNodeRuntimes,
+  getCurrentNodeRuntime,
+  setCurrentNodeRuntime,
+} from "@/utils/node-bridge";
+import { entriesOf, keysOf } from "@/utils/tools";
 
 import DropdownWithInput from "./DropdownWithInput";
 import ModalBody from "./ModalBody";
@@ -16,21 +29,6 @@ import ModalTitle from "./ModalTitle";
 import ModalHeader from "./ModelHeader";
 import Switch from "./Switch";
 import { NodejsIcon, SettingsIcon } from "./icons";
-
-import type { Settings } from "@/settings";
-import type { _Id } from "@/types/tools";
-import type { NodeRuntime } from "@/utils/node-bridge";
-import type { Signal } from "@preact/signals";
-
-import { t } from "@/i18n";
-import { settings } from "@/settings";
-import { runCommand } from "@/utils/cli-tools";
-import {
-  getAllAvailableNodeRuntimes,
-  getCurrentNodeRuntime,
-  setCurrentNodeRuntime,
-} from "@/utils/node-bridge";
-import { assertNever, entriesOf, keysOf } from "@/utils/tools";
 
 interface SettingControl<K extends keyof Settings> {
   position: "right" | "bottom";
@@ -183,7 +181,7 @@ const categories = {
                 };
               })(),
             ),
-          [inputType, forceFocusInput, info, infoColor],
+          [currentVersion, key, signal, inputType, forceFocusInput, info, infoColor],
         );
 
         return (
@@ -248,7 +246,7 @@ const categories = {
               }}
             />
 
-            {info && (
+            {info.value && (
               <div
                 style={{
                   marginTop: "0.5rem",
@@ -256,7 +254,7 @@ const categories = {
                   lineHeight: 1,
                   color: infoColor.value,
                 }}>
-                {info}
+                {info.value}
               </div>
             )}
           </div>
@@ -376,34 +374,33 @@ const SettingsPanel: FC<SettingsPanelProps> = ({ onClose }) => {
                           </div>
                         </>
                       );
-                    if (control.position === "bottom")
-                      return (
-                        <>
-                          <div>
-                            {t.tran(
-                              `settings-panel.${selectedCategory.value}.${kebabCase(key)}.label`,
-                            )}
-                          </div>
-                          <div
-                            style={{
-                              marginTop: "0.5rem",
-                              fontSize: "0.75rem",
-                              lineHeight: 1,
-                              opacity: 0.75,
-                            }}>
-                            {t.tran(
-                              `settings-panel.${selectedCategory.value}.${kebabCase(key)}.description`,
-                            )}
-                          </div>
-                          <div style={{ marginTop: "0.5rem" }}>
-                            {control.component(
-                              key as never,
-                              (signals[selectedCategory.value] as never)[key],
-                            )}
-                          </div>
-                        </>
-                      );
-                    assertNever(control.position);
+                    /* position: bottom */
+                    return (
+                      <>
+                        <div>
+                          {t.tran(
+                            `settings-panel.${selectedCategory.value}.${kebabCase(key)}.label`,
+                          )}
+                        </div>
+                        <div
+                          style={{
+                            marginTop: "0.5rem",
+                            fontSize: "0.75rem",
+                            lineHeight: 1,
+                            opacity: 0.75,
+                          }}>
+                          {t.tran(
+                            `settings-panel.${selectedCategory.value}.${kebabCase(key)}.description`,
+                          )}
+                        </div>
+                        <div style={{ marginTop: "0.5rem" }}>
+                          {control.component(
+                            key as never,
+                            (signals[selectedCategory.value] as never)[key],
+                          )}
+                        </div>
+                      </>
+                    );
                   })()}
 
                   {t.test(`settings-panel.${selectedCategory.value}.${kebabCase(key)}.warning`) && (
@@ -452,6 +449,7 @@ const MenuButton: FC<{
     cursor: selected ? "default" : "pointer",
     backgroundColor: selected ? "var(--item-hover-bg-color)" : "transparent",
     ...(selected ? { pointerEvents: "none" } : {}),
+    // eslint-disable-next-line @typescript-eslint/no-misused-spread
     ...additionalStyle,
   };
   return selected ?

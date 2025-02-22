@@ -24,7 +24,9 @@ const Switch: FC<SwitchProps> = ({ onChange, value }) => {
     <div
       class={`switch ${value ? "on" : "off"}`}
       style={{ backgroundColor: switchBackgroundColor }}
-      onClick={() => onChange(!value)}>
+      onClick={() => {
+        onChange(!value);
+      }}>
       <div class="toggle" style={{ boxShadow: toggleBoxShadow }} />
     </div>
   );

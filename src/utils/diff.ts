@@ -6,8 +6,8 @@ export const computeTextChanges = (
   oldStr: string,
   newStr: string,
   lastCaretPosition?: { line: number; character: number } | null,
-): Array<{ range: Range; text: string }> => {
-  const result: Array<{ range: Range; text: string }> = [];
+): { range: Range; text: string }[] => {
+  const result: { range: Range; text: string }[] = [];
 
   const diffs = diff(
     oldStr,

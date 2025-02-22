@@ -32,7 +32,7 @@ declare global {
 Promise.orderedFirstResolved = function orderedFirstResolved<T>(
   values: Iterable<T | PromiseLike<T>>,
 ): Promise<T> {
-  const states: Array<"pending" | "resolved" | "rejected"> = [];
+  const states: ("pending" | "resolved" | "rejected")[] = [];
   const resolvedValues: T[] = [];
   const errors: unknown[] = [];
   let rejectedPointer = 0;
@@ -44,7 +44,6 @@ Promise.orderedFirstResolved = function orderedFirstResolved<T>(
           const message = "All promises were rejected";
           reject(
             "AggregateError" in window ?
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               (new (window.AggregateError as any)(errors, message) as Error)
             : new Error(message),
           );
@@ -76,7 +75,6 @@ Promise.orderedFirstResolved = function orderedFirstResolved<T>(
       const message = "All promises were rejected";
       reject(
         "AggregateError" in window ?
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (new (window.AggregateError as any)([], message) as Error)
         : new Error(message),
       );
@@ -104,6 +102,7 @@ declare global {
 }
 
 Promise.defer = function defer<T>(factory: () => T | PromiseLike<T>): Promise<T> {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (globalThis.process && typeof process.nextTick === "function") {
     const isThenable = (value: unknown): value is PromiseLike<T> =>
       value !== null &&

@@ -587,13 +587,13 @@ declare namespace Typora {
    * History manager for undo and redo.
    */
   class HistoryManager {
-    commandStack: Array<{
+    commandStack: {
       date: unknown | undefined;
       incomplete: unknown | null;
       source: unknown | null;
       undo: object[];
       redo: object[];
-    }>;
+    }[];
 
     undo(): void;
     redo(): void;
@@ -733,7 +733,7 @@ declare namespace Typora {
     /**
      * Node types.
      */
-    static TYPE: {
+    static readonly TYPE: {
       atag: "atag";
       attr: "attr";
       autolink: "autolink";

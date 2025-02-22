@@ -1,6 +1,5 @@
-import type { ReadonlyRecord } from "@/types/tools";
-
 import { CommandError, NoFreePortError, PlatformError } from "@/errors";
+import type { ReadonlyRecord } from "@/types/tools";
 
 /**
  * Run a command from shell and return its output.
@@ -52,7 +51,7 @@ export const getEnv: () => Promise<ReadonlyRecord<string, string | undefined>> =
   if (Files.isNode)
     // eslint-disable-next-line @typescript-eslint/require-await
     return async function getEnv() {
-      return process.env ?? {};
+      return process.env;
     };
 
   if (Files.isMac) {
@@ -74,7 +73,7 @@ export const getEnv: () => Promise<ReadonlyRecord<string, string | undefined>> =
           const env: Record<string, string | undefined> = {};
           for (const line of lines) {
             const [key, value] = line.split("=");
-            env[key as string] = value;
+            env[key!] = value;
           }
           return env;
         })
@@ -91,6 +90,7 @@ export const getEnv: () => Promise<ReadonlyRecord<string, string | undefined>> =
  *
  * **⚠️ Warning:** This function only works on macOS and Linux.
  * @throws {NoFreePortError} If no free port is found.
+ * @returns
  */
 export const findFreePort = async (startAt = 6190): Promise<number> => {
   const command = /* sh */ `

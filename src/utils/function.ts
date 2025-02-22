@@ -3,7 +3,6 @@
  * @param fn The function to cache.
  * @returns
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const cache = <F extends (...args: any) => unknown>(fn: F): F => {
   const cache = new Map();
   const result = ((...args) => {

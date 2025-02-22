@@ -1,11 +1,11 @@
-import { unique } from "radash";
-
-import * as path from "./path";
-
 import type fs from "node:fs";
+
+import { unique } from "radash";
 
 import { PlatformError } from "@/errors";
 import { getEnv, runCommand } from "@/utils/cli-tools";
+
+import * as path from "./path";
 
 export const constants = {
   // File Access Constants
@@ -247,7 +247,7 @@ export const trueCasePath: (filePath: string, basePath?: string) => Promise<stri
     } else if (!basePath) {
       basePath = process.cwd();
     }
-    return await segments.reduce(
+    return await segments.reduce<string | Promise<string>>(
       async (realPathPromise, fileOrDirectory) =>
         (await realPathPromise) +
         delimiter +
@@ -256,7 +256,7 @@ export const trueCasePath: (filePath: string, basePath?: string) => Promise<stri
           await readDir((await realPathPromise) + delimiter),
           filePath,
         ),
-      basePath as string | Promise<string>,
+      basePath,
     );
   };
 })();
@@ -306,6 +306,7 @@ const _checkExecutableFilePaths: (
 ) => Promise<string[] | string | null> = (() => {
   const COMMON_EXEC_EXTS = unique([
     "",
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     ...((window.process && process.env["PATHEXT"]) || "").split(path.delimiter),
     ...(Files.isMac || Files.isLinux ? [".sh", ".bash"] : []),
   ]);
@@ -393,8 +394,7 @@ export const readDir: (
           else {
             const filtered = files.filter((file) => {
               if (strategy === "dirsOnly") return file.isDirectory();
-              if (strategy === "filesOnly") return file.isFile();
-              return false;
+              return /* filesOnly */ file.isFile();
             });
             resolve(filtered.map((file) => file.name));
           }
@@ -474,9 +474,10 @@ export const readFile: (path: string) => Promise<string> = (() => {
  * @returns The absolute paths of the command.
  */
 export const lookPath = async (command: string): Promise<string[]> => {
-  const dirs = (
-    (window.process ? process.env : await getEnv())[Files.isWin ? "Path" : "PATH"] || ""
-  ).split(path.delimiter);
+  const dirs = // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    ((window.process ? process.env : await getEnv())[Files.isWin ? "Path" : "PATH"] || "").split(
+      path.delimiter,
+    );
   return (await _checkExecutableFilePaths(
     dirs.map((dir) => path.join(dir, command)),
     { addCommonExts: true, first: false },
@@ -491,9 +492,10 @@ export const lookPath = async (command: string): Promise<string[]> => {
  * @returns The absolute path of the command, or `null` if not found.
  */
 export const lookPathFirst = async (command: string): Promise<string | null> => {
-  const dirs = (
-    (window.process ? process.env : await getEnv())[Files.isWin ? "Path" : "PATH"] || ""
-  ).split(path.delimiter);
+  const dirs = // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    ((window.process ? process.env : await getEnv())[Files.isWin ? "Path" : "PATH"] || "").split(
+      path.delimiter,
+    );
   return (await _checkExecutableFilePaths(
     dirs.map((dir) => path.join(dir, command)),
     { addCommonExts: true, first: true },

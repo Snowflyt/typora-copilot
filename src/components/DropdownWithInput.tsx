@@ -102,7 +102,9 @@ const DropdownWithInput: FC<DropdownWithInputProps> = ({
           {filteredOptions.map((option, index) => (
             <li
               key={index}
-              onClick={() => handleOptionClick(option)}
+              onClick={() => {
+                handleOptionClick(option);
+              }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background =
                   getLuminance(backgroundColor) > 0.5 ?

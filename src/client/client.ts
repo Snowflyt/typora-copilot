@@ -1,14 +1,5 @@
 import { pathToFileURL } from "@modules/url";
 
-import { createClient, validateNotificationHandlers } from "./general-client";
-
-import type {
-  ClientEventMap,
-  ClientOptions,
-  NotificationHandler,
-  RequestHandler,
-  ResponsePromise,
-} from "./general-client";
 import type {
   LSPArray,
   LSPObject,
@@ -19,6 +10,15 @@ import type {
 } from "@/types/lsp";
 import type { ReadonlyRecord } from "@/types/tools";
 import type { NodeServer } from "@/utils/node-bridge";
+
+import type {
+  ClientEventMap,
+  ClientOptions,
+  NotificationHandler,
+  RequestHandler,
+  ResponsePromise,
+} from "./general-client";
+import { createClient, validateNotificationHandlers } from "./general-client";
 
 /**
  * Copilot account status.
@@ -166,8 +166,8 @@ export type CopilotClientOptions<
 
 /**
  * Create a Copilot LSP client.
- * @param server
- * @param options
+ * @param server The server to connect to.
+ * @param options The options.
  * @returns
  */
 export const createCopilotClient = <
@@ -270,6 +270,7 @@ export const createCopilotClient = <
     version: 0,
     /**
      * Status of Copilot.
+     * @returns
      */
     get status() {
       return _status;
@@ -289,6 +290,7 @@ export const createCopilotClient = <
      * @readonly
      */
     request: {
+      // eslint-disable-next-line @typescript-eslint/no-misused-spread
       ...client.request,
 
       /**
@@ -378,29 +380,34 @@ export const createCopilotClient = <
 
       /**
        * Notify Copilot that the completion is shown.
-       * @param options
+       * @param options The options.
        */
-      notifyShown: (options: { uuid: string }) => client.notify("notifyShown", options),
+      notifyShown: (options: { uuid: string }) => {
+        client.notify("notifyShown", options);
+      },
       /**
        * Notify Copilot that the completion is accepted.
-       * @param options
+       * @param options The options.
        */
-      notifyAccepted: (options: { uuid: string }) => client.notify("notifyAccepted", options),
+      notifyAccepted: (options: { uuid: string }) => {
+        client.notify("notifyAccepted", options);
+      },
       /**
        * Notify Copilot that the completion is rejected.
-       * @param options
+       * @param options The options.
        */
-      notifyRejected: (options: { uuids: readonly string[] }) =>
-        client.notify("notifyRejected", options),
+      notifyRejected: (options: { uuids: readonly string[] }) => {
+        client.notify("notifyRejected", options);
+      },
     },
 
     /**
      * Add event handler.
      * @readonly
      */
-    on: ((event, handler) => client.on(event as never, handler)) as <
-      EventName extends keyof CopilotClientEventMap,
-    >(
+    on: ((event, handler) => {
+      client.on(event as never, handler);
+    }) as <EventName extends keyof CopilotClientEventMap>(
       event: EventName,
       handler: CopilotClientEventHandler<EventName>,
     ) => void,
@@ -408,9 +415,9 @@ export const createCopilotClient = <
      * Remove event handler.
      * @readonly
      */
-    off: ((event, handler) => client.off(event as never, handler)) as <
-      EventName extends keyof CopilotClientEventMap,
-    >(
+    off: ((event, handler) => {
+      client.off(event as never, handler);
+    }) as <EventName extends keyof CopilotClientEventMap>(
       event: EventName,
       handler: CopilotClientEventHandler<EventName>,
     ) => void,

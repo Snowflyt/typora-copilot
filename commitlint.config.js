@@ -2,10 +2,10 @@
 
 /**
  * @typedef {object} Parsed
- * @property {?string} emoji
- * @property {?string} type
- * @property {?string} scope
- * @property {?string} subject
+ * @property {?string} emoji The emoji at the beginning of the commit message.
+ * @property {?string} type The type of the commit message.
+ * @property {?string} scope The scope of the commit message.
+ * @property {?string} subject The subject of the commit message.
  */
 
 const emojiEnum = /** @type {const} */ ([

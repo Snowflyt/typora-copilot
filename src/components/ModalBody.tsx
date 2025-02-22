@@ -5,6 +5,7 @@ export interface ModalBodyProps {
 
 const ModalBody: FC<ModalBodyProps> = ({ children, className, style }) => {
   return (
+    // eslint-disable-next-line @typescript-eslint/no-misused-spread
     <div className={className} style={{ padding: "0.9rem", width: "100%", ...style }}>
       {children}
     </div>

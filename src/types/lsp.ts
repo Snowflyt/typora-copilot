@@ -1,4 +1,8 @@
+/* eslint-disable @typescript-eslint/no-deprecated */
 /* eslint-disable @typescript-eslint/no-duplicate-type-constituents */
+/* eslint-disable jsdoc/check-tag-names */
+/* eslint-disable sonarjs/future-reserved-words */
+/* eslint-disable sonarjs/no-globals-shadowing */
 
 /**
  * Defines an integer number in the range of -2^31 to 2^31 - 1.
@@ -1768,7 +1772,7 @@ export type TextDocumentClientCapabilities = {
    */
   rangeFormatting?: DocumentRangeFormattingClientCapabilities;
 
-  /** request.
+  /**
    * Capabilities specific to the `textDocument/onTypeFormatting` request.
    */
   onTypeFormatting?: DocumentOnTypeFormattingClientCapabilities;
@@ -3182,10 +3186,10 @@ export type NotebookDocumentChangeEvent = {
     /**
      * Changes to the text content of notebook cells.
      */
-    textContent?: ReadonlyArray<{
+    textContent?: readonly {
       document: VersionedTextDocumentIdentifier;
       changes: readonly TextDocumentContentChangeEvent[];
-    }>;
+    }[];
   };
 };
 
@@ -4670,7 +4674,7 @@ export type InlayHint = {
    * The label of this hint. A human readable string or an array of
    * InlayHintLabelPart label parts.
    *
-   * *Note* that neither the string nor the label part can be empty.
+   * _Note_ that neither the string nor the label part can be empty.
    */
   label: string | readonly InlayHintLabelPart[];
 
@@ -4683,7 +4687,7 @@ export type InlayHint = {
   /**
    * Optional text edits that are performed when accepting this inlay hint.
    *
-   * *Note* that edits are expected to change the document so that the inlay
+   * _Note_ that edits are expected to change the document so that the inlay
    * hint (or its nearest variant) is now part of the document and the inlay
    * hint itself is now obsolete.
    *
@@ -5605,7 +5609,7 @@ export type CompletionItem = {
   /**
    * Select this item when showing.
    *
-   * *Note* that only one completion item can be selected and that the
+   * _Note_ that only one completion item can be selected and that the
    * tool / client decides which item that is. The rule is that the *first*
    * item of those that match best is selected.
    */
@@ -5664,7 +5668,7 @@ export type CompletionItem = {
    * An edit which is applied to a document when selecting this completion.
    * When an edit is provided the value of `insertText` is ignored.
    *
-   * *Note:* The range of the edit must be a single line range and it must
+   * _Note:_ The range of the edit must be a single line range and it must
    * contain the position at which completion has been requested.
    *
    * Most editors support two different operations when accepting a completion
@@ -5675,10 +5679,10 @@ export type CompletionItem = {
    * `textDocument.completion.completionItem.insertReplaceSupport` client
    * capability property.
    *
-   * *Note 1:* The text edit's range as well as both ranges from an insert
+   * _Note 1:_ The text edit's range as well as both ranges from an insert
    * replace edit must be a [single line] and they must contain the position
    * at which completion has been requested.
-   * *Note 2:* If an `InsertReplaceEdit` is returned the edit's insert range
+   * _Note 2:_ If an `InsertReplaceEdit` is returned the edit's insert range
    * must be a prefix of the edit's replace range, that means it must be
    * contained and starting at the same position.
    *
@@ -5721,7 +5725,7 @@ export type CompletionItem = {
 
   /**
    * An optional command that is executed *after* inserting this completion.
-   * *Note* that additional modifications to the current document should be
+   * _Note_ that additional modifications to the current document should be
    * described with the additionalTextEdits-property.
    */
   command?: Command;
@@ -6413,7 +6417,7 @@ export type ParameterInformation = {
    * offsets are based on a UTF-16 string representation as `Position` and
    * `Range` does.
    *
-   * *Note*: a label of type string should be a substring of its containing
+   * _Note_: a label of type string should be a substring of its containing
    * signature label. Its intended use case is to highlight the parameter
    * label part in the `SignatureInformation.label`.
    */

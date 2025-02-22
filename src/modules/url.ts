@@ -20,7 +20,7 @@
  * fileURLToPath("file:///hello world");      // Correct:   /hello world (POSIX)
  * ```
  * @param url The file URL string or URL object to convert to a path.
- * @return The fully-resolved platform-specific Node.js file path.
+ * @returns The fully-resolved platform-specific Node.js file path.
  */
 export const fileURLToPath = (url: string) => {
   let parsedUrl: URL;
@@ -74,7 +74,7 @@ export const fileURLToPath = (url: string) => {
  * pathToFileURL("/some/path%.c");       // Correct:   file:///some/path%25.c (POSIX)
  * ```
  * @param path The path to convert to a File URL.
- * @return The file URL object.
+ * @returns The file URL object.
  */
 export const pathToFileURL = (path: string) => {
   const url = new URL("file:///");

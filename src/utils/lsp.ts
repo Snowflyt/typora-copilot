@@ -11,7 +11,6 @@ import type {
   integer,
   uinteger,
 } from "@/types/lsp";
-
 import { ErrorCodes } from "@/types/lsp";
 
 /**************
@@ -159,11 +158,7 @@ export const isResponseError = (value: unknown): value is ResponseError => {
 };
 
 export const toJSError = (error: ResponseError) => {
-  const ErrorClass = class extends Error {
-    constructor(message?: string) {
-      super(message);
-    }
-  };
+  const ErrorClass = class extends Error {};
   let errorName = getErrorCodeName(error.code) ?? "UnknownError";
   if (!errorName.endsWith("Error")) errorName += "Error";
   Object.defineProperty(ErrorClass, "name", {

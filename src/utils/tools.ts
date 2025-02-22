@@ -4,7 +4,6 @@ import type { ReadonlyRecord } from "@/types/tools";
 /**
  * Assert that the value is never (i.e., this statement should never be reached).
  * @param value The value to assert.
- * @returns
  */
 export const assertNever = (value: never): never => {
   throw new Error(`Unexpected value: ${JSON.stringify(value)}`);
@@ -22,7 +21,7 @@ export const assertNever = (value: never): never => {
  * omit({ a: 1, b: 2, c: 3 }, "a", "c"); // => { b: 2 }
  * ```
  */
-export const omit = <O extends ReadonlyRecord<PropertyKey, unknown>, KS extends Array<keyof O>>(
+export const omit = <O extends ReadonlyRecord<PropertyKey, unknown>, KS extends (keyof O)[]>(
   obj: O,
   ...keys: KS
 ): Omit<O, KS[number]> extends infer U ? { [K in keyof U]: U[K] } : never => {
@@ -97,6 +96,7 @@ export const setGlobalVar = <K extends keyof typeof globalThis | (string & NonNu
  * @param range The range to replace.
  * @param newText The new text.
  * @param eol The end of line character. Defaults to `"\n"`.
+ * @returns
  */
 export const replaceTextByRange = (
   text: string,

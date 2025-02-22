@@ -1,5 +1,3 @@
-/* eslint-disable sonarjs/no-duplicate-string */
-
 import { describe, expect, it } from "vitest";
 
 import * as path from "./path";

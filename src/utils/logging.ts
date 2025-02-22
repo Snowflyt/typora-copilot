@@ -1,8 +1,8 @@
-import { getErrorCodeName } from "./lsp";
-import { omit } from "./tools";
-
 import type { integer } from "@/types/lsp";
 import type { Merge, _Id } from "@/types/tools";
+
+import { getErrorCodeName } from "./lsp";
+import { omit } from "./tools";
 
 /**
  * Options for block logger.
@@ -30,6 +30,7 @@ export const createSimpleLogger = (options?: SimpleLoggerOptions) => {
     /**
      * Log a debug message to the console.
      * @param data Data to log.
+     * @returns
      */
     debug: (...data: unknown[]) =>
       console.debug(
@@ -40,6 +41,7 @@ export const createSimpleLogger = (options?: SimpleLoggerOptions) => {
     /**
      * Log a message to the console.
      * @param data Data to log.
+     * @returns
      */
     info: (...data: unknown[]) =>
       console.log(
@@ -50,6 +52,7 @@ export const createSimpleLogger = (options?: SimpleLoggerOptions) => {
     /**
      * Log a warning message to the console.
      * @param data Data to log.
+     * @returns
      */
     warn: (...data: unknown[]) =>
       console.warn(
@@ -60,6 +63,7 @@ export const createSimpleLogger = (options?: SimpleLoggerOptions) => {
     /**
      * Log an error message to the console.
      * @param data Data to log.
+     * @returns
      */
     error: (...data: unknown[]) =>
       console.error(
@@ -71,6 +75,7 @@ export const createSimpleLogger = (options?: SimpleLoggerOptions) => {
     /**
      * Overwrite `options` with new options.
      * @param overwriteOptions New options.
+     * @returns
      */
     overwrite: (overwriteOptions: SimpleLoggerOptions) =>
       createSimpleLogger({ ...options, ...overwriteOptions }),
@@ -124,6 +129,7 @@ export const createBlockLogger = (options?: BlockLoggerOptions) => ({
    * Log a block-formatted debug message to the console.
    * @param text Text to display.
    * @param data Data to log.
+   * @returns
    */
   debug: (text: string, ...data: unknown[]) =>
     console.debug(..._prepareConsoleBlockParams({ text, ...options }), ...data),
@@ -132,6 +138,7 @@ export const createBlockLogger = (options?: BlockLoggerOptions) => ({
    * Log a block-formatted message to the console.
    * @param text Text to display.
    * @param data Data to log.
+   * @returns
    */
   info: (text: string, ...data: unknown[]) =>
     console.log(..._prepareConsoleBlockParams({ text, ...options }), ...data),
@@ -140,6 +147,7 @@ export const createBlockLogger = (options?: BlockLoggerOptions) => ({
    * Log a block-formatted warning message to the console.
    * @param text Text to display.
    * @param data Data to log.
+   * @returns
    */
   warn: (text: string, ...data: unknown[]) =>
     console.warn(..._prepareConsoleBlockParams({ text, ...options }), ...data),
@@ -148,6 +156,7 @@ export const createBlockLogger = (options?: BlockLoggerOptions) => ({
    * Log a block-formatted error message to the console.
    * @param text Text to display.
    * @param data Data to log.
+   * @returns
    */
   error: (text: string, ...data: unknown[]) =>
     console.error(..._prepareConsoleBlockParams({ text, ...options }), ...data),
@@ -155,6 +164,7 @@ export const createBlockLogger = (options?: BlockLoggerOptions) => ({
   /**
    * Overwrite `options` with new options.
    * @param overwriteOptions New options.
+   * @returns
    */
   overwrite: (overwriteOptions: BlockLoggerOptions) =>
     createBlockLogger({ ...options, ...overwriteOptions }),
@@ -172,7 +182,7 @@ export type LoggerOptions = Merge<SimpleLoggerOptions, { block?: BlockLoggerOpti
 
 /**
  * Create a logger that logs a message to the console.
- * @param options
+ * @param options The options.
  * @returns
  */
 export const createLogger = (options?: LoggerOptions) =>
@@ -182,7 +192,7 @@ export const createLogger = (options?: LoggerOptions) =>
 
 /**
  * Format request ID for logging.
- * @param id
+ * @param id The request ID.
  * @returns
  *
  * @example
@@ -195,7 +205,7 @@ export const createLogger = (options?: LoggerOptions) =>
 export const formatId = (id: (integer | string) | null) => (id !== null ? `[${id}] ` : "");
 /**
  * Format method name for logging.
- * @param method
+ * @param method The method name.
  * @returns
  *
  * @example
@@ -207,7 +217,7 @@ export const formatId = (id: (integer | string) | null) => (id !== null ? `[${id
 export const formatMethod = (method: string | null) => method ?? "Anonymous";
 /**
  * Format error code for logging.
- * @param code
+ * @param code The error code.
  * @returns
  *
  * @example
