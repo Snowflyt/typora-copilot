@@ -14,7 +14,7 @@
 >
 > 自 Typora v1.10 起，所有平台都需要安装 [Node.js](https://nodejs.org/zh-cn/download) ≥ 18 才能使用本插件。
 >
-> （仅对于使用 1.6 ≤ Typora < 1.10 的 Windows / Linux 用户，无需安装 Node.js。:wink:）
+> （仅对于使用 1.6 ≤ Typora < 1.10 的 Windows / Linux 用户，无需安装 Node.js。 :wink:）
 
 _\*注：`/` 表示未经过测试。_
 
