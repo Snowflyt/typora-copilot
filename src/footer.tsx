@@ -273,7 +273,7 @@ export const Footer: FC<FooterOptions> = ({ copilot }) => {
       document.removeEventListener("click", listener);
       $("content").off("click", listener);
     };
-  });
+  }, [isPanelOpen]);
 
   // Close panel on click on spell check button or word count button
   $("#footer-spell-check, #footer-word-count").on("click", () => {

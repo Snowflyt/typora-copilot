@@ -125,6 +125,7 @@ export default class CompletionTaskManager {
         }
 
         this._state = "idle";
+        this.activeRequest = null;
       });
   }
 }
