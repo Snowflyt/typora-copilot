@@ -1,6 +1,6 @@
 {
   "name": "typora-copilot",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "private": true,
   "description": "GitHub Copilot plugin for Typora",
   "keywords": [
@@ -33,11 +33,11 @@
     "lint:fix": "eslint --fix {src,test}/**/*.{js,jsx,ts,tsx} *.{js,cjs,mjs,ts,cts,mts} --no-error-on-unmatched-pattern --report-unused-disable-directives-severity error --max-warnings 0 && stylelint --fix \"src/**/*.{css,scss}\"",
     "prepare": "node -e \"import fs from 'node:fs'; import path from 'node:path'; const hooksDir = path.join(process.cwd(), '.githooks'); const gitHooksDir = path.join(process.cwd(), '.git/hooks'); if (fs.existsSync(gitHooksDir)) { fs.readdirSync(hooksDir).forEach(file => { const srcFile = path.join(hooksDir, file); const destFile = path.join(gitHooksDir, file); fs.copyFileSync(srcFile, destFile); if (process.platform !== 'win32' && !file.endsWith('.cmd')) { fs.chmodSync(destFile, 0o755); } }); }\"",
     "test": "vitest run",
+    "test-types": "typroof",
     "test:cov": "vitest run --coverage",
     "test:ui": "vitest --ui --coverage.enabled=true",
     "test:watch": "vitest",
     "test:watch-cov": "vitest --coverage",
-    "test-types": "typroof",
     "typecheck": "tsc --noEmit -p tsconfig.build.json"
   },
   "dependencies": {
