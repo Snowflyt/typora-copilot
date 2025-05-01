@@ -7,6 +7,10 @@ while [[ "$#" -gt 0 ]]; do
     custom_path="$2"
     shift
     ;;
+  -s | --silent)
+    silent=true
+    shift
+    ;;
   *)
     echo "Unknown parameter passed: $1"
     exit 1
@@ -79,7 +83,19 @@ for path in "${paths[@]}"; do
             success=true
             break
           else
-            echo "Warning: Copilot plugin has not been installed in Typora."
+            if ! $silent; then
+              echo "Warning: Copilot plugin has not been installed in Typora."
+            fi
+
+            # Remove `<path_of_window_html>/copilot/` directory regardless of script presence
+            copilot_dir=$(dirname "$window_html_path")/copilot
+            if [[ -d "$copilot_dir" ]]; then
+              echo "Detected Copilot plugin directory but no script reference. This might be leftover from a previous installation."
+              echo "Removing Copilot plugin directory \"$copilot_dir\"..."
+              rm -rf "$copilot_dir"
+              echo "Uninstallation complete."
+            fi
+
             success=true
             break
           fi

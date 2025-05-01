@@ -9,7 +9,7 @@ Expand-Archive -Path "typora-copilot-$($latestRelease.tag_name).zip" -Destinatio
 Remove-Item "typora-copilot-$($latestRelease.tag_name).zip"
 Set-Location "typora-copilot-$($latestRelease.tag_name)"
 Write-Host "Trying to uninstall the previous version (if any)..."
-.\bin\uninstall_windows.ps1
+.\bin\uninstall_windows.ps1 -Silent
 Write-Host "Trying to install the new version..."
 .\bin\install_windows.ps1
 Set-Location ..

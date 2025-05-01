@@ -1,8 +1,12 @@
-# Allow custom path (-Path or -p)
+# Allow custom path (-Path or -p) and silence warning (-Silent or -s)
 param (
     [Parameter(Mandatory = $false)]
     [Alias('p')]
-    [string] $Path = ''
+    [string] $Path = '',
+
+    [Parameter(Mandatory = $false)]
+    [Alias('s')]
+    [switch] $Silent = $false
 )
 
 # Possible Typora installation paths
@@ -64,7 +68,20 @@ foreach ($path in $paths) {
                         break
                     }
                     else {
-                        Write-Warning "Copilot plugin has not been installed in Typora."
+                        if (-not $Silent) {
+                            Write-Warning "Copilot plugin script has not been found in Typora."
+                        }
+
+                        # Remove `<path_of_window_html>\copilot\` directory regardless of script presence
+                        $copilotPath = Join-Path -Path (Split-Path -Path $windowHtmlPath -Parent) -ChildPath 'copilot'
+                        if (Test-Path $copilotPath) {
+                            Write-Host "Detected Copilot plugin directory but no script reference. This might be leftover from a previous installation."
+                            Write-Host "Removing Copilot plugin directory ""$copilotPath""..."
+                            Remove-Item -Path $copilotPath -Recurse -Force
+                            Write-Host "Uninstallation complete."
+                            $success = $true
+                        }
+
                         $success = $true
                         break
                     }

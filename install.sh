@@ -19,14 +19,14 @@ cd "typora-copilot-$tag_name" || exit
 if [[ "$OSTYPE" == "darwin"* ]]; then
   echo "Trying to uninstall the previous version (if any)..."
   chmod +x ./bin/uninstall_macos.sh
-  ./bin/uninstall_macos.sh
+  ./bin/uninstall_macos.sh --silent
   echo "Trying to install the new version..."
   chmod +x ./bin/install_macos.sh
   ./bin/install_macos.sh
 elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
   echo "Trying to uninstall the previous version (if any)..."
   chmod +x ./bin/uninstall_linux.sh
-  ./bin/uninstall_linux.sh
+  ./bin/uninstall_linux.sh --silent
   echo "Trying to install the new version..."
   chmod +x ./bin/install_linux.sh
   ./bin/install_linux.sh
