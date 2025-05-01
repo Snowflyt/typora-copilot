@@ -65,8 +65,8 @@ export const attachSuggestionPanel = (
   $("content").on("scroll", scrollListener);
 
   return () => {
-    if (options?.cm) options.cm.on("scroll", scrollListener);
-    $("content").on("scroll", scrollListener);
+    if (options?.cm) options.cm.off("scroll", scrollListener);
+    $("content").off("scroll", scrollListener);
     render(null, container);
     container.remove();
   };
