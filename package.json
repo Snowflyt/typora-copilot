@@ -37,7 +37,8 @@
     "test:ui": "vitest --ui --coverage.enabled=true",
     "test:watch": "vitest",
     "test:watch-cov": "vitest --coverage",
-    "test-types": "typroof"
+    "test-types": "typroof",
+    "typecheck": "tsc --noEmit -p tsconfig.build.json"
   },
   "dependencies": {
     "@github/copilot-language-server": "^1.274.0",

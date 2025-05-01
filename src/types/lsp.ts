@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-deprecated */
 /* eslint-disable @typescript-eslint/no-duplicate-type-constituents */
-/* eslint-disable jsdoc/check-tag-names */
 /* eslint-disable sonarjs/future-reserved-words */
 /* eslint-disable sonarjs/no-globals-shadowing */
 
