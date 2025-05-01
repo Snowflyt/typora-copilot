@@ -48,46 +48,46 @@
         "<p>If the issue persists, check your internet connection and try again.</p>"
       ]
     },
-    "warn-nodejs-above-18-required-for-typora-above-1-10": {
-      "title": "Node.js ≥ 18 is required to run this plugin under Typora ≥ 1.6",
+    "warn-nodejs-above-20-required-for-typora-above-1-10": {
+      "title": "Node.js ≥ 20 is required to run this plugin under Typora ≥ 1.10",
       "html": [
         "<p>",
-        "  Node.js ≥ 18 is required to run this plugin under Typora < 1.6,",
+        "  Node.js ≥ 20 is required to run this plugin under Typora ≥ 1.10,",
         "  but no valid Node.js path is found.",
         "</p>",
         "<p>The current Typora version is <code>{{TYPORA_VERSION}}</code>.</p>",
         "<p>",
         "  Either install <a href=\"https://nodejs.org/en/download/\" target=\"_blank\">Node.js</a>",
-        "  ≥ 18 or specify Node.js path in “Settings → Node.js → Node.js path”, and restart Typora",
+        "  ≥ 20 or specify Node.js path in “Settings → Node.js → Node.js path”, and restart Typora",
         "  to take effect.",
         "</p>"
       ]
     },
-    "warn-nodejs-above-18-required-for-typora-under-1-6": {
-      "title": "Node.js ≥ 18 is required to run this plugin under Typora < 1.6",
+    "warn-nodejs-above-20-required-for-typora-under-1-9": {
+      "title": "Node.js ≥ 20 is required to run this plugin under Typora < 1.9",
       "html": [
         "<p>",
-        "  Node.js ≥ 18 is required to run this plugin under Typora < 1.6,",
+        "  Node.js ≥ 20 is required to run this plugin under Typora < 1.9,",
         "  but no valid Node.js path is found.",
         "</p>",
         "<p>The current Typora version is <code>{{TYPORA_VERSION}}</code>.</p>",
         "<p>",
         "  Either install <a href=\"https://nodejs.org/en/download/\" target=\"_blank\">Node.js</a>",
-        "  ≥ 18 or specify Node.js path in “Settings → Node.js → Node.js path”, and restart Typora",
+        "  ≥ 20 or specify Node.js path in “Settings → Node.js → Node.js path”, and restart Typora",
         "  to take effect.",
         "</p>"
       ]
     },
-    "warn-nodejs-above-18-required-on-macOS": {
-      "title": "Node.js ≥18 is required to run this plugin",
+    "warn-nodejs-above-20-required-on-macOS": {
+      "title": "Node.js ≥20 is required to run this plugin",
       "html": [
         "<p>",
-        "  Node.js ≥ 18 is required to run this plugin on macOS,",
+        "  Node.js ≥ 20 is required to run this plugin on macOS,",
         "  but no valid Node.js path is found.",
         "</p>",
         "<p>",
         "  Either install <a href=\"https://nodejs.org/en/download/\" target=\"_blank\">Node.js</a>",
-        "  ≥ 18 or specify Node.js path in “Settings → Node.js → Node.js path”, and restart Typora",
+        "  ≥ 20 or specify Node.js path in “Settings → Node.js → Node.js path”, and restart Typora",
         "  to take effect.",
         "</p>"
       ]
@@ -126,7 +126,7 @@
     },
     "nodejs": {
       "title": "Node.js",
-      "note": "Since Typora v1.10, Node.js ≥ 18 is required for all platforms to run this plugin.",
+      "note": "Since Typora v1.10, Node.js ≥ 20 is required for all platforms to run this plugin.",
       "constant": {
         "PATH_AUTO_DETECT": "Auto detect",
         "PATH_BUNDLED": "Bundled"
@@ -139,7 +139,7 @@
           "updated": "Updated Node.js path to \"{{PATH}}\" ({{VERSION}})",
           "updated-auto": "Updated Node.js path to auto detected path",
           "warn-invalid": "Failed to retrieve Node.js version for \"{{PATH}}\"",
-          "warn-invalid-version": "Expected Node.js version ≥ 18 for \"{{PATH}}\", but got {{VERSION}}",
+          "warn-invalid-version": "Expected Node.js version ≥ 20 for \"{{PATH}}\", but got {{VERSION}}",
           "warn-empty-select-or-input": "Please select or enter a valid Node.js path",
           "warn-empty-input": "Please enter a valid Node.js path"
         }

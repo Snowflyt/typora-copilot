@@ -162,17 +162,17 @@ export interface NodeRuntime {
 export const detectAvailableNodeRuntimes = async ({
   onFirstResolved = () => {},
 }: { onFirstResolved?: (runtime: NodeRuntime) => void } = {}): Promise<readonly NodeRuntime[]> => {
-  // The language server of GitHub Copilot requires at least Node.js >= 18 to run, so we need to
+  // The language server of GitHub Copilot requires at least Node.js >= 20 to run, so we need to
   // find a Node.js runtime that meets this requirement.
   const promises: Promise<
     ((NodeRuntime | string | null)[] | NodeRuntime | string | null)[] | NodeRuntime | string | null
   >[] = [];
 
-  // On Windows and Linux, Typora is built as an Electron app, and since Typora 1.6, the bundled
-  // Node.js version is >= 18.0.0. However, since Typora 1.10, the Electron `runAsNode` fuse is
+  // On Windows and Linux, Typora is built as an Electron app, and since Typora 1.9, the bundled
+  // Node.js version is >= 20.0.0. However, since Typora 1.10, the Electron `runAsNode` fuse is
   // disabled, so the Typora executable can no longer be used as a Node.js runtime.
-  // Thus, for 1.6 <= Typora < 1.10.0 on Windows/Linux, we can use the bundled Node.js runtime.
-  if (Files.isNode && semverLt(TYPORA_VERSION, "1.10.0") && semverGte(process.version, "18.0.0"))
+  // Thus, for 1.9 <= Typora < 1.10.0 on Windows/Linux, we can use the bundled Node.js runtime.
+  if (Files.isNode && semverLt(TYPORA_VERSION, "1.10.0") && semverGte(process.version, "20.0.0"))
     promises.push(Promise.resolve({ path: "bundled", version: process.version }));
 
   /* Detect Node.js runtimes from the system */
@@ -180,9 +180,9 @@ export const detectAvailableNodeRuntimes = async ({
   promises.push(Promise.defer(() => lookPath("node")));
   baseNodeNames.forEach((name) => promises.push(Promise.defer(() => lookApp(name, "node"))));
   // When written this code, the latest Node.js version is v23, but for future compatibility, we
-  // search for Node.js runtimes from v26 to v18.
+  // search for Node.js runtimes from v28 to v20.
   if (Files.isNode) {
-    Array.from({ length: 26 - 18 + 1 }, (_, i) => i + 18)
+    Array.from({ length: 28 - 20 + 1 }, (_, i) => i + 20)
       .reverse()
       .flatMap((i) =>
         baseNodeNames.flatMap((name) => [`${name}${i}`, `${name}-${i}`, `${name}-v${i}`]),
@@ -565,7 +565,7 @@ export const detectAvailableNodeRuntimes = async ({
   );
 
   const filterVersion = (runtime: NodeRuntime | null) =>
-    runtime && semverValid(runtime.version) && semverGte(runtime.version, "18.0.0") ?
+    runtime && semverValid(runtime.version) && semverGte(runtime.version, "20.0.0") ?
       runtime
     : null;
 
