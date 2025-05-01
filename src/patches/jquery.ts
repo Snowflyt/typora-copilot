@@ -1,28 +1,10 @@
-declare global {
-  interface JQuery<TElement> {
-    once<TType extends string>(
-      events: TType,
-      handler: JQuery.TypeEventHandler<TElement, undefined, TElement, TElement, TType>,
-    ): this;
-  }
-}
-
+/************************
+ * Custom jQuery events *
+ ************************/
 $(function () {
-  $.fn.once = function (events, handler) {
-    return this.each(function () {
-      const _handler: JQuery.EventHandler<HTMLElement> = function (event) {
-        $(this).off(events, _handler);
-        handler.call(this, event);
-      };
-      $(this).on(events, _handler);
-    });
-  };
-
-  /*****************
-   * Custom events *
-   *****************/
-
-  /* caretMove */
+  /*************
+   * caretMove *
+   *************/
   (() => {
     /**
      * Get the current caret position.
