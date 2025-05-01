@@ -23,9 +23,6 @@ $(function () {
       return null;
     };
 
-    // Separate caretMove event handlers for each target
-    const onCaretMoveFunctions = new WeakMap<EventTarget, (event: Event) => void>();
-
     const eventsToBind = [
       "keypress",
       "keyup",
@@ -97,14 +94,17 @@ $(function () {
           }
         };
 
-        onCaretMoveFunctions.set(this, onCaretMove);
+        $.data(this, "caretMoveHandler", onCaretMove);
 
         for (const event of eventsToBind) this.addEventListener(event, onCaretMove, true);
+
+        return false;
       },
       teardown() {
-        const onCaretMove = onCaretMoveFunctions.get(this);
-        if (!onCaretMove) return;
+        const onCaretMove = $.data(this, "caretMoveHandler");
+        if (!onCaretMove) return false;
         for (const event of eventsToBind) this.removeEventListener(event, onCaretMove, true);
+        $.removeData(this, "caretMoveHandler");
       },
     };
   })();
