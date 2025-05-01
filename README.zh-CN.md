@@ -4,17 +4,17 @@
 
 ![Copilot 建议截图](./docs/screenshot.zh-CN.png)
 
-[Typora](https://typora.io/) 的 [GitHub Copilot](https://github.com/features/copilot) 插件，支持 Windows、macOS 和 Linux，由 [Copilot.vim](https://github.com/github/copilot.vim) 提供支持。
+[Typora](https://typora.io/) 的 [GitHub Copilot](https://github.com/features/copilot) 插件，支持 Windows、macOS 和 Linux。
 
-该插件使用从 Copilot.vim 提取的 LSP 服务器，以在编辑器中实时提供建议。
+该插件使用 [GitHub Copilot 官方提供的 LSP 服务](https://www.npmjs.com/package/@github/copilot-language-server)，以在编辑器中实时提供建议。
 
 ## 兼容性
 
 > [!NOTE]
 >
-> 自 Typora v1.10 起，所有平台都需要安装 [Node.js](https://nodejs.org/zh-cn/download) ≥ 18 才能使用本插件。
+> 自 Typora v1.10 起，所有平台都需要安装 [Node.js](https://nodejs.org/zh-cn/download) ≥ 20 才能使用本插件。
 >
-> （仅对于使用 1.6 ≤ Typora < 1.10 的 Windows / Linux 用户，无需安装 Node.js。 :wink:）
+> （仅对于使用 Typora 1.9 的 Windows / Linux 用户，无需安装 Node.js。 :wink:）
 
 _\*注：`/` 表示未经过测试。_
 

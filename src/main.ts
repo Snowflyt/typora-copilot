@@ -102,24 +102,24 @@ Promise.defer(async () => {
           if (Files.isMac)
             void waitUntilEditorInitialized().then(() => {
               Files.editor!.EditHelper.showDialog({
-                title: `Typora Copilot: ${t("dialog.warn-nodejs-above-18-required-on-macOS.title")}`,
+                title: `Typora Copilot: ${t("dialog.warn-nodejs-above-20-required-on-macOS.title")}`,
                 type: "error",
                 html: /* html */ `
                   <div style="text-align: center; margin-top: 8px;">
-                    ${t("dialog.warn-nodejs-above-18-required-on-macOS.html")}
+                    ${t("dialog.warn-nodejs-above-20-required-on-macOS.html")}
                   </div>
                 `,
                 buttons: [t("button.understand")],
               });
             });
-          else if (Files.isNode && semverLt(process.version, "18.0.0"))
+          else if (Files.isNode && semverLt(process.version, "20.0.0"))
             void waitUntilEditorInitialized().then(() => {
               Files.editor!.EditHelper.showDialog({
-                title: `Typora Copilot: ${t("dialog.warn-nodejs-above-18-required-for-typora-under-1-6.title")}`,
+                title: `Typora Copilot: ${t("dialog.warn-nodejs-above-20-required-for-typora-under-1-9.title")}`,
                 type: "error",
                 html: /* html */ `
                   <div style="text-align: center; margin-top: 8px;">
-                    ${t("dialog.warn-nodejs-above-18-required-for-typora-under-1-6.html").replace(
+                    ${t("dialog.warn-nodejs-above-20-required-for-typora-under-1-9.html").replace(
                       "{{TYPORA_VERSION}}",
                       TYPORA_VERSION,
                     )}
@@ -131,11 +131,11 @@ Promise.defer(async () => {
           else if (Files.isNode && semverGte(TYPORA_VERSION, "1.10.0"))
             void waitUntilEditorInitialized().then(() => {
               Files.editor!.EditHelper.showDialog({
-                title: `Typora Copilot: ${t("dialog.warn-nodejs-above-18-required-for-typora-above-1-10.title")}`,
+                title: `Typora Copilot: ${t("dialog.warn-nodejs-above-20-required-for-typora-above-1-10.title")}`,
                 type: "error",
                 html: /* html */ `
                   <div style="text-align: center; margin-top: 8px;">
-                    ${t("dialog.warn-nodejs-above-18-required-for-typora-above-1-10.html").replace(
+                    ${t("dialog.warn-nodejs-above-20-required-for-typora-above-1-10.html").replace(
                       "{{TYPORA_VERSION}}",
                       TYPORA_VERSION,
                     )}

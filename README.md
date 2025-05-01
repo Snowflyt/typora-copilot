@@ -4,17 +4,17 @@ English | [简体中文](./README.zh-CN.md)
 
 ![Copilot suggestion screenshot](./docs/screenshot.png)
 
-[GitHub Copilot](https://github.com/features/copilot) plugin for [Typora](https://typora.io/) on both Windows, macOS and Linux, provided through [Copilot.vim](https://github.com/github/copilot.vim).
+[GitHub Copilot](https://github.com/features/copilot) plugin for [Typora](https://typora.io/) on both Windows, macOS and Linux.
 
-This plugin uses the LSP server extracted from Copilot.vim to provide suggestions in real-time right from your editor.
+This plugin uses the [official GitHub Copilot LSP server](https://www.npmjs.com/package/@github/copilot-language-server) to provide suggestions in real-time right from your editor.
 
 ## Compatibility
 
 > [!NOTE]
 >
-> Since Typora v1.10, all platforms require [Node.js](https://nodejs.org/en/download) ≥ 18 to use this plugin.
+> Since Typora v1.10, all platforms require [Node.js](https://nodejs.org/en/download) ≥ 20 to use this plugin.
 >
-> (For those special users on Windows / Linux using 1.6 ≤ Typora < 1.10, no need for Node.js to be installed. :wink:)
+> (For those special users on Windows / Linux using Typora 1.9, no need for Node.js to be installed. :wink:)
 
 _\*Note: `/` means not tested._
 

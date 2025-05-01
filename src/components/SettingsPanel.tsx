@@ -147,7 +147,7 @@ const categories = {
                       const version = output.trim();
                       if (!version) throw new Error("No version found");
                       if (!semverValid(version)) throw new Error(`Invalid version: ${version}`);
-                      if (semverGte(version, "18.0.0")) {
+                      if (semverGte(version, "20.0.0")) {
                         setCurrentNodeRuntime({ path, version });
                         settings[key] = path;
                         signal.value = path;
