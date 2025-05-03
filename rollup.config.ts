@@ -1,3 +1,6 @@
+import fs from "node:fs";
+import path from "node:path";
+
 import commonjs from "@rollup/plugin-commonjs";
 import json from "@rollup/plugin-json";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
@@ -22,6 +25,54 @@ const plugins = [
         .replace(/\n?^\s*\/\/ @ts-.+$/gm, "")
         .replace(/\n?^\s*\/\/\/ <reference.+$/gm, "")
         .replace(/\n?^\s*(\/\/|\/\*) eslint-disable.+$/gm, ""),
+  },
+  {
+    name: "highlight.js-theme-switcher",
+    transform(code, id) {
+      if (id.includes("main.ts")) {
+        const lightThemePath = path.resolve("node_modules/highlight.js/styles/github.min.css");
+        const darkThemePath = path.resolve("node_modules/highlight.js/styles/github-dark.min.css");
+
+        const lightThemeCSS = fs.readFileSync(lightThemePath, "utf8");
+        const darkThemeCSS = fs.readFileSync(darkThemePath, "utf8");
+
+        const escapeCSS = (css: string) =>
+          css.replace(/\\/g, "\\\\").replace(/`/g, "\\`").replace(/\$/g, "\\$");
+
+        const themeSwitch = `
+// Highlight.js theme switcher
+(function() {
+  let styleElement = null;
+  let currentTheme = null;
+
+  const themes = {
+    light: \`${escapeCSS(lightThemeCSS)}\`,
+    dark: \`${escapeCSS(darkThemeCSS)}\`
+  };
+
+  window.setHighlightjsTheme = function(theme) {
+    if (!themes[theme]) {
+      console.error('Invalid theme: ' + theme + '. Use "light" or "dark"');
+      return;
+    }
+
+    if (currentTheme === theme) return;
+    currentTheme = theme;
+
+    if (!styleElement) {
+      styleElement = document.createElement('style');
+      styleElement.id = 'highlightjs-dynamic-theme';
+      document.head.appendChild(styleElement);
+    }
+
+    styleElement.textContent = themes[theme];
+  };
+})();`;
+
+        return code + themeSwitch;
+      }
+      return code;
+    },
   },
 ] satisfies InputPluginOption;
 

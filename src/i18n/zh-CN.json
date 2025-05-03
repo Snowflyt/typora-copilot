@@ -1,6 +1,8 @@
 {
   "button": {
     "ok": "确定",
+    "cancel": "取消",
+    "delete": "删除",
     "understand": "我知道了"
   },
   "copilot-status": {
@@ -8,6 +10,44 @@
     "Warning": "警告",
     "InProgress": "正在生成",
     "Disabled": "已禁用"
+  },
+  "chat": {
+    "you": "你",
+    "input-placeholder": "询问 Copilot",
+    "button": {
+      "send": "发送",
+      "stop": "停止",
+      "new-session": "新会话",
+      "edit-chat-title": "编辑会话标题",
+      "delete-session": "删除会话"
+    },
+    "welcome": {
+      "title": "询问 Copilot",
+      "subtitle": "获取写作、回答问题或生成文档创意的帮助"
+    },
+    "dialog": {
+      "edit-chat-title": {
+        "title": "编辑会话标题",
+        "html": [
+          "<input id=\"new-chat-title\" type=\"text\" value=\"{{SESSION_TITLE}}\" style=\"width: 100%; margin-top: 8px; margin-bottom: 8px; font-size: 14pt; font-weight: bold;\" />"
+        ]
+      },
+      "delete-session": {
+        "title": "删除 Copilot 聊天会话",
+        "html": "<p>确定要删除会话“{{SESSION_TITLE}}”吗？</p>"
+      }
+    },
+    "prompt-style": {
+      "tooltip": "设置 Prompt 风格",
+      "Normal": "正常",
+      "Academic": "学术",
+      "Creative": "创意",
+      "CatGirl": "🐱 猫娘！",
+      "cat-girl-name": "喵喵"
+    },
+    "pick-model": {
+      "tooltip": "选择模型"
+    }
   },
   "dialog": {
     "sign-in": {

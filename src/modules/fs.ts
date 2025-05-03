@@ -439,6 +439,40 @@ export const readDir: (
 })();
 
 /**
+ * Create a directory.
+ * @param path The directory path to create.
+ * @param options Options for directory creation.
+ * @param options.recursive Create parent directories if they don’t exist.
+ * @returns
+ */
+export const mkdir: (
+  path: string,
+  options?: { recursive?: boolean; mode?: number },
+) => Promise<void> = (() => {
+  if (Files.isNode) {
+    const fs = window.reqnode!("fs");
+
+    return async function mkdir(path, options = {}) {
+      return new Promise<void>((resolve, reject) => {
+        fs.mkdir(path, options, (err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+    };
+  }
+
+  if (Files.isMac || Files.isLinux) {
+    return async function mkdir(path, options = {}) {
+      const cmd = options.recursive ? `mkdir -p "${path}"` : `[ -d "${path}" ] || mkdir "${path}"`;
+      await runCommand(cmd);
+    };
+  }
+
+  throw new PlatformError("Unsupported platform for `mkdir`");
+})();
+
+/**
  * Read the contents of a file.
  * @param path File path.
  * @returns
@@ -463,6 +497,77 @@ export const readFile: (path: string) => Promise<string> = (() => {
     };
 
   throw new PlatformError("Unsupported platform for `readFile`");
+})();
+
+/**
+ * Write data to a file, replacing the file if it already exists.
+ * @param path The file path to write to.
+ * @param data The data to write.
+ * @returns
+ */
+export const writeFile: (path: string, data: string) => Promise<void> = (() => {
+  if (Files.isNode) {
+    const fs = window.reqnode!("fs");
+
+    return async function writeFile(path, data) {
+      return new Promise<void>((resolve, reject) => {
+        fs.writeFile(path, data, "utf-8", (err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+    };
+  }
+
+  if (Files.isMac || Files.isLinux) {
+    return async function writeFile(path, data) {
+      // Create a temporary file with the content
+      // eslint-disable-next-line sonarjs/pseudo-random
+      const tempFile = `/tmp/typora_tmp_${Date.now()}_${Math.random().toString(36).substring(2, 15)}.txt`;
+
+      try {
+        // Write content to temp file first (safer approach to avoid data loss)
+        await runCommand(`cat > "${tempFile}" << 'TYPORA_EOF'\n${data}\nTYPORA_EOF`);
+
+        // Move temp file to destination (atomic operation)
+        await runCommand(`mv "${tempFile}" "${path}"`);
+      } catch (error) {
+        // Clean up temp file if it exists
+        await runCommand(`rm -f "${tempFile}"`).catch(() => {});
+        throw error;
+      }
+    };
+  }
+
+  throw new PlatformError("Unsupported platform for `writeFile`");
+})();
+
+/**
+ * Remove a file.
+ * @param path The file path to remove.
+ * @returns
+ */
+export const rmFile: (path: string) => Promise<void> = (() => {
+  if (Files.isNode) {
+    const fs = window.reqnode!("fs");
+
+    return async function rmFile(path) {
+      return new Promise<void>((resolve, reject) => {
+        fs.rm(path, (err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+    };
+  }
+
+  if (Files.isMac || Files.isLinux) {
+    return async function rmFile(path) {
+      await runCommand(`rm -f "${path}"`);
+    };
+  }
+
+  throw new PlatformError("Unsupported platform for `rmFile`");
 })();
 
 /**

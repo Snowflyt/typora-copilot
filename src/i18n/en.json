@@ -1,6 +1,8 @@
 {
   "button": {
     "ok": "OK",
+    "cancel": "Cancel",
+    "delete": "Delete",
     "understand": "I understand"
   },
   "copilot-status": {
@@ -8,6 +10,44 @@
     "Warning": "Warning",
     "InProgress": "In Progress",
     "Disabled": "Disabled"
+  },
+  "chat": {
+    "you": "You",
+    "input-placeholder": "Ask Copilot",
+    "button": {
+      "send": "Send",
+      "stop": "Stop",
+      "new-session": "New session",
+      "edit-chat-title": "Edit chat title",
+      "delete-session": "Delete session"
+    },
+    "welcome": {
+      "title": "Ask Copilot",
+      "subtitle": "Get help with writing, answering questions, or generating ideas for your document."
+    },
+    "dialog": {
+      "edit-chat-title": {
+        "title": "New chat title",
+        "html": [
+          "<input id=\"new-chat-title\" type=\"text\" value=\"{{SESSION_TITLE}}\" style=\"width: 100%; margin-top: 8px; margin-bottom: 8px; font-size: 14pt; font-weight: bold;\" />"
+        ]
+      },
+      "delete-session": {
+        "title": "Delete Copilot Chat session",
+        "html": "<p>Sure you want to delete the session \"{{SESSION_TITLE}}\"?</p>"
+      }
+    },
+    "prompt-style": {
+      "tooltip": "Set Prompt Style",
+      "Normal": "Normal",
+      "Academic": "Academic",
+      "Creative": "Creative",
+      "CatGirl": "🐱 Cat Girl!",
+      "cat-girl-name": "Vanilla"
+    },
+    "pick-model": {
+      "tooltip": "Pick Model"
+    }
   },
   "dialog": {
     "sign-in": {

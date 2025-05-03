@@ -4,7 +4,7 @@ English | [简体中文](./README.zh-CN.md)
 
 ![Copilot suggestion screenshot](./docs/screenshot.png)
 
-[GitHub Copilot](https://github.com/features/copilot) plugin for [Typora](https://typora.io/) on both Windows, macOS and Linux.
+[GitHub Copilot](https://github.com/features/copilot) & [Copilot Chat](https://docs.github.com/copilot/using-github-copilot/copilot-chat) plugin for [Typora](https://typora.io/) on both Windows, macOS and Linux.
 
 This plugin uses the [official GitHub Copilot LSP server](https://www.npmjs.com/package/@github/copilot-language-server) to provide suggestions in real-time right from your editor.
 
@@ -158,11 +158,12 @@ You’ll see a message logging the installation directory of the plugin. _Keep i
 5. For Windows / Linux users, open the previous `window.html` file you found in Typora resource folder with a text editor, and add `<script src="./copilot/index.js" defer="defer"></script>` right after something like `<script src="./appsrc/window/frame.js" defer="defer"></script>` or `<script src="./app/window/frame.js" defer="defer"></script>`; For macOS users, open the previous `index.html` file you found in Typora resource folder with a text editor, and add `<script src="./copilot/index.js" defer></script>` right after something like `<script src="./appsrc/main.js" aria-hidden="true" defer></script>` or `<script src="./app/main.js" aria-hidden="true" defer></script>`.
 6. Restart Typora.
 7. For macOS users, if you see a warning dialog saying Typora may be damaged, Ctrl-click Typora and select “Open” to open Typora.
+
 </details>
 
 ## Setup
 
-When finished installation, you'll find an icon in the toolbar of Typora (i.e. the bottom-right corner of Typora). Click it to open the panel of Copilot, and then click “Sign in to authenticate Copilot”.
+When finished installation, you’ll find an icon in the toolbar of Typora (i.e. the bottom-right corner of Typora). Click **the arrow button** next to the icon to open the panel of Copilot, and then click “Sign in to authenticate Copilot”.
 
 ![Copilot icon](./docs/toolbar-icon.png)
 
@@ -173,6 +174,20 @@ Follow the prompts to authenticate Copilot plugin:
 3. Paste the User Code into the GitHub authentication page.
 4. Return to Typora and press OK on the dialog.
 5. If you see a “Signed in to Copilot” dialog _after a few seconds_, Copilot plugin should start working since then.
+
+## Copilot Chat
+
+Clicking the Copilot icon in the toolbar will toggle the Copilot Chat panel. You can use it to chat with Copilot, and the current document and previous chat history will be sent to Copilot as context.
+
+Make sure you have signed in to Copilot before using the Copilot Chat panel. After signing in, restart Typora to make sure the Copilot Chat panel works properly.
+
+You can:
+
+- Select, create, edit chat title, or delete a chat session from the dropdown list at the top of the panel.
+- Click the “Send” button or press <kbd>Enter</kbd> to send the message. (You can use <kbd>Shift</kbd> + <kbd>Enter</kbd> or <kbd>Ctrl</kbd> + <kbd>Enter</kbd> to insert a new line.)
+- Click the “Stop” button to stop the current request.
+- Select a prompt style from the dropdown list at the bottom of the panel.
+- Pick the model you want to use from the dropdown list at the bottom of the panel.
 
 ## Uninstallation
 

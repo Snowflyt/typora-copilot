@@ -4,7 +4,7 @@
 
 ![Copilot 建议截图](./docs/screenshot.zh-CN.png)
 
-[Typora](https://typora.io/) 的 [GitHub Copilot](https://github.com/features/copilot) 插件，支持 Windows、macOS 和 Linux。
+[Typora](https://typora.io/) 的 [GitHub Copilot](https://github.com/features/copilot) & [Copilot Chat](https://docs.github.com/copilot/using-github-copilot/copilot-chat) 插件，支持 Windows、macOS 和 Linux。
 
 该插件使用 [GitHub Copilot 官方提供的 LSP 服务](https://www.npmjs.com/package/@github/copilot-language-server)，以在编辑器中实时提供建议。
 
@@ -160,11 +160,12 @@ sudo bash ./bin/install_linux.sh --path "/usr/share/typora/" # 替换为你的 T
 5. 对于 Windows / Linux 用户，在 Typora 资源文件夹中用文本编辑器打开 `window.html`，在类似 `<script src="./appsrc/window/frame.js" defer="defer"></script>` 或 `<script src="./app/window/frame.js" defer="defer"></script>` 的代码之后添加 `<script src="./copilot/index.js" defer="defer"></script>`；对于 macOS 用户，在 Typora 资源文件夹中用文本编辑器打开 `index.html`，在类似 `<script src="./appsrc/main.js" aria-hidden="true" defer></script>` 或 `<script src="./app/main.js" aria-hidden="true" defer></script>` 的代码之后添加 `<script src="./copilot/index.js" defer></script>`。
 6. 重启 Typora。
 7. 对于 macOS 用户，如果你在打开 Typora 时被提示“文件已损坏”，你可以按住 Ctrl 点击 Typora，并选择“打开”来打开 Typora.
+
 </details>
 
 ## 初始化
 
-完成安装后，你会在 Typora 工具栏（即界面底部右下角）找到一个 Copilot 图标。点击它打开 Copilot 面板，然后点击“登录以认证 Copilot”。
+完成安装后，你会在 Typora 工具栏（即界面底部右下角）找到一个 Copilot 图标。点击**它右侧的箭头**，你会看到一个下拉菜单，然后点击“登录以认证 Copilot”。
 
 ![Copilot 图标](./docs/toolbar-icon.zh-CN.png)
 
@@ -181,6 +182,20 @@ sudo bash ./bin/install_linux.sh --path "/usr/share/typora/" # 替换为你的 T
 3. 将用户代码粘贴到 GitHub 身份验证页面中。
 4. 返回 Typora 并在对话框中按下“确定”按钮。
 5. 如果你在**几秒钟后**看到一个“已登录 GitHub Copilot”对话框，Copilot 插件应该就可以正常工作了（在中国大陆，你可能需要等待更长的时间）。
+
+## Copilot Chat
+
+点击工具栏中的 Copilot 图标将切换 Copilot Chat 面板。你可以使用它与 Copilot 聊天，当前文档和之前的聊天记录将作为上下文发送给 Copilot。
+
+确保在使用 Copilot Chat 面板之前已登录 Copilot。登录后，重启 Typora 以确保 Copilot Chat 面板正常工作。
+
+你可以：
+
+- 从面板顶部的下拉列表中选择、创建、编辑聊天标题，或删除聊天会话。
+- 点击“发送”按钮或按下 <kbd>Enter</kbd> 键发送消息。（你可以使用 <kbd>Shift</kbd> + <kbd>Enter</kbd> 或 <kbd>Ctrl</kbd> + <kbd>Enter</kbd> 插入新行。）
+- 点击“停止”按钮停止当前请求。
+- 从面板底部的下拉列表中选择提示样式。
+- 从面板底部的下拉列表中选择要使用的模型。
 
 ## 卸载
 

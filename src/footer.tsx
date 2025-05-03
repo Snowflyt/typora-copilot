@@ -8,6 +8,7 @@ import type {
   CopilotClientEventHandler,
   CopilotStatus,
 } from "./client";
+import { attachChatPanel, detachChatPanel } from "./components/ChatPanel";
 import CopilotIcon from "./components/CopilotIcon";
 import SettingsPanel from "./components/SettingsPanel";
 import { t } from "./i18n";
@@ -280,24 +281,61 @@ export const Footer: FC<FooterOptions> = ({ copilot }) => {
     isPanelOpen.value = !isPanelOpen.value;
   });
 
+  // Remember chat panel open state
+  useEffect(() => {
+    if (localStorage.getItem("copilot-chat-panel-open") === "true") attachChatPanel();
+  }, []);
+
   return (
     <>
+      {/* Settings panel */}
       <FooterPanel copilot={copilot} open={isPanelOpen.value} />
 
+      {/* Main footer item */}
       <div
         className="footer-item footer-item-right"
         id="footer-copilot"
-        ty-hint={"Copilot (" + t(`copilot-status.${status.value}`) + ")"}
-        data-lg="Menu"
-        aria-label="Copilot"
-        role="button"
-        style={{ height: height.value }}
-        onClick={(ev) => {
-          isPanelOpen.value = !isPanelOpen.value;
-          document.body.classList.remove("ty-show-spell-check", "ty-show-word-count");
-          ev.stopPropagation();
-        }}>
-        <CopilotIcon status={status.value} textColor={getFooterTextColor()} />
+        style={{ height: height.value, display: "flex", alignItems: "center" }}
+        ty-hint={"Copilot (" + t(`copilot-status.${status.value}`) + ")"}>
+        {/* Main Copilot icon - opens chat */}
+        <div
+          className="footer-copilot-icon"
+          aria-label="Open Copilot Chat"
+          role="button"
+          onClick={(ev) => {
+            isPanelOpen.value = false;
+            document.body.classList.remove("ty-show-spell-check", "ty-show-word-count");
+            const chatContainer = document.querySelector("#copilot-chat-container");
+            if (chatContainer) {
+              detachChatPanel?.();
+              localStorage.removeItem("copilot-chat-panel-open");
+            } else {
+              attachChatPanel();
+            }
+            ev.stopPropagation();
+          }}>
+          <CopilotIcon status={status.value} textColor={getFooterTextColor()} />
+        </div>
+
+        {/* Arrow button - opens settings menu */}
+        <div
+          className="footer-copilot-menu-button"
+          aria-label="Copilot Settings"
+          role="button"
+          onClick={(ev) => {
+            isPanelOpen.value = !isPanelOpen.value;
+            document.body.classList.remove("ty-show-spell-check", "ty-show-word-count");
+            ev.stopPropagation();
+          }}>
+          <svg
+            width="8"
+            height="4"
+            viewBox="0 0 8 4"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 0L8 4H0L4 0Z" fill={getFooterTextColor()} />
+          </svg>
+        </div>
       </div>
     </>
   );

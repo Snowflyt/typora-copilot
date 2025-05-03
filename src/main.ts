@@ -9,6 +9,7 @@ import semverValid from "semver/functions/valid";
 
 import type { Completion } from "./client";
 import { createCopilotClient } from "./client";
+import { ChatSession } from "./client/chat";
 import CompletionTaskManager from "./completion";
 import { attachSuggestionPanel } from "./components/SuggestionPanel";
 import { PLUGIN_DIR, VERSION } from "./constants";
@@ -693,6 +694,7 @@ Promise.defer(async () => {
     _actualLatestMarkdown: initialMarkdown,
     suppressMarkdownChange: 0,
   };
+  ChatSession.currentDocument = initialMarkdown;
   // Initialize CodeMirror
   const sourceView = editor.sourceView as Typora.EnhancedSourceView;
   if (!sourceView.cm) sourceView.prep();
@@ -877,6 +879,7 @@ Promise.defer(async () => {
     }
     // Update current markdown text
     state.markdown = newMarkdown;
+    ChatSession.currentDocument = newMarkdown;
     // Reject last completion if exists
     taskManager.rejectCurrentIfExist();
     // Trigger completion
@@ -911,6 +914,7 @@ Promise.defer(async () => {
     }
     // Update current markdown text
     state.markdown = newMarkdown;
+    ChatSession.currentDocument = newMarkdown;
     // Reject last completion if exists
     taskManager.rejectCurrentIfExist();
     // Trigger completion
