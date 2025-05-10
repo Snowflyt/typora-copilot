@@ -54,6 +54,7 @@
     "string-ts": "^2.2.1"
   },
   "devDependencies": {
+    "@catppuccin/highlightjs": "^1.0.1",
     "@commitlint/cli": "^19.8.0",
     "@eslint/js": "^9.26.0",
     "@rollup/plugin-commonjs": "^28.0.3",

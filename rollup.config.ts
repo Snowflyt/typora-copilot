@@ -31,7 +31,9 @@ const plugins = [
     transform(code, id) {
       if (id.includes("main.ts")) {
         const lightThemePath = path.resolve("node_modules/highlight.js/styles/github.min.css");
-        const darkThemePath = path.resolve("node_modules/highlight.js/styles/github-dark.min.css");
+        const darkThemePath = path.resolve(
+          "node_modules/@catppuccin/highlightjs/css/catppuccin-mocha.css",
+        );
 
         const lightThemeCSS = fs.readFileSync(lightThemePath, "utf8");
         const darkThemeCSS = fs.readFileSync(darkThemePath, "utf8");
