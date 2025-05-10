@@ -34,6 +34,7 @@ const ChatPanel: FC<ChatPanelProps> = ({ onClose }) => {
   const isThinking = useSignal(false);
   const isSending = useSignal(false);
   const messages = useSignal<Message[]>([]);
+  const sessionJustSwitchedFlag = useSignal(false);
 
   const modelId = useSignal("gpt-4o");
   const models = useSignal<ChatModel[]>([]);
@@ -122,6 +123,7 @@ const ChatPanel: FC<ChatPanelProps> = ({ onClose }) => {
             role: msg.role as "user" | "assistant",
             content: msg.content,
           }));
+        sessionJustSwitchedFlag.value = !sessionJustSwitchedFlag.value;
       } else {
         createNewSession();
       }
@@ -156,6 +158,7 @@ const ChatPanel: FC<ChatPanelProps> = ({ onClose }) => {
         role: msg.role as "user" | "assistant",
         content: msg.content,
       }));
+    sessionJustSwitchedFlag.value = !sessionJustSwitchedFlag.value;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -276,6 +279,7 @@ const ChatPanel: FC<ChatPanelProps> = ({ onClose }) => {
         promptType={promptType.value}
         messages={messages.value}
         isThinking={isThinking.value}
+        sessionJustSwitchedFlag={sessionJustSwitchedFlag.value}
       />
       <InputArea
         input={input}
@@ -560,10 +564,27 @@ interface MessageListProps {
   promptType: PromptType;
   messages: Message[];
   isThinking: boolean;
+  sessionJustSwitchedFlag: boolean;
 }
 
-const MessageList: FC<MessageListProps> = ({ isThinking, messages, promptType }) => {
+const MessageList: FC<MessageListProps> = ({
+  isThinking,
+  messages,
+  promptType,
+  sessionJustSwitchedFlag,
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = useCallback(() => {
+    if (containerRef.current) containerRef.current.scrollTop = containerRef.current.scrollHeight;
+  }, []);
+
+  useEffect(scrollToBottom, [sessionJustSwitchedFlag, scrollToBottom]);
+
+  // Watch for new messages and scroll to bottom if the role is "user"
+  useEffect(() => {
+    if (messages.length > 0 && messages[messages.length - 1]!.role === "user") scrollToBottom();
+  }, [messages, scrollToBottom]);
 
   return (
     <div className="chat-panel-messages" ref={containerRef}>
