@@ -748,7 +748,7 @@ Promise.defer(async () => {
   /************
    * Watchers *
    ************/
-  /* Interval to update workspace and active file pathname */
+  /* Interval to update workspace */
   setInterval(() => {
     const newWorkspaceFolder = getWorkspaceFolder() ?? FAKE_TEMP_WORKSPACE_FOLDER;
     if (newWorkspaceFolder !== taskManager.workspaceFolder) {
@@ -756,14 +756,19 @@ Promise.defer(async () => {
       taskManager.workspaceFolder = newWorkspaceFolder;
       onChangeWorkspaceFolder(newWorkspaceFolder, oldWorkspaceFolder);
     }
+  }, 100);
+
+  const checkActiveFileChange = (): boolean => {
     const newActiveFilePathname =
       getActiveFilePathname() ?? path.join(FAKE_TEMP_WORKSPACE_FOLDER, FAKE_TEMP_FILENAME);
     if (newActiveFilePathname !== taskManager.activeFilePathname) {
       const oldActiveFilePathname = taskManager.activeFilePathname;
       taskManager.activeFilePathname = newActiveFilePathname;
       onChangeActiveFile(newActiveFilePathname, oldActiveFilePathname);
+      return true;
     }
-  }, 100);
+    return false;
+  };
 
   /* Reject completion on toggle source mode */
   sourceView.on("beforeToggle", (_, on) => {
@@ -775,6 +780,8 @@ Promise.defer(async () => {
 
   /* Watch for markdown change in live preview mode */
   editor.on("change", (_, { newMarkdown }) => {
+    if (checkActiveFileChange()) return;
+
     if (settings.disableCompletions) return;
     if (sourceView.inSourceMode) return;
 
@@ -888,6 +895,8 @@ Promise.defer(async () => {
 
   /* Watch for markdown change in source mode */
   cm.on("change", (cm): void => {
+    if (checkActiveFileChange()) return;
+
     if (settings.disableCompletions) return;
     if (!editor.sourceView.inSourceMode) return;
 
