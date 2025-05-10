@@ -80,6 +80,20 @@ const enhanceEditor = () => {
     handlersMap.set(event, handlers);
   };
 
+  // Temporarily suppress change event when opening a file to avoid too many events
+  let isOpeningFile = false;
+  let onOpenFileComplete: (() => void | Promise<void>) | null = null;
+  const originalOpenFile = Files.editor!.library!.openFile;
+  Files.editor!.library!.openFile = function openFile(this: any, pathname: string, cb: () => void) {
+    isOpeningFile = true;
+    originalOpenFile.call(this, pathname, (...args) => {
+      isOpeningFile = false;
+      void onOpenFileComplete?.();
+      onOpenFileComplete = null;
+      return cb(...args);
+    });
+  };
+
   const temporarilySuppressConsoleError = () => {
     const originalConsoleError = console.error;
     console.error = () => {};
@@ -114,9 +128,11 @@ const enhanceEditor = () => {
           newMarkdown,
         });
     };
-    void Promise.resolve().then(() => {
-      void scheduledTriggerChangeTask?.();
-    });
+    if (isOpeningFile) onOpenFileComplete = scheduledTriggerChangeTask;
+    else
+      void Promise.resolve().then(() => {
+        void scheduledTriggerChangeTask?.();
+      });
   };
 
   /* Proxy set on `editor.nodeMap` */

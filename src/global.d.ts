@@ -448,6 +448,12 @@ declare namespace Typora {
        * Current folder path.
        */
       watchedFolder?: string;
+      /**
+       * Open a file.
+       * @param pathname The file pathname.
+       * @param cb The callback to be invoked when the file is opened.
+       */
+      openFile(pathname: string, cb: () => void): void;
     };
 
     /**
