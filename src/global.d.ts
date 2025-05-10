@@ -9,7 +9,6 @@
 /* eslint-disable no-var */
 
 /// <reference types="codemirror" />
-/// <reference types="rangy" />
 
 /*********************
  * Global variables. *
@@ -428,7 +427,7 @@ declare namespace Typora {
      * not declared here.
      */
     selection: {
-      getRangy: () => RangyRange | null;
+      getRangy: () => import("rangy").RangyRange | null;
 
       jumpIntoElemBegin: (elem: JQuery) => void;
       jumpIntoElemEnd: (elem: JQuery) => void;
