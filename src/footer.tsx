@@ -356,11 +356,11 @@ export const attachFooter = (copilot: CopilotClient) => {
     else footerBar.appendChild(container);
   } else {
     container.style.position = "fixed";
-    container.style.bottom = "0";
-    container.style.right = "0.25rem";
+    container.style.bottom = "0.125rem";
+    container.style.right = "0.75rem";
     container.style.zIndex = "1000";
     container.style.height = "2rem";
-    container.style.width = "2.75rem";
+    container.style.width = "3.5rem";
     document.querySelector("content")!.appendChild(container);
   }
 
