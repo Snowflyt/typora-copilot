@@ -77,7 +77,7 @@ const ChatPanel: FC<ChatPanelProps> = ({ onClose }) => {
     if (currentSession.modelId === modelId.value) return;
 
     currentSession.modelId = modelId.value;
-    void ChatSession.saveAll();
+    void ChatSession.save(currentSession.id);
     sessions.value = ChatSession.getAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modelId.value, currentSessionId.value]);
@@ -90,7 +90,7 @@ const ChatPanel: FC<ChatPanelProps> = ({ onClose }) => {
     if (currentSession.messages[0]!.content === getPrompt()) return;
 
     currentSession.messages[0]!.content = getPrompt();
-    void ChatSession.saveAll();
+    void ChatSession.save(currentSession.id);
     sessions.value = ChatSession.getAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [promptType.value, currentSessionId.value, getPrompt]);
@@ -164,7 +164,7 @@ const ChatPanel: FC<ChatPanelProps> = ({ onClose }) => {
     if (!session) return;
 
     session.title = title;
-    void ChatSession.saveAll();
+    void ChatSession.save(session.id);
 
     sessions.value = ChatSession.getAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -172,8 +172,7 @@ const ChatPanel: FC<ChatPanelProps> = ({ onClose }) => {
 
   const handleDeleteSession = useCallback(
     (id: string) => {
-      ChatSession.delete(id);
-      void ChatSession.saveAll();
+      void ChatSession.delete(id);
 
       sessions.value = ChatSession.getAll();
 
@@ -249,7 +248,7 @@ const ChatPanel: FC<ChatPanelProps> = ({ onClose }) => {
           },
         ];
         isSending.value = false;
-        void ChatSession.saveAll();
+        void ChatSession.save(currentSessionId.value);
       })
       .catch((error) => {
         console.error("Error sending message:", error);

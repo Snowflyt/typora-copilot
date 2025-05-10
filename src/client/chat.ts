@@ -625,8 +625,24 @@ export class ChatSession {
    * @param id The ID of the session.
    * @returns `true` if deleted, `false` if not found.
    */
-  public static delete(id: string): boolean {
-    return ChatSession.instances.delete(id);
+  public static async delete(id: string): Promise<boolean> {
+    const deleted = ChatSession.instances.delete(id);
+
+    if (deleted) {
+      const configDir = await getConfigPath();
+      if (!configDir) return true;
+
+      try {
+        const chatDir = path.join(configDir, "typora-copilot", "chat-sessions");
+        const filePath = path.join(chatDir, `${id}.json`);
+        if (!(await fs.accessFile(filePath))) return true;
+        await fs.rmFile(filePath);
+      } catch (error) {
+        console.error("Failed to remove session:", error);
+      }
+    }
+
+    return deleted;
   }
 
   /**
@@ -692,10 +708,7 @@ export class ChatSession {
     return result.content;
   }
 
-  /**
-   * Save all sessions to storage.
-   */
-  public static async saveAll(): Promise<void> {
+  public static async save(id: string): Promise<void> {
     const configDir = await getConfigPath();
     if (!configDir) return;
 
@@ -703,19 +716,15 @@ export class ChatSession {
       const chatDir = path.join(configDir, "typora-copilot", "chat-sessions");
       await fs.mkdir(chatDir, { recursive: true });
 
-      for (const [id, session] of ChatSession.instances) {
-        if (session.messages.every((msg) => msg.role === "system")) continue;
-        await fs.writeFile(path.join(chatDir, `${id}.json`), JSON.stringify(session, null, 2));
-      }
+      const session = ChatSession.instances.get(id);
+      if (!session) return;
 
-      // Remove unused sessions
-      const files = await fs.readDir(chatDir, "filesOnly");
-      for (const filename of files) {
-        const id = path.basename(filename, ".json");
-        if (!ChatSession.instances.has(id)) await fs.rmFile(path.join(chatDir, filename));
-      }
+      // Skip saving if all messages are system messages
+      if (session.messages.every((msg) => msg.role === "system")) return;
+
+      await fs.writeFile(path.join(chatDir, `${id}.json`), JSON.stringify(session, null, 2));
     } catch (error) {
-      console.error("Failed to save sessions:", error);
+      console.error("Failed to save session:", error);
     }
   }
 
