@@ -365,11 +365,13 @@
   .message-header {
     display: flex;
     align-items: center;
-    margin-bottom: 4px;
+    margin-bottom: 12px;
 
     .message-icon {
-      width: 24px;
-      height: 24px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 1px solid rgba(0, 0, 0, 5%);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -392,14 +394,13 @@
     }
 
     .copilot-icon {
-      background-color: rgba(0, 0, 0, 5%);
-      border-radius: 50%;
+      background-color: rgba(0, 0, 0, 3%);
       padding: 4px;
     }
 
     .message-author {
-      font-size: 12px;
-      font-weight: 500;
+      font-size: 13px;
+      font-weight: bold;
       color: var(--text-color);
     }
   }
@@ -410,7 +411,6 @@
     line-height: 1.5;
     word-wrap: break-word;
     margin: 0;
-    padding: 12px;
     border-radius: 6px;
     background: transparent;
 
@@ -422,26 +422,18 @@
   pre.message-content {
     white-space: pre-wrap;
   }
-
-  &.user .message-content {
-    background-color: rgba(0, 0, 0, 3%);
-  }
-
-  &.assistant .message-content {
-    background-color: var(--bg-color-copilot, rgba(0, 0, 0, 5%));
-  }
 }
 
 .markdown-content {
   /* Reset header font sizes */
   h1 {
-    font-size: 1.5em;
+    font-size: 1.36em;
     margin-top: 0.7em;
     margin-bottom: 0.5em;
   }
 
   h2 {
-    font-size: 1.3em;
+    font-size: 1.25em;
     margin-top: 0.6em;
     margin-bottom: 0.4em;
   }
@@ -559,7 +551,6 @@
   display: flex;
   align-items: center;
   height: 24px;
-  padding: 0 12px;
 
   span {
     width: 6px;

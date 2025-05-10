@@ -622,7 +622,7 @@ const MessageList: FC<MessageListProps> = ({
                     : <CopilotIcon
                         status="Normal"
                         textColor="var(--text-color)"
-                        style={{ width: "80%", height: "80%" }}
+                        style={{ width: "90%", height: "90%" }}
                       />
                     }
                   </div>
