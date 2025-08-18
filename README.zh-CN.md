@@ -46,6 +46,8 @@ _\*注：`/` 表示未经过测试。_
 
 ## 安装
 
+**开始任何安装方式之前，请先完全退出 Typora（尤其是 macOS 用户：请使用 <kbd>⌘</kbd>+<kbd>Q</kbd> 退出）。**
+
 ### 一键安装（推荐）
 
 你可以直接将以下命令复制粘贴到你的终端中来安装插件：
@@ -156,7 +158,7 @@ sudo bash ./bin/install_linux.sh --path "/usr/share/typora/" # 替换为你的 T
 1. 从[发布页面](https://github.com/Snowflyt/typora-copilot/releases)下载最新版本并解压。
 2. 找到 Typora 安装目录下的 `window.html` 文件，通常位于 `<typora_root_path>/resources/`；对于 macOS 用户，找到 Typora 安装目录下的 `index.html` 文件，通常位于 `<typora_root_path>/Contents/Resources/TypeMark/`。`<typora_root_path>` 是 Typora 的安装路径，替换为你的实际 Typora 安装路径（注意尖括号 `<` 和 `>` 也要删除）。这个文件夹在下面的步骤中被称为 Typora 资源文件夹。
 3. 在 Typora 资源文件夹中创建一个名为 `copilot` 的文件夹。
-4. 将解压出的文件全局复制到 `copilot` 文件夹中。
+4. 将解压后的文件全部复制到 `copilot` 文件夹中。**请确保最终路径为 `copilot/index.js`（而不是 `copilot/typora-copilot/index.js`）。如果出现后者，请将 `typora-copilot` 文件夹内的内容上移一层，使 `index.js` 直接位于 `copilot` 下。**
 5. 对于 Windows / Linux 用户，在 Typora 资源文件夹中用文本编辑器打开 `window.html`，在类似 `<script src="./appsrc/window/frame.js" defer="defer"></script>` 或 `<script src="./app/window/frame.js" defer="defer"></script>` 的代码之后添加 `<script src="./copilot/index.js" defer="defer"></script>`；对于 macOS 用户，在 Typora 资源文件夹中用文本编辑器打开 `index.html`，在类似 `<script src="./appsrc/main.js" aria-hidden="true" defer></script>` 或 `<script src="./app/main.js" aria-hidden="true" defer></script>` 的代码之后添加 `<script src="./copilot/index.js" defer></script>`。
 6. 重启 Typora。
 7. 对于 macOS 用户，如果你在打开 Typora 时被提示“文件已损坏”，你可以按住 Ctrl 点击 Typora，并选择“打开”来打开 Typora.

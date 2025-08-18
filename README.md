@@ -46,6 +46,8 @@ _\*Note: `/` means not tested._
 
 ## Installation
 
+**Before installing using any method, make sure Typora is fully closed (especially on macOS: use <kbd>⌘</kbd>+<kbd>Q</kbd> to quit).**
+
 ### Automated Installation (Recommended)
 
 To install the plugin, you can just copy and paste the following command into your terminal:
@@ -154,7 +156,7 @@ You’ll see a message logging the installation directory of the plugin. _Keep i
 1. Download the latest release from [the releases page](https://github.com/Snowflyt/typora-copilot/releases) and unzip it.
 2. For Windows / Linux users, find `window.html` in your Typora installation folder, usually located at `<typora_root_path>/resources/`; For macOS users, find `index.html` in your Typora installation folder, usually located at `<typora_root_path>/Contents/Resources/TypeMark/`. `<typora_root_path>` is the path where Typora is installed, replace it with your real Typora installation path (note that the angle brackets `<` and `>` should also be removed). This folder is called Typora resource folder in the following steps.
 3. Create a folder named `copilot` in Typora resource folder.
-4. Copy the downloaded release to the `copilot` folder.
+4. Copy the contents of the unzipped release into the `copilot` folder. **Ensure the final path is `copilot/index.js` (not `copilot/typora-copilot/index.js`). If you see the latter, move the files up one level so `index.js` sits directly under `copilot`.**
 5. For Windows / Linux users, open the previous `window.html` file you found in Typora resource folder with a text editor, and add `<script src="./copilot/index.js" defer="defer"></script>` right after something like `<script src="./appsrc/window/frame.js" defer="defer"></script>` or `<script src="./app/window/frame.js" defer="defer"></script>`; For macOS users, open the previous `index.html` file you found in Typora resource folder with a text editor, and add `<script src="./copilot/index.js" defer></script>` right after something like `<script src="./appsrc/main.js" aria-hidden="true" defer></script>` or `<script src="./app/main.js" aria-hidden="true" defer></script>`.
 6. Restart Typora.
 7. For macOS users, if you see a warning dialog saying Typora may be damaged, Ctrl-click Typora and select “Open” to open Typora.

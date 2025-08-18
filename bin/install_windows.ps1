@@ -74,6 +74,17 @@ foreach ($path in $paths) {
                 if ($success) { break }
             }
             else {
+                # Script tag already present; validate installation integrity
+                $copilotPath = Join-Path -Path (Split-Path -Path $windowHtmlPath -Parent) -ChildPath 'copilot'
+                $indexJsPath = Join-Path -Path $copilotPath -ChildPath 'index.js'
+                if (-not (Test-Path $indexJsPath)) {
+                    Write-Warning "Corrupted Copilot installation detected. Expected ""$indexJsPath"" but it does not exist."
+                    Write-Host "Please delete the entire ""$copilotPath"" directory and re-run this installer."
+                    Write-Host "Do NOT place the release inside Typora's installation folder (especially not under ""copilot"")."
+                    Write-Host "Download/extract it to any other folder and run this script from there."
+                    break
+                }
+
                 Write-Warning "Copilot plugin has already been installed in Typora."
                 $success = $true
                 break

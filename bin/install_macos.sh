@@ -103,6 +103,17 @@ for path in "${paths[@]}"; do
 
         if $success; then break; fi
       else
+        # Script tag already present; validate installation integrity
+        copilot_path="$(dirname "$index_html_path")/copilot"
+        index_js_path="$copilot_path/index.js"
+        if [[ ! -f "$index_js_path" ]]; then
+          echo "Warning: Corrupted Copilot installation detected. Expected \"$index_js_path\" but it does not exist."
+          echo "Please delete the entire \"$copilot_path\" directory and re-run this installer."
+          echo "Do NOT place the release inside Typora's installation folder (especially not under \"copilot\")."
+          echo "Download/extract it to any other folder and run this script from there."
+          break
+        fi
+
         echo "Warning: Copilot plugin has already been installed in Typora."
         success=true
         break
