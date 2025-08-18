@@ -798,7 +798,7 @@ Promise.defer(async () => {
     /* When update not suppressed */
     // Update caret position
     if (
-      editor.selection.getRangy()?.collapse && // If not selecting text
+      editor.selection.getRangy()?.collapsed && // If not selecting text
       window.getSelection()?.rangeCount // If has cursor
     ) {
       const changes = computeTextChanges(state.markdown, newMarkdown, state.caretPosition);
