@@ -1,6 +1,7 @@
 // @ts-check
 
 import eslint from "@eslint/js";
+// eslint-disable-next-line import-x/no-named-as-default
 import importX from "eslint-plugin-import-x";
 import jsdoc from "eslint-plugin-jsdoc";
 import prettierRecommended from "eslint-plugin-prettier/recommended";

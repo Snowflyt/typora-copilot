@@ -4,6 +4,7 @@
 const config = {
   extends: "stylelint-config-standard-scss",
   rules: {
+    "color-function-alias-notation": "with-alpha",
     "color-function-notation": "legacy",
   },
 };
