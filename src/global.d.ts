@@ -153,6 +153,8 @@ interface Window {
        */
       cb: (results: [boolean, string, string, string]) => void,
     ): void;
+
+    callSync(type: "path.readText", path: string): string;
   };
 
   getCodeMirrorMode: (

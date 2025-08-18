@@ -493,7 +493,7 @@ export const readFile: (path: string) => Promise<string> = (() => {
 
   if (Files.isMac)
     return async function readFile(path) {
-      return await runCommand(`\\cat "${path}"`);
+      return await Promise.resolve(window.bridge!.callSync("path.readText", path));
     };
 
   throw new PlatformError("Unsupported platform for `readFile`");
