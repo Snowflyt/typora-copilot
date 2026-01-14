@@ -308,7 +308,6 @@ export const Footer: FC<FooterOptions> = ({ copilot }) => {
             const chatContainer = document.querySelector("#copilot-chat-container");
             if (chatContainer) {
               detachChatPanel?.();
-              localStorage.removeItem("copilot-chat-panel-open");
             } else {
               attachChatPanel();
             }

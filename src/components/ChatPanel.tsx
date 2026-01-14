@@ -993,6 +993,7 @@ export function attachChatPanel(): void {
     (contentDiv as HTMLElement).style.right = "0";
     contentDiv.removeEventListener("resize", updatePosition);
     window.removeEventListener("resize", updatePosition);
+    localStorage.removeItem("copilot-chat-panel-open");
     render(null, container);
     container.remove();
   };
