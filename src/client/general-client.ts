@@ -52,7 +52,7 @@ interface _BaseResponsePromise {
   /**
    * Cancel the request.
    *
-   * @throws An error if the promise is not pending.
+   * @throws {Error} if the promise is not pending.
    */
   readonly cancel: () => void;
 }

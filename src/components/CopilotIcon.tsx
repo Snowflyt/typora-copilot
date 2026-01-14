@@ -5,7 +5,7 @@ import Spinner from "./Spinner";
 export interface CopilotIconProps {
   status: CopilotStatus | "Disabled";
   textColor: string;
-  style?: preact.JSX.CSSProperties;
+  style?: preact.CSSProperties;
 }
 
 /**

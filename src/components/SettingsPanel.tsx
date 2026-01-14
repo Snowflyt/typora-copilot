@@ -431,9 +431,9 @@ const SettingsPanel: FC<SettingsPanelProps> = ({ onClose }) => {
 const MenuButton: FC<{
   selected?: boolean;
   onClick?: () => void;
-  style?: preact.JSX.CSSProperties;
+  style?: preact.CSSProperties;
 }> = ({ children, onClick, selected = false, style: additionalStyle }) => {
-  const style: preact.JSX.CSSProperties = {
+  const style: preact.CSSProperties = {
     width: "100%",
     fontSize: "0.875rem",
     height: "fit-content",

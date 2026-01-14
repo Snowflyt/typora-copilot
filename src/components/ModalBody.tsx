@@ -1,6 +1,6 @@
 export interface ModalBodyProps {
   className?: string;
-  style?: preact.JSX.CSSProperties;
+  style?: preact.CSSProperties;
 }
 
 const ModalBody: FC<ModalBodyProps> = ({ children, className, style }) => {

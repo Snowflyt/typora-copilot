@@ -3074,8 +3074,7 @@ export type NotebookDocumentSyncOptions = {
  * @since 3.17.0
  */
 export interface NotebookDocumentSyncRegistrationOptions
-  extends NotebookDocumentSyncOptions,
-    StaticRegistrationOptions {}
+  extends NotebookDocumentSyncOptions, StaticRegistrationOptions {}
 
 /**
  * Params of the `notebookDocument/didOpen` notification.
@@ -3277,17 +3276,13 @@ export type DeclarationClientCapabilities = {
 export interface DeclarationOptions extends WorkDoneProgressOptions {}
 
 export interface DeclarationRegistrationOptions
-  extends DeclarationOptions,
-    TextDocumentRegistrationOptions,
-    StaticRegistrationOptions {}
+  extends DeclarationOptions, TextDocumentRegistrationOptions, StaticRegistrationOptions {}
 
 /**
  * Params of the `textDocument/declaration` request.
  */
 export interface DeclarationParams
-  extends TextDocumentPositionParams,
-    WorkDoneProgressParams,
-    PartialResultParams {}
+  extends TextDocumentPositionParams, WorkDoneProgressParams, PartialResultParams {}
 
 export type DefinitionClientCapabilities = {
   /**
@@ -3306,16 +3301,13 @@ export type DefinitionClientCapabilities = {
 export interface DefinitionOptions extends WorkDoneProgressOptions {}
 
 export interface DefinitionRegistrationOptions
-  extends TextDocumentRegistrationOptions,
-    DefinitionOptions {}
+  extends TextDocumentRegistrationOptions, DefinitionOptions {}
 
 /**
  * Params of the `textDocument/definition` request.
  */
 export interface DefinitionParams
-  extends TextDocumentPositionParams,
-    WorkDoneProgressParams,
-    PartialResultParams {}
+  extends TextDocumentPositionParams, WorkDoneProgressParams, PartialResultParams {}
 
 export type TypeDefinitionClientCapabilities = {
   /**
@@ -3336,17 +3328,13 @@ export type TypeDefinitionClientCapabilities = {
 export interface TypeDefinitionOptions extends WorkDoneProgressOptions {}
 
 export interface TypeDefinitionRegistrationOptions
-  extends TextDocumentRegistrationOptions,
-    TypeDefinitionOptions,
-    StaticRegistrationOptions {}
+  extends TextDocumentRegistrationOptions, TypeDefinitionOptions, StaticRegistrationOptions {}
 
 /**
  * Params of the `textDocument/typeDefinition` request.
  */
 export interface TypeDefinitionParams
-  extends TextDocumentPositionParams,
-    WorkDoneProgressParams,
-    PartialResultParams {}
+  extends TextDocumentPositionParams, WorkDoneProgressParams, PartialResultParams {}
 
 export type ImplementationClientCapabilities = {
   /**
@@ -3367,17 +3355,13 @@ export type ImplementationClientCapabilities = {
 export interface ImplementationOptions extends WorkDoneProgressOptions {}
 
 export interface ImplementationRegistrationOptions
-  extends TextDocumentRegistrationOptions,
-    ImplementationOptions,
-    StaticRegistrationOptions {}
+  extends TextDocumentRegistrationOptions, ImplementationOptions, StaticRegistrationOptions {}
 
 /**
  * Params of the `textDocument/implementation` request.
  */
 export interface ImplementationParams
-  extends TextDocumentPositionParams,
-    WorkDoneProgressParams,
-    PartialResultParams {}
+  extends TextDocumentPositionParams, WorkDoneProgressParams, PartialResultParams {}
 
 export type ReferenceClientCapabilities = {
   /**
@@ -3389,16 +3373,13 @@ export type ReferenceClientCapabilities = {
 export interface ReferenceOptions extends WorkDoneProgressOptions {}
 
 export interface ReferenceRegistrationOptions
-  extends TextDocumentRegistrationOptions,
-    ReferenceOptions {}
+  extends TextDocumentRegistrationOptions, ReferenceOptions {}
 
 /**
  * Params of the `textDocument/references` request.
  */
 export interface ReferenceParams
-  extends TextDocumentPositionParams,
-    WorkDoneProgressParams,
-    PartialResultParams {
+  extends TextDocumentPositionParams, WorkDoneProgressParams, PartialResultParams {
   context: ReferenceContext;
 }
 
@@ -3422,16 +3403,13 @@ export type CallHierarchyClientCapabilities = {
 export interface CallHierarchyOptions extends WorkDoneProgressOptions {}
 
 export interface CallHierarchyRegistrationOptions
-  extends TextDocumentRegistrationOptions,
-    CallHierarchyOptions,
-    StaticRegistrationOptions {}
+  extends TextDocumentRegistrationOptions, CallHierarchyOptions, StaticRegistrationOptions {}
 
 /**
  * Params of the `textDocument/prepareCallHierarchy` request.
  */
 export interface CallHierarchyPrepareParams
-  extends TextDocumentPositionParams,
-    WorkDoneProgressParams {}
+  extends TextDocumentPositionParams, WorkDoneProgressParams {}
 
 export type CallHierarchyItem = {
   /**
@@ -3483,8 +3461,7 @@ export type CallHierarchyItem = {
  * Params of the `callHierarchy/incomingCalls` request.
  */
 export interface CallHierarchyIncomingCallsParams
-  extends WorkDoneProgressParams,
-    PartialResultParams {
+  extends WorkDoneProgressParams, PartialResultParams {
   item: CallHierarchyItem;
 }
 
@@ -3505,8 +3482,7 @@ export type CallHierarchyIncomingCall = {
  * Params of the `callHierarchy/outgoingCalls` request.
  */
 export interface CallHierarchyOutgoingCallsParams
-  extends WorkDoneProgressParams,
-    PartialResultParams {
+  extends WorkDoneProgressParams, PartialResultParams {
   item: CallHierarchyItem;
 }
 
@@ -3536,16 +3512,13 @@ export type TypeHierarchyClientCapabilities = {
 export interface TypeHierarchyOptions extends WorkDoneProgressOptions {}
 
 export interface TypeHierarchyRegistrationOptions
-  extends TextDocumentRegistrationOptions,
-    TypeHierarchyOptions,
-    StaticRegistrationOptions {}
+  extends TextDocumentRegistrationOptions, TypeHierarchyOptions, StaticRegistrationOptions {}
 
 /**
  * Params of the `textDocument/prepareTypeHierarchy` request.
  */
 export interface TypeHierarchyPrepareParams
-  extends TextDocumentPositionParams,
-    WorkDoneProgressParams {}
+  extends TextDocumentPositionParams, WorkDoneProgressParams {}
 
 export type TypeHierarchyItem = {
   /**
@@ -3619,16 +3592,13 @@ export type DocumentHighlightClientCapabilities = {
 export interface DocumentHighlightOptions extends WorkDoneProgressOptions {}
 
 export interface DocumentHighlightRegistrationOptions
-  extends TextDocumentRegistrationOptions,
-    DocumentHighlightOptions {}
+  extends TextDocumentRegistrationOptions, DocumentHighlightOptions {}
 
 /**
  * Params of the `textDocument/documentHighlight` request.
  */
 export interface DocumentHighlightParams
-  extends TextDocumentPositionParams,
-    WorkDoneProgressParams,
-    PartialResultParams {}
+  extends TextDocumentPositionParams, WorkDoneProgressParams, PartialResultParams {}
 
 /**
  * A document highlight is a range inside a text document which deserves
@@ -3696,8 +3666,7 @@ export interface DocumentLinkOptions extends WorkDoneProgressOptions {
 }
 
 export interface DocumentLinkRegistrationOptions
-  extends TextDocumentRegistrationOptions,
-    DocumentLinkOptions {}
+  extends TextDocumentRegistrationOptions, DocumentLinkOptions {}
 
 /**
  * Params of the `textDocument/documentLink` request.
@@ -3816,8 +3785,7 @@ export interface CodeLensOptions extends WorkDoneProgressOptions {
 }
 
 export interface CodeLensRegistrationOptions
-  extends TextDocumentRegistrationOptions,
-    CodeLensOptions {}
+  extends TextDocumentRegistrationOptions, CodeLensOptions {}
 
 /**
  * Params of the `textDocument/codeLens` request.
@@ -3925,9 +3893,7 @@ export type FoldingRangeClientCapabilities = {
 export interface FoldingRangeOptions extends WorkDoneProgressOptions {}
 
 export interface FoldingRangeRegistrationOptions
-  extends TextDocumentRegistrationOptions,
-    FoldingRangeOptions,
-    StaticRegistrationOptions {}
+  extends TextDocumentRegistrationOptions, FoldingRangeOptions, StaticRegistrationOptions {}
 
 /**
  * Params of the `textDocument/foldingRange` request.
@@ -4031,9 +3997,7 @@ export type SelectionRangeClientCapabilities = {
 export interface SelectionRangeOptions extends WorkDoneProgressOptions {}
 
 export interface SelectionRangeRegistrationOptions
-  extends SelectionRangeOptions,
-    TextDocumentRegistrationOptions,
-    StaticRegistrationOptions {}
+  extends SelectionRangeOptions, TextDocumentRegistrationOptions, StaticRegistrationOptions {}
 
 /**
  * Params of the `textDocument/selectionRange` request.
@@ -4126,8 +4090,7 @@ export interface DocumentSymbolOptions extends WorkDoneProgressOptions {
 }
 
 export interface DocumentSymbolRegistrationOptions
-  extends TextDocumentRegistrationOptions,
-    DocumentSymbolOptions {}
+  extends TextDocumentRegistrationOptions, DocumentSymbolOptions {}
 
 /**
  * Params of the `textDocument/documentSymbol` request.
@@ -4485,9 +4448,7 @@ export interface SemanticTokensOptions extends WorkDoneProgressOptions {
 }
 
 export interface SemanticTokensRegistrationOptions
-  extends TextDocumentRegistrationOptions,
-    SemanticTokensOptions,
-    StaticRegistrationOptions {}
+  extends TextDocumentRegistrationOptions, SemanticTokensOptions, StaticRegistrationOptions {}
 
 /**
  * Params of the `textDocument/semanticTokens/full` request.
@@ -4634,9 +4595,7 @@ export interface InlayHintOptions extends WorkDoneProgressOptions {
  * @since 3.17.0
  */
 export interface InlayHintRegistrationOptions
-  extends InlayHintOptions,
-    TextDocumentRegistrationOptions,
-    StaticRegistrationOptions {}
+  extends InlayHintOptions, TextDocumentRegistrationOptions, StaticRegistrationOptions {}
 
 /**
  * Params of the `textDocument/inlayHint` request.
@@ -4838,9 +4797,7 @@ export interface InlineValueOptions extends WorkDoneProgressOptions {}
  * @since 3.17.0
  */
 export interface InlineValueRegistrationOptions
-  extends InlineValueOptions,
-    TextDocumentRegistrationOptions,
-    StaticRegistrationOptions {}
+  extends InlineValueOptions, TextDocumentRegistrationOptions, StaticRegistrationOptions {}
 
 /**
  * A parameter literal used in inline value requests.
@@ -4997,13 +4954,10 @@ type MonikerClientCapabilities = {
 export interface MonikerOptions extends WorkDoneProgressOptions {}
 
 export interface MonikerRegistrationOptions
-  extends TextDocumentRegistrationOptions,
-    MonikerOptions {}
+  extends TextDocumentRegistrationOptions, MonikerOptions {}
 
 export interface MonikerParams
-  extends TextDocumentPositionParams,
-    WorkDoneProgressParams,
-    PartialResultParams {}
+  extends TextDocumentPositionParams, WorkDoneProgressParams, PartialResultParams {}
 
 /**
  * Moniker uniqueness level to define scope of the moniker.
@@ -5287,16 +5241,13 @@ export interface CompletionOptions extends WorkDoneProgressOptions {
 }
 
 export interface CompletionRegistrationOptions
-  extends TextDocumentRegistrationOptions,
-    CompletionOptions {}
+  extends TextDocumentRegistrationOptions, CompletionOptions {}
 
 /**
  * Params of the `textDocument/completion` request.
  */
 export interface CompletionParams
-  extends TextDocumentPositionParams,
-    WorkDoneProgressParams,
-    PartialResultParams {
+  extends TextDocumentPositionParams, WorkDoneProgressParams, PartialResultParams {
   /**
    * The completion context. This is only available if the client specifies
    * to send this using the client capability
@@ -5892,9 +5843,7 @@ export interface DiagnosticOptions extends WorkDoneProgressOptions {
  * @since 3.17.0
  */
 export interface DiagnosticRegistrationOptions
-  extends TextDocumentRegistrationOptions,
-    DiagnosticOptions,
-    StaticRegistrationOptions {}
+  extends TextDocumentRegistrationOptions, DiagnosticOptions, StaticRegistrationOptions {}
 
 /**
  * Params of the `textDocument/diagnostic` request.
@@ -6029,8 +5978,7 @@ export interface RelatedFullDocumentDiagnosticReport extends FullDocumentDiagnos
  *
  * @since 3.17.0
  */
-export interface RelatedUnchangedDocumentDiagnosticReport
-  extends UnchangedDocumentDiagnosticReport {
+export interface RelatedUnchangedDocumentDiagnosticReport extends UnchangedDocumentDiagnosticReport {
   /**
    * Diagnostics of related documents. This information is useful
    * in programming languages where code in a file A can generate
@@ -6133,8 +6081,7 @@ export interface WorkspaceFullDocumentDiagnosticReport extends FullDocumentDiagn
  *
  * @since 3.17.0
  */
-export interface WorkspaceUnchangedDocumentDiagnosticReport
-  extends UnchangedDocumentDiagnosticReport {
+export interface WorkspaceUnchangedDocumentDiagnosticReport extends UnchangedDocumentDiagnosticReport {
   /**
    * The URI for which diagnostic information is reported.
    */
@@ -6253,8 +6200,7 @@ export interface SignatureHelpOptions extends WorkDoneProgressOptions {
 }
 
 export interface SignatureHelpRegistrationOptions
-  extends TextDocumentRegistrationOptions,
-    SignatureHelpOptions {}
+  extends TextDocumentRegistrationOptions, SignatureHelpOptions {}
 
 export interface SignatureHelpParams extends TextDocumentPositionParams, WorkDoneProgressParams {
   /**
@@ -6524,8 +6470,7 @@ export interface CodeActionOptions extends WorkDoneProgressOptions {
 }
 
 export interface CodeActionRegistrationOptions
-  extends TextDocumentRegistrationOptions,
-    CodeActionOptions {}
+  extends TextDocumentRegistrationOptions, CodeActionOptions {}
 
 /**
  * Params for the CodeActionRequest
@@ -6797,9 +6742,7 @@ export type DocumentColorClientCapabilities = {
 export interface DocumentColorOptions extends WorkDoneProgressOptions {}
 
 export interface DocumentColorRegistrationOptions
-  extends TextDocumentRegistrationOptions,
-    StaticRegistrationOptions,
-    DocumentColorOptions {}
+  extends TextDocumentRegistrationOptions, StaticRegistrationOptions, DocumentColorOptions {}
 
 /**
  * Params of the `textDocument/documentColor` request.
@@ -6899,8 +6842,7 @@ export type DocumentFormattingClientCapabilities = {
 export interface DocumentFormattingOptions extends WorkDoneProgressOptions {}
 
 export interface DocumentFormattingRegistrationOptions
-  extends TextDocumentRegistrationOptions,
-    DocumentFormattingOptions {}
+  extends TextDocumentRegistrationOptions, DocumentFormattingOptions {}
 
 /**
  * Params of the `textDocument/formatting` request.
@@ -6971,8 +6913,7 @@ export type DocumentRangeFormattingClientCapabilities = {
 export interface DocumentRangeFormattingOptions extends WorkDoneProgressOptions {}
 
 export interface DocumentRangeFormattingRegistrationOptions
-  extends TextDocumentRegistrationOptions,
-    DocumentRangeFormattingOptions {}
+  extends TextDocumentRegistrationOptions, DocumentRangeFormattingOptions {}
 
 /**
  * Params of the `textDocument/rangeFormatting` request.
@@ -7014,8 +6955,7 @@ export type DocumentOnTypeFormattingOptions = {
 };
 
 export interface DocumentOnTypeFormattingRegistrationOptions
-  extends TextDocumentRegistrationOptions,
-    DocumentOnTypeFormattingOptions {}
+  extends TextDocumentRegistrationOptions, DocumentOnTypeFormattingOptions {}
 
 /**
  * Params of the `textDocument/onTypeFormatting` request.
@@ -7124,9 +7064,7 @@ export interface PrepareRenameParams extends TextDocumentPositionParams, WorkDon
 export interface LinkedEditingRangeOptions extends WorkDoneProgressOptions {}
 
 export interface LinkedEditingRangeRegistrationOptions
-  extends TextDocumentRegistrationOptions,
-    LinkedEditingRangeOptions,
-    StaticRegistrationOptions {}
+  extends TextDocumentRegistrationOptions, LinkedEditingRangeOptions, StaticRegistrationOptions {}
 
 export type LinkedEditingRangeClientCapabilities = {
   /**
@@ -7142,8 +7080,7 @@ export type LinkedEditingRangeClientCapabilities = {
  * Params of the `textDocument/linkedEditingRange` request.
  */
 export interface LinkedEditingRangeParams
-  extends TextDocumentPositionParams,
-    WorkDoneProgressParams {}
+  extends TextDocumentPositionParams, WorkDoneProgressParams {}
 
 export type LinkedEditingRanges = {
   /**

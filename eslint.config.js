@@ -1,34 +1,33 @@
 // @ts-check
 
 import eslint from "@eslint/js";
-// eslint-disable-next-line import-x/no-named-as-default
-import importX from "eslint-plugin-import-x";
-import jsdoc from "eslint-plugin-jsdoc";
+import { defineConfig } from "eslint/config";
+import { importX } from "eslint-plugin-import-x";
+import { jsdoc } from "eslint-plugin-jsdoc";
 import prettierRecommended from "eslint-plugin-prettier/recommended";
 import react from "eslint-plugin-react";
-import * as reactHooks from "eslint-plugin-react-hooks";
+import reactHooks from "eslint-plugin-react-hooks";
 import sonarjs from "eslint-plugin-sonarjs";
 import sortDestructureKeys from "eslint-plugin-sort-destructure-keys";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
-export default tseslint.config(
+export default defineConfig(
   eslint.configs.recommended,
   tseslint.configs.strictTypeChecked,
   tseslint.configs.stylisticTypeChecked,
-  jsdoc.configs["flat/recommended-typescript-error"],
+  jsdoc({ config: "flat/recommended-typescript-error" }),
   react.configs.flat.recommended,
   react.configs.flat["jsx-runtime"],
-  reactHooks.configs["recommended-latest"],
-  importX.flatConfigs.recommended,
-  importX.flatConfigs.typescript,
+  reactHooks.configs.flat["recommended-latest"],
+  /** @type {import("eslint").Linter.Config} */ (importX.flatConfigs.recommended),
+  /** @type {import("eslint").Linter.Config} */ (importX.flatConfigs.typescript),
   prettierRecommended,
   sonarjs.configs.recommended,
   {
     plugins: {
-      jsdoc,
       react,
-      "sort-destructure-keys": sortDestructureKeys,
+      "sort-destructure-keys": /** @type {import("eslint").ESLint.Plugin} */ (sortDestructureKeys),
     },
     linterOptions: {
       reportUnusedDisableDirectives: true,
@@ -103,6 +102,7 @@ export default tseslint.config(
       "jsdoc/check-param-names": "off",
       "jsdoc/check-tag-names": "off",
       "jsdoc/check-values": "off",
+      "jsdoc/reject-any-type": "off",
       "jsdoc/require-jsdoc": "off",
       "jsdoc/require-param": "off",
       "jsdoc/require-returns-description": "off",
@@ -121,6 +121,7 @@ export default tseslint.config(
       "object-shorthand": "error",
       "react/no-unknown-property": "off", // Already checked by TypeScript
       "react/prop-types": "off", // Already checked by TypeScript
+      "react-hooks/immutability": "off",
       "sonarjs/class-name": ["error", { format: "^_?[A-Z][a-zA-Z0-9]*$" }],
       "sonarjs/code-eval": "off", // Already covered by `@typescript-eslint/no-implied-eval`
       "sonarjs/cognitive-complexity": "off",

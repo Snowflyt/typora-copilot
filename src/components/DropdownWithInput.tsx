@@ -42,14 +42,14 @@ const DropdownWithInput: FC<DropdownWithInputProps> = ({
     onCloseDropdown?.();
   };
 
-  const handleBlur = (e: React.FocusEvent<HTMLDivElement>) => {
+  const handleBlur = (e: preact.TargetedFocusEvent<HTMLDivElement>) => {
     if (!dropdownRef.current?.contains(e.relatedTarget as Node)) {
       setIsOpen(false); // Close dropdown on blur
       onCloseDropdown?.();
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: preact.TargetedEvent<HTMLInputElement>) => {
     const inputValue = (e.target! as unknown as { value: string }).value;
     onChange(inputValue);
     setFilteredOptions(
@@ -59,7 +59,7 @@ const DropdownWithInput: FC<DropdownWithInputProps> = ({
     onOpenDropdown?.();
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: preact.TargetedKeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       setIsOpen(false); // Close dropdown when pressing Enter
       onCloseDropdown?.();

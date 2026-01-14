@@ -598,16 +598,19 @@ export const detectAvailableNodeRuntimes = async ({
       .then((r) =>
         // Flatten 1
         r === null ? [r]
+          // eslint-disable-next-line @typescript-eslint/await-thenable
         : Array.isArray(r) ? Promise.all(r)
         : [r],
       )
       .then((r) =>
         // Flatten 2
+        // eslint-disable-next-line @typescript-eslint/await-thenable
         Promise.all(r.filter(Boolean).flatMap((r) => (Array.isArray(r) ? r.filter(Boolean) : [r]))),
       )
       .then((r) =>
         // Resolve true case path
         Promise.all(
+          // eslint-disable-next-line @typescript-eslint/await-thenable
           r.filter(Boolean).map((runtime) =>
             runtime.path === "bundled" ?
               runtime
@@ -633,6 +636,7 @@ export const detectAvailableNodeRuntimes = async ({
   // Filter out runtimes with same realpath
   return unique(
     await Promise.all(
+      // eslint-disable-next-line @typescript-eslint/await-thenable
       runtimes.map((runtime) =>
         runtime.path === "bundled" ?
           { ...runtime, realPath: runtime.path }
